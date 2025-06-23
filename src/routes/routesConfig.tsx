@@ -1,10 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from '../App.tsx'
 import NotFoundPage from "../pages/notFoundPage.tsx";
+import Login from "../auth/login.tsx";
 
 
 const router = createBrowserRouter([
-    {path: "/", element: <App/>},
+    {path: "/login", element: <Login/>},
     {path: "*", element: <NotFoundPage/>},
 ]);
 
