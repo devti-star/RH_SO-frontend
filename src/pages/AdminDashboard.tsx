@@ -13,6 +13,8 @@ import {
   Button,
   Divider,
   Avatar,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 // Dados de exemplo, agora com o campo 'foto' (pode ser vazio por enquanto)
@@ -30,6 +32,9 @@ export default function AdminDashboard() {
   const [tab, setTab] = React.useState(0);
   const [selectedDoc, setSelectedDoc] = React.useState<number | null>(null);
   const [busca, setBusca] = React.useState("");
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const getStatus = (t: number) =>
     t === 0 ? "pendente" : t === 1 ? "progresso" : "finalizado";
@@ -53,8 +58,10 @@ export default function AdminDashboard() {
         height: "100vh",
         bgcolor: "#f8f8f8",
         display: "flex",
-        alignItems: "center",
+        alignItems: isMobile ? "flex-start" : "center",
         justifyContent: "center",
+        p: isMobile ? 0 : 0,
+        overflow: "auto"
       }}
     >
       <Box
@@ -62,36 +69,52 @@ export default function AdminDashboard() {
           bgcolor: "#fff",
           borderRadius: 3,
           boxShadow: 3,
-          width: "90vw",
+          width: isMobile ? "100vw" : "90vw",
           maxWidth: 1450,
-          height: "80vh",
+          height: isMobile ? "100%" : "80vh",
           minHeight: 620,
           display: "flex",
-          flexDirection: "row",
+          flexDirection: isMobile ? "column" : "row",
           alignItems: "stretch",
           p: 0,
+          minWidth: isMobile ? "100vw" : 0,
         }}
       >
         {/* ESQUERDA */}
         <Box
           sx={{
-            width: "55%",
-            minWidth: 370,
-            borderRight: "1.5px solid #e0e0e0",
+            width: isMobile ? "100%" : "55%",
+            minWidth: isMobile ? 0 : 370,
+            borderRight: isMobile ? "none" : "1.5px solid #e0e0e0",
+            borderBottom: isMobile ? "1.5px solid #e0e0e0" : "none",
             display: "flex",
             flexDirection: "column",
-            p: "38px 0 0 0",
+            p: isMobile ? "20px 0 0 0" : "38px 0 0 0",
+            maxHeight: isMobile ? "none" : "100%",
           }}
         >
           <Box
             sx={{
-              px: 5,
+              px: isMobile ? 2 : 5,
               height: "100%",
               display: "flex",
               flexDirection: "column",
             }}
           >
-            <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+            <Tabs
+              value={tab}
+              onChange={(_, v) => setTab(v)}
+              sx={{
+                mb: 2,
+                ".MuiTabs-flexContainer": {
+                  flexDirection: isMobile ? "column" : "row",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? 2 : 0
+                }
+              }}
+              orientation={isMobile ? "horizontal" : "horizontal"}
+              variant={isMobile ? "scrollable" : "standard"}
+            >
               <Tab
                 label={
                   <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -111,9 +134,7 @@ export default function AdminDashboard() {
                 sx={{ textTransform: "none" }}
               />
               <Tab
-                label={
-                  <span style={{ fontWeight: "bold" }}>Finalizados</span>
-                }
+                label={<span style={{ fontWeight: "bold" }}>Finalizados</span>}
                 sx={{ textTransform: "none" }}
               />
             </Tabs>
@@ -135,7 +156,7 @@ export default function AdminDashboard() {
               }}
             />
 
-            <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 1 }}>
+            <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: isMobile ? 0 : 1 }}>
               <Stack spacing={2}>
                 {atestadosFiltrados.length === 0 && (
                   <Typography sx={{ mt: 5, textAlign: "center", color: "#bbb" }}>
@@ -157,7 +178,7 @@ export default function AdminDashboard() {
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                           {a.texto}
                         </Typography>
-                        <Box sx={{ display: "flex", gap: 2 }}>
+                        <Box sx={{ display: "flex", gap: 2, flexWrap: isMobile ? "wrap" : "nowrap" }}>
                           <Button
                             variant="outlined"
                             size="small"
@@ -185,14 +206,16 @@ export default function AdminDashboard() {
         {/* DIREITA */}
         <Box
           sx={{
-            width: "45%",
+            width: isMobile ? "100%" : "45%",
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
             justifyContent: "flex-start",
-            px: 4,
-            pt: 5,
+            px: isMobile ? 2 : 4,
+            pt: isMobile ? 2 : 5,
             bgcolor: "#f4f4f4",
+            minHeight: isMobile ? 260 : "auto",
+            flex: isMobile ? "none" : undefined
           }}
         >
           <Typography
@@ -218,9 +241,9 @@ export default function AdminDashboard() {
               alignItems: "center",
               justifyContent: "center",
               fontWeight: 600,
-              fontSize: 32,
+              fontSize: isMobile ? 22 : 32,
               color: "#888",
-              minHeight: 350,
+              minHeight: isMobile ? 180 : 350,
               mt: 2,
               mx: "auto",
             }}
