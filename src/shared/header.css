@@ -1,0 +1,28 @@
+.nav{
+  background-color: #050A24;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10vh;
+}
+
+.logo{
+  height: 80%;
+  width: auto;
+  object-fit: contain;
+  padding-left: 3%
+}
+
+.options{
+  flex:1;
+  display: flex;
+  color: #ffffff;
+  justify-content: center;
+  align-items: end;
+}
+
+.options a {
+  font-size: 20pt;
+  margin-left: 40px; 
+  margin-bottom: 0; 
+}
