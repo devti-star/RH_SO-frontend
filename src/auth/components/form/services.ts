@@ -3,11 +3,13 @@ import { apiURL } from "../../../config"
 import type { login } from "../../../models/login"
 import type { token } from "../../../models/token";
 import { useNavigate } from 'react-router-dom';
+import api from "../../../interceptors/token.intercept";
+import { useSnackbarStore } from "../../../shared/useSnackbar";
 
 export const handleLogin = async(credenciais: login) => {
     try {
         const navigate = useNavigate();
-        const response = await axios.post<token>(apiURL + "", credenciais);
+        const response = await api.post<token>(apiURL + "", credenciais);
 
         const token = response.data.acces_token;
 
@@ -17,7 +19,8 @@ export const handleLogin = async(credenciais: login) => {
 
 
     } catch (error){
-        alert("E-mail ou senhas incorretos. Verifique suas credenciais" + error)
+        const { showSnackbar } = useSnackbarStore.getState();
+        showSnackbar('Eerwgarf8asfasdf.', 'error');
     }
 }
 

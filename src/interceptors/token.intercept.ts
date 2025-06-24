@@ -1,13 +1,10 @@
 import { apiURL } from "../config";
 import axios from "axios";
 import { useSnackbarStore } from "../shared/useSnackbar";
-import { useNavigate } from "react-router-dom";
 
 const api = axios.create({
   baseURL: apiURL,
 });
-
-const navigate = useNavigate();
 
 api.interceptors.request.use(
   (config) => {
@@ -29,11 +26,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       showSnackbar('Sessão expirada. Faça login novamente.', 'error');
       localStorage.removeItem('token');
-      navigate('/login');
     } else {
       showSnackbar('Erro ao processar requisição.', 'error');
     }
-
+    console.log("Entrou aqui!!!!!!!!!!")
     return Promise.reject(error);
   }
 );
