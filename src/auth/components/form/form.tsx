@@ -8,6 +8,7 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
+  type BoxProps,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState } from "react";
@@ -16,7 +17,12 @@ import CustomButton from "../../../shared/customButton";
 import { handleLogin } from "./services";
 import type { login } from "../../../models/login";
 
-export default function Form() {
+
+interface FormProps extends BoxProps{
+  espacamento?: string
+}
+
+export default function Form({espacamento = "100px 50px 130px 50px", ...props}: FormProps) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,15 +42,16 @@ export default function Form() {
 
   return (
     <Box
+      {...props}
       sx={{
         height: "350px",
-        width: "490px",
+        width: "100%",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: "100px 50px 130px 50px",
-        borderRadius: "0px 30px 30px 0px",
-        boxShadow: "0px 6px 5px rgba(193, 192, 192, 0.6)",
+        boxSizing: "border-box",
+        padding: espacamento,
+        ...props.sx
       }}
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>

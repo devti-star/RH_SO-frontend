@@ -3,7 +3,7 @@ import type { BoxProps } from "@mui/material";
 import logo from "./images/logoBranca.png";
 
 interface BannerProps extends BoxProps {
-  largura_imagem?: string | number; // Pode ser '500px' ou 500
+  largura_imagem?: string | number;
 }
 
 export default function Banner({ largura_imagem = "490px", ...props }: BannerProps) {
