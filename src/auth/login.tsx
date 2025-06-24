@@ -1,6 +1,5 @@
 import { Box, Container, useMediaQuery } from "@mui/material";
-import Banner from "./components/banner";
-import backgroundIMage from "./images/logoBranca.png";
+import Banner from "../shared/banner";
 import Form from "./components/form/form";
 
 export default function Login() {
