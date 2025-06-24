@@ -15,9 +15,18 @@ import {
   Avatar,
   useMediaQuery,
   useTheme,
+  Dialog,
+  DialogContent
 } from "@mui/material";
+import { Document, Page, pdfjs } from "react-pdf";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import CloseIcon from "@mui/icons-material/Close";
 
-// Dados de exemplo, agora com o campo 'foto' (pode ser vazio por enquanto)
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+
 const mockAtestados = [
   { id: 1, nome: "Nome cidadão 1", texto: "Texto do atestado 1.", arquivo: "arquivo1.pdf", status: "pendente", foto: "" },
   { id: 2, nome: "Nome cidadão 2", texto: "Texto do atestado 2.", arquivo: "arquivo2.pdf", status: "pendente", foto: "" },
@@ -32,6 +41,7 @@ export default function AdminDashboard() {
   const [tab, setTab] = React.useState(0);
   const [selectedDoc, setSelectedDoc] = React.useState<number | null>(null);
   const [busca, setBusca] = React.useState("");
+  const [fullscreenOpen, setFullscreenOpen] = React.useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -51,6 +61,10 @@ export default function AdminDashboard() {
 
   const docSelecionado = mockAtestados.find((a) => a.id === selectedDoc);
 
+  // Para exibir todas as páginas no fullscreen:
+  const [numPages, setNumPages] = React.useState<number>(1);
+  const handlePdfLoad = (pdf: any) => setNumPages(pdf.numPages);
+
   return (
     <Box
       sx={{
@@ -60,7 +74,7 @@ export default function AdminDashboard() {
         display: "flex",
         alignItems: isMobile ? "flex-start" : "center",
         justifyContent: "center",
-        p: isMobile ? 0 : 0,
+        p: 0,
         overflow: "auto"
       }}
     >
@@ -112,14 +126,25 @@ export default function AdminDashboard() {
                   gap: isMobile ? 2 : 0
                 }
               }}
-              orientation={isMobile ? "horizontal" : "horizontal"}
+              orientation="horizontal"
               variant={isMobile ? "scrollable" : "standard"}
             >
               <Tab
                 label={
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <span style={{ fontWeight: "bold" }}>Análise Pendente</span>
-                    <Badge badgeContent={pendentes} color="error" sx={{ ml: 1, mb: "2px" }} />
+                    <Badge
+                      badgeContent={pendentes}
+                      color="error"
+                      sx={{
+                        ml: 2,
+                        mb: "0px",
+                        "& .MuiBadge-badge": {
+                          top: -10,
+                          right: 2,
+                        }
+                      }}
+                    />
                   </Box>
                 }
                 sx={{ textTransform: "none" }}
@@ -128,7 +153,18 @@ export default function AdminDashboard() {
                 label={
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <span style={{ fontWeight: "bold" }}>Em Progresso</span>
-                    <Badge badgeContent={progresso} color="info" sx={{ ml: 1, mb: "2px" }} />
+                    <Badge
+                      badgeContent={progresso}
+                      color="info"
+                      sx={{
+                        ml: 2,
+                        mb: "0px",
+                        "& .MuiBadge-badge": {
+                          top: -10,
+                          right: 2,
+                        }
+                      }}
+                    />
                   </Box>
                 }
                 sx={{ textTransform: "none" }}
@@ -218,18 +254,29 @@ export default function AdminDashboard() {
             flex: isMobile ? "none" : undefined
           }}
         >
-          <Typography
-            sx={{
-              mb: 1,
-              ml: 1,
-              fontWeight: 500,
-              fontSize: 18,
-              color: "#111",
-              alignSelf: "flex-start",
-            }}
-          >
-            {docSelecionado ? docSelecionado.arquivo : "Nome do arquivo.pdf"}
-          </Typography>
+          <Box sx={{ width: "100%", display: "flex", alignItems: "center", mb: 1, ml: 1 }}>
+            <Typography
+              sx={{
+                fontWeight: 500,
+                fontSize: 18,
+                color: "#111",
+                flex: 1,
+              }}
+            >
+              {docSelecionado ? docSelecionado.arquivo : "Nome do arquivo.pdf"}
+            </Typography>
+            {docSelecionado && (
+              <IconButton
+                onClick={() => {
+                  if (docSelecionado) window.open(`/${docSelecionado.arquivo}`, "_blank");
+                }}
+                title="Abrir PDF em nova aba"
+              >
+                <FullscreenIcon />
+              </IconButton>
+
+            )}
+          </Box>
           <Box
             sx={{
               width: "100%",
@@ -240,18 +287,79 @@ export default function AdminDashboard() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontWeight: 600,
-              fontSize: isMobile ? 22 : 32,
-              color: "#888",
               minHeight: isMobile ? 180 : 350,
               mt: 2,
               mx: "auto",
+              overflow: "auto"
             }}
           >
-            DOCUMENTO
+            {docSelecionado ? (
+              <Document
+                file={`/${docSelecionado.arquivo}`}
+                loading="Carregando PDF..."
+                error={<span>Não foi possível exibir o PDF.</span>}
+                onLoadSuccess={handlePdfLoad}
+              >
+                <Page
+                  pageNumber={1}
+                  width={isMobile ? undefined : 500}
+                  height={isMobile ? 330 : undefined}
+                />
+              </Document>
+            ) : (
+              "DOCUMENTO"
+            )}
           </Box>
         </Box>
       </Box>
+
+      {/* MODAL FULLSCREEN PDF */}
+      <Dialog
+        open={fullscreenOpen}
+        onClose={() => setFullscreenOpen(false)}
+        fullScreen
+        PaperProps={{
+          sx: { bgcolor: "#222" }
+        }}
+      >
+        <DialogContent sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 0,
+          bgcolor: "#222"
+        }}>
+          <Box sx={{
+            width: "100vw", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative"
+          }}>
+            <IconButton
+              onClick={() => setFullscreenOpen(false)}
+              sx={{ position: "absolute", top: 20, right: 20, color: "#fff", zIndex: 10 }}
+              title="Fechar tela cheia"
+            >
+              <CloseIcon />
+            </IconButton>
+            {docSelecionado && (
+              <Document
+                file={`/${docSelecionado.arquivo}`}
+                loading={<span style={{ color: "#fff" }}>Carregando PDF...</span>}
+                error={<span style={{ color: "#fff" }}>Não foi possível exibir o PDF.</span>}
+                onLoadSuccess={handlePdfLoad}
+              >
+                {/* Exibe todas as páginas do PDF em tela cheia */}
+                {Array.from(new Array(numPages), (el, index) => (
+                  <Page
+                    key={index}
+                    pageNumber={index + 1}
+                    width={Math.min(window.innerWidth * 0.85, 1100)}
+                  />
+                ))}
+              </Document>
+            )}
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
