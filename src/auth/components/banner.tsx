@@ -16,7 +16,7 @@ export default function Banner() {
         borderRadius: "0px 30px"
       }}
     >
-        <img src={logo} alt="" style={{height: "330px"}}/>
+        <img src={logo} alt="" style={{width: "490px"}}/>
     </Box>
   );
 }
