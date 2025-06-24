@@ -20,7 +20,7 @@ export const handleLogin = async(credenciais: login) => {
 
     } catch (error){
         const { showSnackbar } = useSnackbarStore.getState();
-        showSnackbar('Eerwgarf8asfasdf.', 'error');
+        showSnackbar('E-mail ou senha incorretos', 'error');
     }
 }
 
