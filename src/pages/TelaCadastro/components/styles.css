@@ -1,0 +1,10 @@
+.campo {
+    width: 45%;
+}
+
+.titulo-form {
+    font-size: 30px !important;
+    font-weight: 530 !important;
+    font-family: Poppins, sans-serif !important;
+    margin-bottom: 10px !important;
+}

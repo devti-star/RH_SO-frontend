@@ -23,20 +23,20 @@ export default function TelaCadastro() {
           sx={{
             height: "100vh",
             background: " #050A24",
-            width: "50%",
+            width: "40%",
             display: "flex",
             justifyContent: "flex-end",
             alignItems: "center",
           }}
         >
-          <Banner  />
+          <Banner largura_imagem={300}/>
         </Box>
       )}
       <Box
         sx={{
           height: "100vh",
           background: "white",
-          width: isMobile ? "100%" : "50%",
+          width: isMobile ? "100%" : "60%",
           display: "flex",
           flexDirection: "row",
           justifyContent: isMobile ? "center" : "flex-start",
@@ -46,7 +46,7 @@ export default function TelaCadastro() {
         <Box
           sx={{
             height: "580px",
-            width: "490px",
+            width: "90%",
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
             justifyContent: isMobile ? "center" : "flex-start",
