@@ -1,0 +1,22 @@
+footer{
+    background-color: #050A24!important;
+    color: #ffffff;
+    width: 100% !important;
+    position: fixed;
+    text-align: center ;
+    justify-content: center;
+    font-size: 16px ;
+    font-family: verdana ;
+    font-weight: bold;
+    width: 600px ;
+    bottom: 0;
+    height: 6%;
+    background-color: #f6f6f6 ;
+}
+
+footer .line{
+  width:100% !important;
+  min-height: 3px !important;
+  margin-top: 5px !important;
+  background-color: #ffffff !important;
+};
