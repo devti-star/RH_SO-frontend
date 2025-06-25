@@ -3,13 +3,14 @@ import App from '../App.tsx'
 import NotFoundPage from "../pages/notFoundPage.tsx";
 import SolicitacaoCarimbo from "../pages/solicitacaoCarimbo.tsx";
 import SolicitacaoCracha from "../pages/SolicitacaoCracha.tsx";
+import Login from "../auth/login.tsx";
+
 
 const router = createBrowserRouter([
-    {path: "/", element: <App/>},
-    {path: "*", element: <NotFoundPage/>},
+    {path: "/login", element: <Login/>},    
     {path: "/solicitacaoCarimbo", element: <SolicitacaoCarimbo />},
     {path: "/SolicitacaoCracha", element: <SolicitacaoCracha/>},
-
+    {path: "*", element: <NotFoundPage/>},
 ]);
 
 
