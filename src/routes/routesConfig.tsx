@@ -6,6 +6,8 @@ import Login from "../auth/login.tsx";
 import TelaCadastro from "../pages/TelaCadastro/TelaCadastro.tsx";
 
 
+/* alteraçoes que for feitas aqui devem alterar o shared/header*/
+
 const router = createBrowserRouter([
 
     {path: "/login", element: <Login/>},    
