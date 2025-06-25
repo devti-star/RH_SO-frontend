@@ -4,7 +4,7 @@ function Footer(){
         return(
           <footer>
             <div className="line"></div>
-            <p>© Diretoria de Tecnologia da Informação/Tres Lagoas - Todos os direitos reservados</p> 
+            <p className="text-sm text-gray-500 text-center py-4">© Diretoria de TI / Três Lagoas · v1.0.0</p> 
           </footer>
         )
 }

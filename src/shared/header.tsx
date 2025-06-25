@@ -21,17 +21,16 @@ type RouteItem = {
   subItems?: Array<{ label: string; path: string }>;
 };
 
-// Estrutura de rotas com dropdown para "Requerimento RH"
 const routes: RouteItem[] = [
   { label: 'Minhas Solicitações', path: '/minhas-solicitacoes' },
   { label: 'Enviar Atestado', path: '/enviar-atestado' },
-  { 
-    label: 'Requerimento RH', 
+  { label: 'Requerimento RH' },
+  {
+    label: 'Solicitações',
     subItems: [
-      { label: 'Férias', path: '/ferias' },
-      { label: 'Aumento Salarial', path: '/aumento-salarial' },
-      { label: 'Promoção', path: '/promocao' },
-    ] 
+      { label: 'Solicitação de Carimbo', path: '/ferias' },
+      { label: 'Solicitação de Crachá', path: '/aumento-salarial' },
+    ],
   },
 ];
 
@@ -65,181 +64,52 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
-  // Abre dropdown mobile
   const handleOpenMobileDropdown = (label: string) => {
     setMobileDropdownOpen(mobileDropdownOpen === label ? null : label);
   };
 
-  // Verifica se um item ou subitem está ativo
   const isActive = (path?: string, subItems?: Array<{ path: string }>) => {
     if (path) return location.pathname === path;
     if (subItems) return subItems.some(subItem => location.pathname === subItem.path);
     return false;
   };
 
-  // Abrir dropdown ao passar o mouse
   const handleOpenDropdown = (label: string, event: React.MouseEvent<HTMLElement>) => {
     setDropdownAnchor(event.currentTarget);
     setHoverDropdown(label);
   };
 
-  // Fechar dropdown ao remover o mouse
   const handleCloseDropdown = () => {
     setHoverDropdown(null);
     setDropdownAnchor(null);
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#121B23' }}>
+    <AppBar position="static" sx={{ backgroundColor: '#050a24' }}>
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ height: 90 }}>
-          {/* Logo para telas grandes */}
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontWeight: 700,
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            <Box component="img" sx={{ height: 50, width: 'auto' }} src="src/assets/logoBranca.png" />
-          </Typography>
-
-          {/* Menu para dispositivos móveis */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="menu navegação"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-              open={Boolean(anchorElNav)}
-              onClose={() => {
-                setAnchorElNav(null);
-                setMobileDropdownOpen(null);
-              }}
-              sx={{ display: { xs: 'block', md: 'none', backgroundColor: '#121B23' } }}
-            >
-              {routes.map((route) => {
-                if (route.subItems) {
-                  const active = isActive(route.path, route.subItems);
-                  return (
-                    <div key={route.label}>
-                      <MenuItem 
-                        onClick={() => handleOpenMobileDropdown(route.label)}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          borderBottom: active ? '2px solid #121B23' : 'none',
-                        }}
-                      >
-                        <Typography>{route.label}</Typography>
-                        <ArrowDropDownIcon 
-                          sx={{ 
-                            ml: 1,
-                            transform: mobileDropdownOpen === route.label ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.3s ease'
-                          }} 
-                        />
-                      </MenuItem>
-                      
-                      {mobileDropdownOpen === route.label && route.subItems.map((subItem) => (
-                        <MenuItem 
-                          key={subItem.path} 
-                          onClick={() => {
-                            handleCloseNavMenu(subItem.path);
-                            setMobileDropdownOpen(null);
-                          }}
-                          sx={{
-                            pl: 4,
-                            borderBottom: location.pathname === subItem.path 
-                              ? '2px solid white' 
-                              : 'none',
-                            backgroundColor: location.pathname === subItem.path 
-                              ? 'rgba(255, 255, 255, 0.1)' 
-                              : 'transparent',
-                          }}
-                        >
-                          <Typography textAlign="center">{subItem.label}</Typography>
-                        </MenuItem>
-                      ))}
-                    </div>
-                  );
-                } else {
-                  return (
-                    <MenuItem 
-                      key={route.path} 
-                      onClick={() => handleCloseNavMenu(route.path)}
-                      sx={{
-                        borderBottom: isActive(route.path) 
-                          ? '2px solid white' 
-                          : 'none',
-                        backgroundColor: isActive(route.path) 
-                          ? 'rgba(255, 255, 255, 0.1)' 
-                          : 'transparent',
-                      }}
-                    >
-                      <Typography textAlign="center">{route.label}</Typography>
-                    </MenuItem>
-                  );
-                }
-              })}
-            </Menu>
+        <Toolbar disableGutters sx={{ height: 100, px: 2 }}>
+          {/* Logo fixada à esquerda */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
+            <Box component="img" sx={{ height: 60, width: 'auto' }} src="src/assets/logoBranca.png" />
           </Box>
 
-          {/* Logo para mobile */}
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontWeight: 700,
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            <Box component="img" sx={{ height: 40, width: 'auto' }} src="src/assets/logoBranca.png" />
-          </Typography>
-
-          {/* Botões para desktop */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 2 }}>
+          {/* Botões centralizados */}
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {routes.map((route) => {
               if (route.subItems) {
                 const active = isActive(route.path, route.subItems);
                 return (
-                  <Box 
-                    key={route.label} 
-                    sx={{ 
-                      position: 'relative',
-                    }}
+                  <Box
+                    key={route.label}
+                    sx={{ position: 'relative' }}
                     onMouseEnter={(e) => handleOpenDropdown(route.label, e)}
                     onMouseLeave={handleCloseDropdown}
                   >
                     <Button
                       sx={{
-                        my: 2,
+                        mx: 1,
                         color: 'white',
+                        fontSize: '1.1rem',
                         display: 'flex',
                         alignItems: 'center',
                         position: 'relative',
@@ -263,24 +133,24 @@ function ResponsiveAppBar() {
                       {route.label}
                       <ArrowDropDownIcon sx={{ ml: 0.5 }} />
                     </Button>
-                    
+
                     <Menu
                       anchorEl={dropdownAnchor}
                       open={hoverDropdown === route.label}
                       onClose={handleCloseDropdown}
                       MenuListProps={{
                         onMouseLeave: handleCloseDropdown,
-                        sx: { py: 0 }
+                        sx: { py: 0 },
                       }}
                       PaperProps={{
                         sx: {
-                          backgroundColor: '#121B23',
+                          backgroundColor: '#050a24',
                           minWidth: '200px',
                           boxShadow: '0px 8px 16px 0px rgba(0,0,0,0.2)',
                           zIndex: 1,
                           borderRadius: '10px',
                           overflow: 'hidden',
-                        }
+                        },
                       }}
                     >
                       {route.subItems.map((subItem) => (
@@ -294,9 +164,8 @@ function ResponsiveAppBar() {
                             px: 3,
                             py: 1.5,
                             color: 'white',
-                            backgroundColor: location.pathname === subItem.path 
-                              ? 'rgba(255, 255, 255, 0.1)' 
-                              : 'transparent',
+                            backgroundColor:
+                              location.pathname === subItem.path ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
                             '&:hover': {
                               backgroundColor: 'rgba(255, 255, 255, 0.15)',
                             },
@@ -315,9 +184,9 @@ function ResponsiveAppBar() {
                     key={route.path}
                     onClick={() => navigate(route.path!)}
                     sx={{
-                      my: 2,
+                      mx: 1,
                       color: 'white',
-                      display: 'block',
+                      fontSize: '1.1rem',
                       position: 'relative',
                       '&:after': {
                         content: '""',
@@ -342,12 +211,12 @@ function ResponsiveAppBar() {
               }
             })}
           </Box>
-          
+
           {/* Área do usuário */}
-          <Box sx={{ flexGrow: 0, backgroundColor: '#121B23'}}>
+          <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Abrir configurações">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Usuário"/>
+                <Avatar alt="Usuário" />
               </IconButton>
             </Tooltip>
             <Menu
@@ -359,15 +228,13 @@ function ResponsiveAppBar() {
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
-              PaperProps={{
-                sx: {backgroundColor: '#121B23', color: 'white'},
-              }}
-             >
+              PaperProps={{ sx: { backgroundColor: '#050a24', color: 'white' } }}
+            >
               {settings.map((setting) => (
-                <MenuItem 
-                  sx={{ backgroundColor: '#121B23', color: "#ffffff"}} 
-                  key={setting} 
+                <MenuItem
+                  key={setting}
                   onClick={handleCloseUserMenu}
+                  sx={{ backgroundColor: '#050a24', color: '#ffffff' }}
                 >
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
