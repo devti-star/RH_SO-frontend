@@ -1,8 +1,10 @@
+import './footer.css'
 
-function Footer() {
+function Footer(){
         return(
           <footer>
-            <p>Copyright &copy; Prefeitura Municipal de Três Lagoas</p> 
+            <div className="line"></div>
+            <p>© Diretoria de Tecnologia da Informação/Tres Lagoas - Todos os direitos reservados</p> 
           </footer>
         )
 }

@@ -11,11 +11,21 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
+import { useLocation, useNavigate } from 'react-router-dom'; // Importações adicionadas
 
-const pages = ['Minhas Solicitações', 'Enviar Atestado', 'Requerimento RH', 'Meus Dados'];
+/* alteraçoes que for feitas no routesconfig devem alterar este array*/
+
+const routes = [
+  { label: 'Minhas Solicitações', path: '/minhas-solicitacoes' },
+  { label: 'Enviar Atestado', path: '/enviar-atestado' },
+  { label: 'Requerimento RH', path: '/requerimento-rh' },
+  { label: 'Meus Dados', path: '/meus-dados' },
+];
 const settings = ['Sair'];
 
 function ResponsiveAppBar() {
+  const navigate = useNavigate();
+  const location = useLocation(); // Obtém a rota atual
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -86,9 +96,17 @@ function ResponsiveAppBar() {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
+                {routes.map((route) => (
+                <MenuItem 
+                  key={route.path} 
+                  onClick={() => handleCloseNavMenu(route.path)}
+                  sx={{
+                    borderBottom: location.pathname === route.path 
+                      ? '2px solid white' 
+                      : 'none',
+                  }}
+                >
+                  <Typography textAlign="center">{route.label}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -108,23 +126,48 @@ function ResponsiveAppBar() {
               color: 'inherit',
               textDecoration: 'none',
             }}
+
           >
-            LOGO
+           <Box component="img" sx={{height:40, width:'auto',}} src="src/assets/logoBranca.png" />
           </Typography>
 
           {/* Botões para desktop */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 2 }}>
+            {routes.map((route) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                key={route.path}
+                onClick={() => handleCloseNavMenu(route.path)}
+                sx={{
+                  my: 2,
+                  color: 'white',
+                  display: 'block',
+                  position: 'relative',
+                  '&:after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    backgroundColor: location.pathname === route.path 
+                      ? 'white' 
+                      : 'transparent',
+                    transform: location.pathname === route.path 
+                      ? 'scaleX(1)' 
+                      : 'scaleX(0)',
+                    transition: 'transform 0.3s ease, background-color 0.3s ease',
+                  },
+                  '&:hover:after': {
+                    backgroundColor: 'white',
+                    transform: 'scaleX(1)',
+                  },
+                }}
               >
-                {page}
+                {route.label}
               </Button>
             ))}
           </Box>
-
+                      
           {/* Avatar e menu do usuário */}
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Abrir configurações">
