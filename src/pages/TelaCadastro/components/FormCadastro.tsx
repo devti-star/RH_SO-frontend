@@ -4,7 +4,9 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
+  MenuItem,
   OutlinedInput,
+  Select,
   Typography,
   type BoxProps,
 } from "@mui/material";
@@ -12,6 +14,7 @@ import CustomButton from "../../../shared/customButton";
 import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./styles.css";
+import type { secretaria } from "../../../models/secretaria.interface";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -30,13 +33,66 @@ export default function FormCadastro({
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [foto, setFoto] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [senha, setSenha] = useState("");
   const [senhaConfirm, setSenhaConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
+  const secretarias: secretaria[] = [
+    { id: 0, secretaria: "Gabinete" },
+    { id: 1, secretaria: "Procuradoria" },
+    { id: 2, secretaria: "SMS - Secretaria Municipal de Saúde Pública" },
+    {
+      id: 3,
+      secretaria:
+        "SEGOV - Secretaria Municipal de Governo e Políticas Públicas",
+    },
+    { id: 4, secretaria: "SMAS – Secretaria Municipal de Assistência Social" },
+    { id: 5, secretaria: "SEMEC – Secretaria Municipal de Educação e Cultura" },
+    {
+      id: 6,
+      secretaria: "SEMEA – Secretaria Municipal de Meio Ambiente e Agronegócio",
+    },
+    {
+      id: 7,
+      secretaria:
+        "SEINTRA – Secretaria Municipal de Infraestrutura, Transporte e Trânsito",
+    },
+    {
+      id: 8,
+      secretaria:
+        "SEJUVEL – Secretaria Municipal de Esporte, Juventude e Lazer",
+    },
+    {
+      id: 9,
+      secretaria:
+        "SEFIRC – Secretaria Municipal de Finanças, Receita e Controle",
+    },
+    { id: 10, secretaria: "SEMAD – Secretaria Municipal de Administração" },
+    {
+      id: 11,
+      secretaria:
+        "SEDECT – Secretaria Municipal de Desenvolvimento Econômico, Ciência e Tecnologia",
+    },
+  ];
+
   function handleSubmit() {}
+
+
+  const handleClick = () => {
+    inputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFoto(file);
+    }
+  };
+
+
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -96,14 +152,35 @@ export default function FormCadastro({
           sx={{ marginTop: "10px" }}
           className="campo"
         >
-          <InputLabel htmlFor="campo-secretaria">Secretaria</InputLabel>
-          <OutlinedInput
-            id="campo-secretaria"
-            type={"text"}
+          <InputLabel htmlFor="campo-secretaria" id="secretaria">
+            Secretaria
+          </InputLabel>
+          <Select
+            labelId="secretaria"
+            value={secretaria}
             label="Secretaria"
-            placeholder="Insira a sua senha"
             onChange={(e) => setSecretaria(e.target.value)}
-          ></OutlinedInput>
+            MenuProps={{
+              anchorOrigin: {
+                vertical: "bottom",
+                horizontal: "left",
+              },
+              transformOrigin: {
+                vertical: "top",
+                horizontal: "left",
+              },
+              PaperProps: {
+                sx: {
+                  mt: 1, // Margem opcional para espaçar do campo
+                  minWidth: "45%",
+                },
+              },
+            }}
+          >
+            {secretarias.map((sec) => {
+              return <MenuItem value={sec.id}>{sec.secretaria}</MenuItem>;
+            })}
+          </Select>
         </FormControl>
 
         <FormControl
@@ -218,12 +295,14 @@ export default function FormCadastro({
           <InputLabel htmlFor="campo-foto">Foto</InputLabel>
           <OutlinedInput
             id="campo-foto"
-            type={"text"}
+            type="file"
             label="Foto"
             placeholder="Insira a sua foto"
             onChange={(e) => setFoto(e.target.value)}
           ></OutlinedInput>
         </FormControl>
+
+        <input type="file" hidden ref={handleClick}></input>
 
         <FormControl
           variant="outlined"
