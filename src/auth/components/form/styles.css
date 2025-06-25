@@ -1,0 +1,19 @@
+.recuperar-senha{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.recuperar-senha a{
+    text-decoration: none;
+    color: #0C1951;
+}
+
+.titulo-form {
+    font-size: 30px !important;
+    font-weight: 530 !important;
+    font-family: Poppins, sans-serif !important;
+    margin-bottom: 10px !important;
+}
