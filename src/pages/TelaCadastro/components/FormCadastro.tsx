@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormHelperText,
   FormLabel,
   IconButton,
   InputAdornment,
@@ -15,11 +16,16 @@ import {
   type BoxProps,
 } from "@mui/material";
 import CustomButton from "../../../shared/customButton";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./styles.css";
 import type { secretaria } from "../../../models/secretaria.interface";
 import CloseIcon from "@mui/icons-material/Close";
+import {
+  mascaraCPF,
+  mascaraRG,
+  mascaraTelefone,
+} from "../../../shared/mascaras/services";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -69,7 +75,7 @@ export default function FormCadastro({
   const [cpf, setCPF] = useState("");
   const [departamento, setDepartamento] = useState("");
   const [rg, setRG] = useState("");
-  const [maticula, setMatricula] = useState("");
+  const [matricula, setMatricula] = useState("");
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -84,15 +90,23 @@ export default function FormCadastro({
   const [senhaConfirm, setSenhaConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [erroSenhas, setErroSenhas] = useState(false);
 
-  function handleSubmit() {}
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (senha !== senhaConfirm) {
+      setErroSenhas(true);
+    } else {
+      setErroSenhas(false);
+    }
+  };
 
   const handleClick = () => {
     inputRef.current?.click();
   };
 
-  const abrirModal = () => setModalAberto(true);
-  const fecharModal = () => setModalAberto(false);
+  const modificarModal = () => setModalAberto(!modalAberto);
 
   useEffect(() => {
     return () => {
@@ -116,6 +130,24 @@ export default function FormCadastro({
 
   const handleTogglePasswordConfirm = () => {
     setShowPasswordConfirm((prev) => !prev);
+  };
+
+  const handleChangeRG = (e: ChangeEvent<HTMLInputElement>) => {
+    const value: string = mascaraRG(e);
+
+    setRG(value);
+  };
+
+  const handleChangeCPF = (e: ChangeEvent<HTMLInputElement>) => {
+    const value: string = mascaraCPF(e);
+
+    setCPF(value);
+  };
+
+  const handleChangeTelefone = (e: ChangeEvent<HTMLInputElement>) => {
+    const value: string = mascaraTelefone(e);
+
+    setTelefone(value);
   };
 
   return (
@@ -209,8 +241,13 @@ export default function FormCadastro({
             id="campo-cpf"
             type="text"
             label="CPF"
-            placeholder="111.111.11-11"
-            onChange={(e) => setCPF(e.target.value)}
+            value={cpf}
+            placeholder="111.111.111-11"
+            onChange={handleChangeCPF}
+            inputProps={{
+              pattern: "[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2}",
+              title: "Formato esperado: 111.111.111-11",
+            }}
           ></OutlinedInput>
         </FormControl>
 
@@ -237,10 +274,15 @@ export default function FormCadastro({
           <InputLabel htmlFor="campo-rg">RG</InputLabel>
           <OutlinedInput
             id="campo-rg"
-            type={"text"}
+            type="text"
             label="RG"
+            value={rg}
             placeholder="11.111.111-x"
-            onChange={(e) => setRG(e.target.value)}
+            onChange={handleChangeRG}
+            inputProps={{
+              pattern: "[0-9]{2}\\.[0-9]{3}\\.[0-9]{3}-[0-9a-z]",
+              title: "Formato esperado: 11.111.111-x",
+            }}
           ></OutlinedInput>
         </FormControl>
 
@@ -298,9 +340,14 @@ export default function FormCadastro({
           <OutlinedInput
             id="campo-telefone"
             type={"text"}
+            value={telefone}
             label="Telefone/Whatsapp"
-            placeholder="(11)11111-1111"
-            onChange={(e) => setTelefone(e.target.value)}
+            placeholder="(11) 11111-1111"
+            onChange={handleChangeTelefone}
+            inputProps={{
+              pattern: "\\([0-9]{2}\\)[0-9]{5}-[0-9]{4}",
+              title: "Formato esperado: (11) 11111-1111",
+            }}
           ></OutlinedInput>
         </FormControl>
 
@@ -327,14 +374,20 @@ export default function FormCadastro({
             <>
               <Typography
                 variant="body2"
-                sx={{ mt: 2, cursor: "pointer", width: "fit-content", color: "rgb(0, 102, 204)" }}
-                onClick={abrirModal}
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  cursor: "pointer",
+                  width: "fit-content",
+                  color: "rgb(0, 102, 204)",
+                }}
+                onClick={modificarModal}
               >
                 {foto.name}
               </Typography>
               <Dialog
                 open={modalAberto}
-                onClose={fecharModal}
+                onClose={modificarModal}
                 maxWidth="sm"
                 fullWidth
                 slotProps={{ paper: { sx: { borderRadius: "15px" } } }}
@@ -347,7 +400,7 @@ export default function FormCadastro({
                   }}
                 >
                   Pré-visualização da Imagem
-                  <IconButton onClick={fecharModal}>
+                  <IconButton onClick={modificarModal}>
                     <CloseIcon />
                   </IconButton>
                 </DialogTitle>
@@ -391,7 +444,7 @@ export default function FormCadastro({
 
         <FormControl
           variant="outlined"
-          sx={{ marginTop: "10px" }}
+          sx={{ marginTop: "15px" }}
           className="campo"
         >
           <InputLabel htmlFor="campo-senha-confirmacao">
@@ -399,7 +452,7 @@ export default function FormCadastro({
           </InputLabel>
           <OutlinedInput
             id="campo-senha-confirmacao"
-            type={showPassword ? "text" : "password"}
+            type={showPasswordConfirm ? "text" : "password"}
             label="Confirme a sua senha"
             placeholder="Confirme a sua senha"
             onChange={(e) => setSenhaConfirm(e.target.value)}
@@ -415,6 +468,13 @@ export default function FormCadastro({
               </InputAdornment>
             }
           ></OutlinedInput>
+          {erroSenhas && (
+            <FormHelperText
+              sx={{ m: 0, mt: 1, color: "red", fontSize: "15px" }}
+            >
+              As senhas não coincidem
+            </FormHelperText>
+          )}
         </FormControl>
 
         <Box
