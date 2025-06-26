@@ -46,7 +46,7 @@ const CHECKLIST = [
 ];
 
 // Troque aqui para "triagem" | "medico" | "enfermeiro"
-const perfilAtual = "triagem";
+const perfilAtual = "enfermeiro";
 
 // Mock de atestados - de arquivo1.pdf a arquivo14.pdf, todos checklist colapsados inicialmente
 const MOCK_ATESTADOS = [
@@ -280,7 +280,12 @@ function getConfig(perfil) {
         { label: "Finalizados", status: ["finalizado"] },
       ],
       mostraChecklist: () => false,
-      statusLabel: () => null,
+      statusLabel: (a, tab) =>
+        tab === 0 ? (
+          <span style={{ color: "#b66400" }}>
+            Mensagem do médico: {a.observacao}
+          </span>
+        ) : null,
       observacaoStyle: () => ({ color: "#1277be" }),
       botoes: (tab) => (tab === 0 ? ["informar"] : []),
       canAprovar: () => false,
@@ -788,7 +793,7 @@ export default function AdminDashboard() {
                                 size="small"
                                 sx={{
                                   borderRadius: 2,
-                                  bgcolor: "#e6a700",
+                                  bgcolor: "#ffcc00",
                                   color: "#222",
                                 }}
                                 disabled={!!a.aprovado}
@@ -838,18 +843,27 @@ export default function AdminDashboard() {
             flex: isMobile ? "none" : undefined,
           }}
         >
-          <Typography
-            sx={{
-              mb: 1,
-              ml: 1,
-              fontWeight: 500,
-              fontSize: 18,
-              color: "#111",
-              alignSelf: "flex-start",
-            }}
-          >
-            {docSelecionado ? docSelecionado.arquivo : "Nome do arquivo.pdf"}
-          </Typography>
+          <Box sx={{ width: "100%", display: "flex", alignItems: "center", mb: 1, ml: 1 }}>
+            <Typography
+              sx={{
+                fontWeight: 500,
+                fontSize: 18,
+                color: "#111",
+                flex: 1,
+              }}
+            >
+              {docSelecionado ? docSelecionado.arquivo : "Nome do arquivo.pdf"}
+            </Typography>
+            {docSelecionado && (
+              <IconButton
+                onClick={() => window.open(`/${docSelecionado.arquivo}`, "_blank")}
+                title="Abrir PDF em nova aba"
+              >
+                <FullscreenIcon />
+              </IconButton>
+            )}
+          </Box>
+
           <Box
             sx={{
               width: "100%",
