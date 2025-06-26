@@ -1,6 +1,7 @@
 import {
   Box,
   FormControl,
+  FormLabel,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -11,7 +12,7 @@ import {
   type BoxProps,
 } from "@mui/material";
 import CustomButton from "../../../shared/customButton";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./styles.css";
 import type { secretaria } from "../../../models/secretaria.interface";
@@ -19,6 +20,41 @@ import type { secretaria } from "../../../models/secretaria.interface";
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
 }
+
+const secretarias: secretaria[] = [
+  { id: 0, secretaria: "Gabinete" },
+  { id: 1, secretaria: "Procuradoria" },
+  { id: 2, secretaria: "SMS - Secretaria Municipal de Saúde Pública" },
+  {
+    id: 3,
+    secretaria: "SEGOV - Secretaria Municipal de Governo e Políticas Públicas",
+  },
+  { id: 4, secretaria: "SMAS – Secretaria Municipal de Assistência Social" },
+  { id: 5, secretaria: "SEMEC – Secretaria Municipal de Educação e Cultura" },
+  {
+    id: 6,
+    secretaria: "SEMEA – Secretaria Municipal de Meio Ambiente e Agronegócio",
+  },
+  {
+    id: 7,
+    secretaria:
+      "SEINTRA – Secretaria Municipal de Infraestrutura, Transporte e Trânsito",
+  },
+  {
+    id: 8,
+    secretaria: "SEJUVEL – Secretaria Municipal de Esporte, Juventude e Lazer",
+  },
+  {
+    id: 9,
+    secretaria: "SEFIRC – Secretaria Municipal de Finanças, Receita e Controle",
+  },
+  { id: 10, secretaria: "SEMAD – Secretaria Municipal de Administração" },
+  {
+    id: 11,
+    secretaria:
+      "SEDECT – Secretaria Municipal de Desenvolvimento Econômico, Ciência e Tecnologia",
+  },
+];
 
 export default function FormCadastro({
   espacamento = "100px 50px 130px 50px",
@@ -33,66 +69,41 @@ export default function FormCadastro({
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
   const [telefone, setTelefone] = useState("");
+
+  //Para a imagem
   const [foto, setFoto] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [previaFoto, setPreviaFoto] = useState<string | undefined>(undefined);
+  const [modalAberto, setModalAberto] = useState(false);
+
   const [senha, setSenha] = useState("");
   const [senhaConfirm, setSenhaConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
-  const secretarias: secretaria[] = [
-    { id: 0, secretaria: "Gabinete" },
-    { id: 1, secretaria: "Procuradoria" },
-    { id: 2, secretaria: "SMS - Secretaria Municipal de Saúde Pública" },
-    {
-      id: 3,
-      secretaria:
-        "SEGOV - Secretaria Municipal de Governo e Políticas Públicas",
-    },
-    { id: 4, secretaria: "SMAS – Secretaria Municipal de Assistência Social" },
-    { id: 5, secretaria: "SEMEC – Secretaria Municipal de Educação e Cultura" },
-    {
-      id: 6,
-      secretaria: "SEMEA – Secretaria Municipal de Meio Ambiente e Agronegócio",
-    },
-    {
-      id: 7,
-      secretaria:
-        "SEINTRA – Secretaria Municipal de Infraestrutura, Transporte e Trânsito",
-    },
-    {
-      id: 8,
-      secretaria:
-        "SEJUVEL – Secretaria Municipal de Esporte, Juventude e Lazer",
-    },
-    {
-      id: 9,
-      secretaria:
-        "SEFIRC – Secretaria Municipal de Finanças, Receita e Controle",
-    },
-    { id: 10, secretaria: "SEMAD – Secretaria Municipal de Administração" },
-    {
-      id: 11,
-      secretaria:
-        "SEDECT – Secretaria Municipal de Desenvolvimento Econômico, Ciência e Tecnologia",
-    },
-  ];
-
   function handleSubmit() {}
-
 
   const handleClick = () => {
     inputRef.current?.click();
   };
 
+  const mudarModal = () => setModalAberto(!modalAberto)
+
+  useEffect(() => {
+    return () => {
+      if (previaFoto) {
+        URL.revokeObjectURL(previaFoto);
+      }
+    };
+  }, [previaFoto]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setFoto(file);
+      setPreviaFoto(URL.createObjectURL(file)); //Criação de URL temporária para visualização da foto carregada
     }
   };
-
-
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -289,20 +300,32 @@ export default function FormCadastro({
 
         <FormControl
           variant="outlined"
-          sx={{ marginTop: "10px" }}
           className="campo"
+          sx={{ marginTop: "10px" }}
         >
-          <InputLabel htmlFor="campo-foto">Foto</InputLabel>
-          <OutlinedInput
-            id="campo-foto"
+          <FormLabel sx={{ mb: 0, color: "black" }}>Foto</FormLabel>
+          <input
             type="file"
-            label="Foto"
-            placeholder="Insira a sua foto"
-            onChange={(e) => setFoto(e.target.value)}
-          ></OutlinedInput>
+            hidden
+            ref={inputRef}
+            onChange={handleFileChange}
+            accept=".png, .jpg, .jpeg"
+          ></input>
+          <CustomButton
+            payload="Carregar foto .png, .jpg ou .jpeg"
+            onClick={handleClick}
+            sx={{ mt: 0 }}
+          ></CustomButton>
+          {foto && (
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              Imagem selecionada: &nbsp;
+              <a href={previaFoto} target="_blanck" rel="noopener noreferrer">
+                {" "}
+                {foto.name}{" "}
+              </a>
+            </Typography>
+          )}
         </FormControl>
-
-        <input type="file" hidden ref={handleClick}></input>
 
         <FormControl
           variant="outlined"
