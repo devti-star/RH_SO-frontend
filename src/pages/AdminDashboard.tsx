@@ -115,7 +115,7 @@ const MOCK_ATESTADOS = [
     status: "enfermeiro",
     checklist: [true, true, true, true, true, true, true, true],
     aprovado: "reprovado",
-    observacao: "Aguardando justificativa do enfermeiro.",
+    observacao: "Laudo incosistente.",
     expanded: false,
   },
   // Em Ajustes
@@ -226,20 +226,20 @@ function getConfig(perfil) {
       statusLabel: (a, tab) => {
         if (tab === 2)
           return (
-            <span style={{ color: "#b68400" }}>
+            <span style={{ color: "#b68400", fontWeight: 600 }}>
               Aguardando reenvio do atestado pelo requerente.
             </span>
           );
         if (tab === 1) {
           if (a.status === "medico")
             return (
-              <span style={{ color: "#0d68b6" }}>
+              <span style={{ color: "#0d68b6", fontWeight: 600 }}>
                 Aguardando aprovação do médico
               </span>
             );
           if (a.status === "enfermeiro")
             return (
-              <span style={{ color: "#b66400" }}>
+              <span style={{ color: "#b66400", fontWeight: 600 }}>
                 Aguardando justificativa do enfermeiro
               </span>
             );
@@ -265,7 +265,7 @@ function getConfig(perfil) {
       mostraChecklist: () => false,
       statusLabel: (a, tab) =>
         tab === 1 ? (
-          <span style={{ color: "#b66400" }}>
+          <span style={{ color: "#b66400", fontWeight: 600 }}>
             Aguardando justificativa do enfermeiro
           </span>
         ) : null,
@@ -282,7 +282,7 @@ function getConfig(perfil) {
       mostraChecklist: () => false,
       statusLabel: (a, tab) =>
         tab === 0 ? (
-          <span style={{ color: "#b66400" }}>
+          <span style={{ color: "#b66400", fontWeight: 600 }}>
             Mensagem do médico: {a.observacao}
           </span>
         ) : null,
@@ -310,6 +310,7 @@ export default function AdminDashboard() {
   const [atualId, setAtualId] = React.useState(null);
 
   // PDF
+  const [mobileDocOpen, setMobileDocOpen] = React.useState(false);
   const [numPages, setNumPages] = React.useState(1);
   const handlePdfLoad = (pdf) => setNumPages(pdf.numPages);
 
@@ -670,16 +671,9 @@ export default function AdminDashboard() {
                           {config.tabs[tab].label === "Em Ajustes" && (
                             <>
                               <Typography
-                                sx={{
-                                  color: "#b68400",
-                                  fontWeight: 600,
-                                  mb: 0.5,
-                                }}
+                                sx={{ color: "#b68400", fontWeight: 600 }}
                               >
-                                Aguardando reenvio do atestado pelo requerente.
-                              </Typography>
-                              <Typography sx={{ color: "#b68400" }}>
-                                Justificativa: {a.observacao}
+                                Observação: {a.observacao}
                               </Typography>
                             </>
                           )}
@@ -703,7 +697,13 @@ export default function AdminDashboard() {
                           {/* Observação em finalizados e reprovações */}
                           {config.tabs[tab].label === "Finalizados" &&
                             a.observacao && (
-                              <Typography sx={{ color: "#1277be", mt: 0.5 }}>
+                              <Typography
+                                sx={{
+                                  color: "#1277be",
+                                  mt: 0.5,
+                                  fontWeight: 600,
+                                }}
+                              >
                                 Justificativa: {a.observacao}
                               </Typography>
                             )}
@@ -730,8 +730,14 @@ export default function AdminDashboard() {
                           {/* Observação em em progresso */}
                           {config.tabs[tab].label === "Em Progresso" &&
                             a.observacao && (
-                              <Typography sx={{ color: "#1277be", mt: 0.5 }}>
-                                Justificativa: {a.observacao}
+                              <Typography
+                                sx={{
+                                  color: "#1277be",
+                                  mt: 0.5,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Observação: {a.observacao}
                               </Typography>
                             )}
 
@@ -747,7 +753,10 @@ export default function AdminDashboard() {
                             <Button
                               variant="outlined"
                               size="small"
-                              onClick={() => setSelectedDoc(a.id)}
+                              onClick={() => {
+                                setSelectedDoc(a.id);
+                                if (isMobile) setMobileDocOpen(true);
+                              }}
                               sx={{ borderRadius: 2 }}
                             >
                               VER DOCUMENTO
@@ -829,75 +838,83 @@ export default function AdminDashboard() {
           </Box>
         </Box>
         {/* DIREITA */}
-        <Box
-          sx={{
-            width: isMobile ? "100%" : "45%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            px: isMobile ? 2 : 4,
-            pt: isMobile ? 2 : 5,
-            bgcolor: "#f4f4f4",
-            minHeight: isMobile ? 260 : "auto",
-            flex: isMobile ? "none" : undefined,
-          }}
-        >
-          <Box sx={{ width: "100%", display: "flex", alignItems: "center", mb: 1, ml: 1 }}>
-            <Typography
-              sx={{
-                fontWeight: 500,
-                fontSize: 18,
-                color: "#111",
-                flex: 1,
-              }}
-            >
-              {docSelecionado ? docSelecionado.arquivo : "Nome do arquivo.pdf"}
-            </Typography>
-            {docSelecionado && (
-              <IconButton
-                onClick={() => window.open(`/${docSelecionado.arquivo}`, "_blank")}
-                title="Abrir PDF em nova aba"
-              >
-                <FullscreenIcon />
-              </IconButton>
-            )}
-          </Box>
-
+        {!isMobile && (
           <Box
             sx={{
-              width: "100%",
-              flex: 1,
-              bgcolor: "#d6d6d6",
-              border: "2px solid #7db2ff",
-              borderRadius: 2,
+              width: "45%",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: isMobile ? 180 : 350,
-              mt: 2,
-              mx: "auto",
-              overflow: "auto",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              px: 4,
+              pt: 5,
+              bgcolor: "#f4f4f4",
+              minHeight: "auto",
             }}
           >
-            {docSelecionado ? (
-              <Document
-                file={`/${docSelecionado.arquivo}`}
-                loading="Carregando PDF..."
-                error={<span>Não foi possível exibir o PDF.</span>}
-                onLoadSuccess={handlePdfLoad}
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                mb: 1,
+                ml: 1,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 500,
+                  fontSize: 18,
+                  color: "#111",
+                  flex: 1,
+                }}
               >
-                <Page
-                  pageNumber={1}
-                  width={isMobile ? undefined : 500}
-                  height={isMobile ? 330 : undefined}
-                />
-              </Document>
-            ) : (
-              "DOCUMENTO"
-            )}
+                {docSelecionado
+                  ? docSelecionado.arquivo
+                  : "Nome do arquivo.pdf"}
+              </Typography>
+              {docSelecionado && (
+                <IconButton
+                  onClick={() =>
+                    window.open(`/${docSelecionado.arquivo}`, "_blank")
+                  }
+                  title="Abrir PDF em nova aba"
+                >
+                  <FullscreenIcon />
+                </IconButton>
+              )}
+            </Box>
+            <Box
+              sx={{
+                width: "100%",
+                flex: 1,
+                bgcolor: "#d6d6d6",
+                border: "2px solid #7db2ff",
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 350,
+                mt: 2,
+                mx: "auto",
+                overflow: "auto",
+              }}
+            >
+              {docSelecionado ? (
+                <Document
+                  file={`/${docSelecionado.arquivo}`}
+                  loading="Carregando PDF..."
+                  error={<span>Não foi possível exibir o PDF.</span>}
+                  onLoadSuccess={handlePdfLoad}
+                >
+                  <Page pageNumber={1} width={500} height={330} />
+                </Document>
+              ) : (
+                "DOCUMENTO"
+              )}
+            </Box>
           </Box>
-        </Box>
+        )}
       </Box>
 
       {/* Pop up de justificar */}
@@ -953,6 +970,63 @@ export default function AdminDashboard() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {isMobile && (
+        <Dialog
+          open={mobileDocOpen}
+          onClose={() => setMobileDocOpen(false)}
+          fullScreen
+          PaperProps={{ style: { background: "#222" } }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              bgcolor: "#222",
+              color: "#fff",
+              p: 2,
+              pb: 0,
+            }}
+          >
+            <Typography sx={{ flex: 1, fontWeight: "bold" }}>
+              {docSelecionado ? docSelecionado.arquivo : ""}
+            </Typography>
+            <IconButton
+              onClick={() => setMobileDocOpen(false)}
+              sx={{ color: "#fff" }}
+            >
+              <CancelIcon />
+            </IconButton>
+          </Box>
+          <Box
+            sx={{
+              width: "100vw",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "#222",
+              p: 0,
+              pt: 2,
+            }}
+          >
+            {docSelecionado && (
+              <Document
+                file={`/${docSelecionado.arquivo}`}
+                loading="Carregando PDF..."
+                error={
+                  <span style={{ color: "#fff" }}>
+                    Não foi possível exibir o PDF.
+                  </span>
+                }
+                onLoadSuccess={handlePdfLoad}
+              >
+                <Page pageNumber={1} width={window.innerWidth - 24} />
+              </Document>
+            )}
+          </Box>
+        </Dialog>
+      )}
     </Box>
   );
 }
