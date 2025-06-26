@@ -1,5 +1,8 @@
 import {
   Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   FormControl,
   FormLabel,
   IconButton,
@@ -16,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./styles.css";
 import type { secretaria } from "../../../models/secretaria.interface";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -87,7 +91,8 @@ export default function FormCadastro({
     inputRef.current?.click();
   };
 
-  const mudarModal = () => setModalAberto(!modalAberto)
+  const abrirModal = () => setModalAberto(true);
+  const fecharModal = () => setModalAberto(false);
 
   useEffect(() => {
     return () => {
@@ -263,6 +268,7 @@ export default function FormCadastro({
           <OutlinedInput
             id="campo-email"
             label="E-mail"
+            type="email"
             placeholder="Insira seu email aqui"
             onChange={(e) => setEmail(e.target.value)}
           ></OutlinedInput>
@@ -316,14 +322,44 @@ export default function FormCadastro({
             onClick={handleClick}
             sx={{ mt: 0 }}
           ></CustomButton>
-          {foto && (
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              Imagem selecionada: &nbsp;
-              <a href={previaFoto} target="_blanck" rel="noopener noreferrer">
-                {" "}
-                {foto.name}{" "}
-              </a>
-            </Typography>
+
+          {foto && previaFoto && (
+            <>
+              <Typography
+                variant="body2"
+                sx={{ mt: 2, cursor: "pointer", width: "fit-content", color: "rgb(0, 102, 204)" }}
+                onClick={abrirModal}
+              >
+                {foto.name}
+              </Typography>
+              <Dialog
+                open={modalAberto}
+                onClose={fecharModal}
+                maxWidth="sm"
+                fullWidth
+                slotProps={{ paper: { sx: { borderRadius: "15px" } } }}
+              >
+                <DialogTitle
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  Pré-visualização da Imagem
+                  <IconButton onClick={fecharModal}>
+                    <CloseIcon />
+                  </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                  <img
+                    src={previaFoto}
+                    alt="Pré-visualização"
+                    style={{ width: "100%", borderRadius: 8 }}
+                  />
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </FormControl>
 
