@@ -13,8 +13,11 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Collapse from '@mui/material/Collapse'; // Adicionado para submenus móveis
+import ListItemIcon from '@mui/material/ListItemIcon'; // Adicionado para ícones de submenu
+import ExpandMore from '@mui/icons-material/ExpandMore'; // Adicionado para indicador de submenu
+import ExpandLess from '@mui/icons-material/ExpandLess'; // Adicionado para indicador de submenu
 
-// Definindo tipos para as rotas e subrotas
 type RouteItem = {
   label: string;
   path?: string;
@@ -55,6 +58,7 @@ function ResponsiveAppBar() {
 
   const handleCloseNavMenu = (path?: string) => {
     setAnchorElNav(null);
+    setMobileDropdownOpen(null);
     if (path) {
       navigate(path);
     }
@@ -88,13 +92,37 @@ function ResponsiveAppBar() {
     <AppBar position="static" sx={{ backgroundColor: '#050a24' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ height: 100, px: 2 }}>
-          {/* Logo fixada à esquerda */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
+          {/* Menu Hamburguer (visível apenas em mobile) */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 2 }}>
+            <IconButton
+              size="large"
+              aria-label="menu"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+
+          {/* Logo */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            mr: { xs: 'auto', md: 4 },
+            flexGrow: { xs: 1, md: 0 }
+          }}>
             <Box component="img" sx={{ height: 60, width: 'auto' }} src="src/assets/logoBranca.png" />
           </Box>
 
-          {/* Botões centralizados */}
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {/* Botões centralizados (visível apenas em desktop) */}
+          <Box sx={{ 
+            flexGrow: 1, 
+            display: { xs: 'none', md: 'flex' }, 
+            justifyContent: 'center', 
+            alignItems: 'center' 
+          }}>
             {routes.map((route) => {
               if (route.subItems) {
                 const active = isActive(route.path, route.subItems);
@@ -211,6 +239,76 @@ function ResponsiveAppBar() {
               }
             })}
           </Box>
+
+          {/* Menu Hamburguer (conteúdo) */}
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorElNav}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+            keepMounted
+            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            open={Boolean(anchorElNav)}
+            onClose={() => handleCloseNavMenu()}
+            sx={{ 
+              display: { xs: 'block', md: 'none' },
+              '& .MuiPaper-root': {
+                backgroundColor: '#050a24',
+                color: 'white',
+                width: '100%',
+                maxWidth: '100vw',
+              }
+            }}
+          >
+            {routes.map((route) => {
+              if (route.subItems) {
+                return (
+                  <React.Fragment key={route.label}>
+                    <MenuItem 
+                      onClick={() => handleOpenMobileDropdown(route.label)}
+                      sx={{ py: 1.5 }}
+                    >
+                      <Typography variant="body1">{route.label}</Typography>
+                      {mobileDropdownOpen === route.label ? 
+                        <ExpandLess sx={{ ml: 'auto' }} /> : 
+                        <ExpandMore sx={{ ml: 'auto' }} />
+                      }
+                    </MenuItem>
+                    
+                    <Collapse in={mobileDropdownOpen === route.label} timeout="auto" unmountOnExit>
+                      {route.subItems.map((subItem) => (
+                        <MenuItem
+                          key={subItem.path}
+                          onClick={() => handleCloseNavMenu(subItem.path)}
+                          sx={{ 
+                            py: 1.5,
+                            pl: 4,
+                            backgroundColor: location.pathname === subItem.path ? 
+                              'rgba(255, 255, 255, 0.1)' : 'transparent',
+                          }}
+                        >
+                          {subItem.label}
+                        </MenuItem>
+                      ))}
+                    </Collapse>
+                  </React.Fragment>
+                );
+              } else {
+                return (
+                  <MenuItem
+                    key={route.label}
+                    onClick={() => route.path && handleCloseNavMenu(route.path)}
+                    sx={{ 
+                      py: 1.5,
+                      backgroundColor: isActive(route.path) ? 
+                        'rgba(255, 255, 255, 0.1)' : 'transparent',
+                    }}
+                  >
+                    <Typography variant="body1">{route.label}</Typography>
+                  </MenuItem>
+                );
+              }
+            })}
+          </Menu>
 
           {/* Área do usuário */}
           <Box sx={{ flexGrow: 0 }}>
