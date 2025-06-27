@@ -1,5 +1,5 @@
 import ResponsiveAppBar from "../shared/header";
-import Footer from "../shared/footer";
+import Footer from "../shared/footer/footer";
 import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
 
