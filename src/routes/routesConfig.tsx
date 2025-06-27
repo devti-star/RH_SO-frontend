@@ -4,7 +4,7 @@ import NotFoundPage from "../pages/notFoundPage.tsx";
 import SolicitacaoCarimbo from "../pages/solicitacaoCarimbo.tsx";
 import SolicitacaoCracha from "../pages/SolicitacaoCracha.tsx";
 import Login from "../auth/login.tsx";
-import MeusDados from "../pages/meus-dados/meus-dados.tsx";
+import MeusDados from "../pages/meus-dados.tsx";
 
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
