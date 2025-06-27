@@ -29,6 +29,7 @@ import {
 import type { Cadastro } from "../../../models/cadastro.interface";
 import { handleCadastro } from "./service";
 import { useNavigate } from "react-router-dom";
+import AceitacaoEmail from "../../../shared/aceitacaoEmail";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -125,8 +126,7 @@ export default function FormCadastro({
       
       sucesso = await handleCadastro(cadastro);
       console.log("Cadastro: ",cadastro);
-      setMostrarModal(sucesso);
-      navigate('/login');
+      setMostrarModal(true);
     }
   };
 
@@ -532,6 +532,7 @@ export default function FormCadastro({
           ></CustomButton>
         </Box>
       </Box>
+      {mostrarModal && (<AceitacaoEmail></AceitacaoEmail>)}
     </Box>
   );
 }

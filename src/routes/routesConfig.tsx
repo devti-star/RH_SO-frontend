@@ -24,8 +24,6 @@ const router = createBrowserRouter([
       { path: "/solicitacaoCracha", element: <SolicitacaoCracha /> },
       { path: "/admin", element: <AdminDashboard /> },
       { path: "/MinhasSolicitacoes", element: <MinhasSolicitacoes /> },
-
-
     ],
   },
   { path: "/Cadastro", element: <TelaCadastro/>},

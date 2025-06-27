@@ -1,11 +1,18 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close'; 
+import { useNavigate } from 'react-router-dom';
 
 export default function AceitacaoEmail() {
     const [modalAberto, setModalAberto] = useState(true);
     const modificarModal = () => setModalAberto(!modalAberto);
+    const navigate = useNavigate();
     
+    const fecharModal = () => {
+      setModalAberto(!modalAberto);
+      navigate('/login');
+    }
+
     return (
             <Dialog
                 open={modalAberto}
@@ -22,7 +29,7 @@ export default function AceitacaoEmail() {
                   }}
                 >
                  Verificação de conta
-                  <IconButton onClick={modificarModal}>
+                  <IconButton onClick={fecharModal}>
                     <CloseIcon />
                   </IconButton>
                 </DialogTitle>
