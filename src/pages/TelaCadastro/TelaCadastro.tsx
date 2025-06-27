@@ -60,6 +60,7 @@ export default function TelaCadastro() {
               ? "30px 30px 30px 30px"
               : "0px 30px 30px 0px",
             boxShadow: "0px 6px 5px rgba(193, 192, 192, 0.6)",
+            pt: isMobileTiny ? 25 : 0,
           }}
         >
           {isMobile && <img src={logo} style={{ width: "200px" }} />}
