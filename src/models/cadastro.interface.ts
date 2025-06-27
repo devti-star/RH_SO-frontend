@@ -8,7 +8,7 @@ export interface Cadastro {
     email: string,
     cargo: string,
     telefone: string,
-    foto: File,
+    foto: File | null,
     senha: string,
     
 }

@@ -26,6 +26,8 @@ import {
   mascaraRG,
   mascaraTelefone,
 } from "../../../shared/mascaras/services";
+import type { Cadastro } from "../../../models/cadastro.interface";
+import { handleCadastro } from "./service";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -92,13 +94,32 @@ export default function FormCadastro({
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [erroSenhas, setErroSenhas] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [mostrarModal,setMostrarModal] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let sucesso: boolean;
 
     if (senha !== senhaConfirm) {
       setErroSenhas(true);
     } else {
       setErroSenhas(false);
+      const cadastro: Cadastro = {
+        nome: nome.trim(),
+        secretaria: secretaria,
+        cpf: cpf.replace(/[().-\s+]/g,''),
+        departamento: departamento.trim(),
+        rg: rg.replace(/[().-\s+]/g,''),
+        matricula: matricula.trim(),
+        email: email.trim(),
+        cargo: cargo.trim(),
+        telefone: telefone.replace(/[().-\s+]/g,''),
+        foto: foto,
+        senha: senha
+      };
+      
+      sucesso = await handleCadastro(cadastro);
+      setMostrarModal(sucesso)
     }
   };
 
@@ -184,6 +205,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-nome">Nome Completo</InputLabel>
           <OutlinedInput
@@ -199,6 +221,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-secretaria" id="secretaria">
             Secretaria
@@ -235,6 +258,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-cpf">CPF</InputLabel>
           <OutlinedInput
@@ -255,6 +279,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-departamento">Departamento</InputLabel>
           <OutlinedInput
@@ -270,6 +295,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-rg">RG</InputLabel>
           <OutlinedInput
@@ -290,6 +316,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-matricula">Matrícula</InputLabel>
           <OutlinedInput
@@ -305,6 +332,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-email">E-mail</InputLabel>
           <OutlinedInput
@@ -320,6 +348,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-cargo">Cargo</InputLabel>
           <OutlinedInput
@@ -335,6 +364,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-telefone">Telefone/Whatsapp</InputLabel>
           <OutlinedInput
@@ -345,7 +375,7 @@ export default function FormCadastro({
             placeholder="(11) 11111-1111"
             onChange={handleChangeTelefone}
             inputProps={{
-              pattern: "\\([0-9]{2}\\)[0-9]{5}-[0-9]{4}",
+              pattern: "\\([0-9]{2}\\) [0-9]{5}-[0-9]{4}",
               title: "Formato esperado: (11) 11111-1111",
             }}
           ></OutlinedInput>
@@ -355,6 +385,7 @@ export default function FormCadastro({
           variant="outlined"
           className="campo"
           sx={{ marginTop: "10px" }}
+          required
         >
           <FormLabel sx={{ mb: 0, color: "black" }}>Foto</FormLabel>
           <input
@@ -420,6 +451,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "10px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-senha">Senha</InputLabel>
           <OutlinedInput
@@ -446,6 +478,7 @@ export default function FormCadastro({
           variant="outlined"
           sx={{ marginTop: "15px" }}
           className="campo"
+          required
         >
           <InputLabel htmlFor="campo-senha-confirmacao">
             Confirme a sua senha
