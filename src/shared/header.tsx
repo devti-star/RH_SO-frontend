@@ -25,16 +25,16 @@ type RouteItem = {
 };
 
 const routes: RouteItem[] = [
-  { label: 'Minhas Solicitações', path: '/minhas-solicitacoes' },
+  { label: 'Minhas Solicitações', path: '/MinhasSolicitacoes' },
   { label: 'Enviar Atestado', path: '/enviar-atestado' },
-  { label: 'Requerimento RH' },
-  {
-    label: 'Solicitações',
-    subItems: [
-      { label: 'Solicitação de Carimbo', path: '/ferias' },
-      { label: 'Solicitação de Crachá', path: '/aumento-salarial' },
-    ],
-  },
+  //{ label: 'Requerimento RH' },
+  //{
+    //label: 'Solicitações',
+    //subItems: [
+     // { label: 'Solicitação de Carimbo', path: '/ferias' },
+      //{ label: 'Solicitação de Crachá', path: '/aumento-salarial' },
+    //],
+  //},
 ];
 
 const settings = ['Meus Dados', 'Sair'];
