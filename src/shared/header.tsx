@@ -25,16 +25,18 @@ type RouteItem = {
 };
 
 const routes: RouteItem[] = [
-  { label: 'Minhas Solicitações', path: '/minhas-solicitacoes' },
+  { label: 'Minhas Solicitações', path: '/MinhasSolicitacoes' },
   { label: 'Enviar Atestado', path: '/enviar-atestado' },
-  { label: 'Requerimento RH' },
-  {
-    label: 'Solicitações',
-    subItems: [
-      { label: 'Solicitação de Carimbo', path: '/ferias' },
-      { label: 'Solicitação de Crachá', path: '/aumento-salarial' },
-    ],
-  },
+  { label: 'Painel SESMT', path: '/admin' },
+
+  //{ label: 'Requerimento RH' },
+  //{
+    //label: 'Solicitações',
+    //subItems: [
+     // { label: 'Solicitação de Carimbo', path: '/ferias' },
+      //{ label: 'Solicitação de Crachá', path: '/aumento-salarial' },
+    //],
+  //},
 ];
 
 const settings = ['Meus Dados', 'Sair'];
@@ -329,14 +331,22 @@ function ResponsiveAppBar() {
               PaperProps={{ sx: { backgroundColor: '#050a24', color: 'white' } }}
             >
               {settings.map((setting) => (
-                <MenuItem
-                  key={setting}
-                  onClick={handleCloseUserMenu}
-                  sx={{ backgroundColor: '#050a24', color: '#ffffff' }}
-                >
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem
+                key={setting}
+                onClick={() => {
+                  handleCloseUserMenu();
+                  if (setting === 'Meus Dados') navigate('/meus-dados');
+                  if (setting === 'Sair') {
+                    //  limpar o token ou redirecionar Aqui 
+                    navigate('/login');
+                  }
+                }}
+                sx={{ backgroundColor: '#050a24', color: '#ffffff' }}
+              >
+                <Typography textAlign="center">{setting}</Typography>
+              </MenuItem>
+            ))}
+
             </Menu>
           </Box>
         </Toolbar>
