@@ -45,6 +45,10 @@ const CHECKLIST = [
   "Inciso VIII - Endereço profissional ou residencial do médico;",
 ];
 
+//TODO 
+// Ver como vai funcionar com enum
+// Ordenar por data de movimentação
+
 // Troque aqui para "triagem" | "medico" | "enfermeiro"
 const perfilAtual = "triagem";
 

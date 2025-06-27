@@ -18,7 +18,7 @@ const router = createBrowserRouter([
     element: <Page />,
     children: [
       { path: "/solicitacaoCarimbo", element: <SolicitacaoCarimbo /> },
-      { path: "/SolicitacaoCracha", element: <SolicitacaoCracha /> },
+      { path: "/solicitacaoCracha", element: <SolicitacaoCracha /> },
       { path: "/admin", element: <AdminDashboard /> },
     ],
   },
