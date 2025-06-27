@@ -28,6 +28,7 @@ import {
 } from "../../../shared/mascaras/services";
 import type { Cadastro } from "../../../models/cadastro.interface";
 import { handleCadastro } from "./service";
+import { useNavigate } from "react-router-dom";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -96,14 +97,18 @@ export default function FormCadastro({
 
   const [mostrarModal,setMostrarModal] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let sucesso: boolean;
+    
 
     if (senha !== senhaConfirm) {
       setErroSenhas(true);
     } else {
       setErroSenhas(false);
+      
       const cadastro: Cadastro = {
         nome: nome.trim(),
         secretaria: secretaria,
@@ -119,7 +124,9 @@ export default function FormCadastro({
       };
       
       sucesso = await handleCadastro(cadastro);
-      setMostrarModal(sucesso)
+      console.log("Cadastro: ",cadastro);
+      setMostrarModal(sucesso);
+      navigate('/login');
     }
   };
 

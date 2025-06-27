@@ -9,7 +9,7 @@ export const handleCadastro = async(dados: Cadastro): Promise<boolean> => {
         return true;
     } catch (error){
         const { showSnackbar } = useSnackbarStore.getState();
-        showSnackbar('Erro ao criar conta: ', 'error');
+        showSnackbar(`Erro ao criar conta: ${error}`, 'error');
         return false;
     } 
 }
