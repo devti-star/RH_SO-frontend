@@ -8,7 +8,7 @@ import Login from "../auth/login.tsx";
 import MeusDados from "../pages/meus-dados.tsx";
 import MinhasSolicitacoes from "../pages/MinhasSolicitacoes.tsx";
 import Page from "../pages/Page"; 
-
+import EnviarAtestadoSESMT from "../pages/enviar-atestado.tsx";
 
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
@@ -26,8 +26,10 @@ const router = createBrowserRouter([
       { path: "/solicitacaoCracha", element: <SolicitacaoCracha /> },
       { path: "/admin", element: <AdminDashboard /> },
       { path: "/MinhasSolicitacoes", element: <MinhasSolicitacoes /> },
+      { path: "/enviar-atestado", element: <EnviarAtestadoSESMT /> },
 
 
+      
     ],
   },
   { path: "*", element: <NotFoundPage /> },
