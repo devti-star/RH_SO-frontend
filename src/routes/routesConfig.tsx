@@ -5,6 +5,7 @@ import SolicitacaoCarimbo from "../pages/solicitacaoCarimbo.tsx";
 import SolicitacaoCracha from "../pages/SolicitacaoCracha.tsx";
 import Login from "../auth/login.tsx";
 import Page from "../pages/Page.tsx";
+import MinhasSolicitacoes from "../pages/MinhasSolicitacoes.tsx";
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
 
@@ -14,8 +15,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <Page />,
     children: [
-      { path: "/solicitacaoCarimbo", element: <SolicitacaoCarimbo /> },
+      { path: "/SolicitacaoCarimbo", element: <SolicitacaoCarimbo /> },
       { path: "/SolicitacaoCracha", element: <SolicitacaoCracha /> },
+    { path: "/MinhasSolicitacoes", element: <MinhasSolicitacoes /> },
+
     ],
   },
 

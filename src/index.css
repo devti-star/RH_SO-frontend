@@ -4,6 +4,6 @@ html, body, #root {
   width: 100%;
   margin: 0;
   padding: 0;
-  background: #888;
+  background: #f9f9f9;
   overflow: auto; 
 }
