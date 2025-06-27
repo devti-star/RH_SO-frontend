@@ -211,6 +211,39 @@ const MOCK_ATESTADOS = [
     observacao: "",
     expanded: false,
   },
+  {
+    id: 15,
+    nome: "Cid 15",
+    texto: "Atestado 1",
+    arquivo: "arquivo1.pdf",
+    status: "triagem",
+    checklist: [false, false, false, false, false, false, false, false],
+    aprovado: null,
+    observacao: "",
+    expanded: false,
+  },
+  {
+    id: 16,
+    nome: "Cid 16",
+    texto: "Atestado 16",
+    arquivo: "arquivo1.pdf",
+    status: "triagem",
+    checklist: [false, false, false, false, false, false, false, false],
+    aprovado: null,
+    observacao: "",
+    expanded: false,
+  },
+  {
+    id: 17,
+    nome: "Cid 17",
+    texto: "Atestado 16",
+    arquivo: "arquivo1.pdf",
+    status: "triagem",
+    checklist: [false, false, false, false, false, false, false, false],
+    aprovado: null,
+    observacao: "",
+    expanded: false,
+  },
 ];
 
 function getConfig(perfil) {
@@ -314,8 +347,12 @@ export default function AdminDashboard() {
   const [numPages, setNumPages] = React.useState(1);
   const handlePdfLoad = (pdf) => setNumPages(pdf.numPages);
 
+  const [page, setPage] = React.useState(1);
+  const itemsPerPage = 5; // Altere para quantos cards quiser por página
+
+
   // Filtro
-  const filtrarAtestados = () => {
+  const filtrarAtestados = React.useCallback(() => {
     const statusArr = config.tabs[tab].status;
     return atestados.filter(
       (a) =>
@@ -323,7 +360,20 @@ export default function AdminDashboard() {
         (a.nome.toLowerCase().includes(busca.toLowerCase()) ||
           a.texto.toLowerCase().includes(busca.toLowerCase()))
     );
-  };
+  }, [atestados, config.tabs, tab, busca]);
+
+  const atestadosFiltrados = filtrarAtestados();
+  const totalPages = Math.ceil(atestadosFiltrados.length / itemsPerPage);
+
+  const paginatedAtestados = atestadosFiltrados.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [busca, tab]);
+
 
   // Badge de notificação (apenas pendentes)
   const getBadge = (tabIdx) => {
@@ -528,14 +578,12 @@ export default function AdminDashboard() {
               }}
             >
               <Stack spacing={2}>
-                {filtrarAtestados().length === 0 && (
-                  <Typography
-                    sx={{ mt: 5, textAlign: "center", color: "#bbb" }}
-                  >
+                {atestadosFiltrados.length === 0 && (
+                  <Typography sx={{ mt: 5, textAlign: "center", color: "#bbb" }}>
                     Nenhum resultado encontrado.
                   </Typography>
                 )}
-                {filtrarAtestados().map((a) => {
+                {paginatedAtestados.map((a) => {
                   const checklistPreenchido = a.checklist?.every?.((v) => v);
 
                   // Ícone de aprovado/reprovado para finalizados
@@ -833,6 +881,30 @@ export default function AdminDashboard() {
                     </Card>
                   );
                 })}
+                {totalPages > 1 && (
+                  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: 2, gap: 2 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={page === 1}
+                      onClick={() => setPage(page - 1)}
+                    >
+                      Anterior
+                    </Button>
+                    <Typography>
+                      Página {page} de {totalPages}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={page === totalPages}
+                      onClick={() => setPage(page + 1)}
+                    >
+                      Próxima
+                    </Button>
+                  </Box>
+                )}
+
               </Stack>
             </Box>
           </Box>
