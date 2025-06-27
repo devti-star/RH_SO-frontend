@@ -1,3 +1,9 @@
+@media (max-width: 619px){
+    .campo {
+        width: 80% !important;
+    }
+}
+
 .campo {
     width: 45%;
 }

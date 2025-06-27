@@ -33,6 +33,7 @@ import AceitacaoEmail from "../../../shared/aceitacaoEmail";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
+  flex_direction?: string;
 }
 
 const secretarias: secretaria[] = [
@@ -72,6 +73,7 @@ const secretarias: secretaria[] = [
 
 export default function FormCadastro({
   espacamento = "100px 50px 130px 50px",
+  flex_direction = "row",
   ...props
 }: FormCadastroProps) {
   const [nome, setNome] = useState("");
@@ -97,8 +99,6 @@ export default function FormCadastro({
   const [erroSenhas, setErroSenhas] = useState(false);
 
   const [mostrarModal,setMostrarModal] = useState(false);
-
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,10 +179,9 @@ export default function FormCadastro({
   };
 
   return (
-    <Box
+    <Box className="teste"
       {...props}
       sx={{
-        height: "350px",
         width: "100%",
         display: "flex",
         flexDirection: "row",
@@ -199,9 +198,10 @@ export default function FormCadastro({
         sx={{
           width: "100%",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: flex_direction,
           flexWrap: "wrap",
           justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <Typography variant="h1" className="titulo-form" sx={{ width: "100%" }}>
