@@ -499,7 +499,7 @@ export default function AdminDashboard() {
     <Box
       sx={{
         width: "100vw",
-        height: "100vh",
+        height: "85vh",
         bgcolor: "#f8f8f8",
         display: "flex",
         alignItems: isMobile ? "flex-start" : "center",
@@ -825,10 +825,12 @@ export default function AdminDashboard() {
                             sx={{
                               display: "flex",
                               gap: 2,
-                              flexWrap: isMobile ? "wrap" : "nowrap",
+                              flexWrap: "wrap",      // Sempre wrap, nunca nowrap!
                               mt: 1,
+                              alignItems: "center",  // Garante alinhamento vertical
                             }}
                           >
+
                             <Button
                               variant="outlined"
                               size="small"
@@ -836,7 +838,15 @@ export default function AdminDashboard() {
                                 setSelectedDoc(a.id);
                                 if (isMobile) setMobileDocOpen(true);
                               }}
-                              sx={{ borderRadius: 2 }}
+                              sx={{ 
+                                borderRadius: 2,
+                                minHeight: 38,
+                                maxHeight: 38,
+                                minWidth: 120,
+                                flexShrink: 0,
+                                flexGrow: 0,
+                                px: 2, 
+                               }}
                             >
                               VER DOCUMENTO
                             </Button>
@@ -848,7 +858,15 @@ export default function AdminDashboard() {
                                 variant="contained"
                                 color="success"
                                 size="small"
-                                sx={{ borderRadius: 2 }}
+                                sx={{ 
+                                  borderRadius: 2,
+                                  minHeight: 38,
+                                  maxHeight: 38,
+                                  minWidth: 120,
+                                  flexShrink: 0,
+                                  flexGrow: 0,
+                                  px: 2, 
+                                }}
                                 disabled={
                                   !config.canAprovar(a.checklist, a.aprovado)
                                 }
@@ -864,7 +882,15 @@ export default function AdminDashboard() {
                                 variant="contained"
                                 color="error"
                                 size="small"
-                                sx={{ borderRadius: 2 }}
+                                sx={{ 
+                                  borderRadius: 2,
+                                  minHeight: 38,
+                                  maxHeight: 38,
+                                  minWidth: 120,
+                                  flexShrink: 0,
+                                  flexGrow: 0,
+                                  px: 2, 
+                                 }}
                                 disabled={!!a.aprovado}
                                 onClick={() =>
                                   handleJustificar(a.id, "reprovar")
@@ -881,6 +907,12 @@ export default function AdminDashboard() {
                                 size="small"
                                 sx={{
                                   borderRadius: 2,
+                                  minHeight: 38,
+                                  maxHeight: 38,
+                                  minWidth: 120,
+                                  flexShrink: 0,
+                                  flexGrow: 0,
+                                  px: 2, 
                                   bgcolor: "#ffcc00",
                                   color: "#222",
                                 }}
