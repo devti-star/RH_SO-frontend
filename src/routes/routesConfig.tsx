@@ -14,6 +14,7 @@ import { GuardiaoAutenticacao } from "../guards/autenticacao.guard.ts";
 import { GuardiaoAutorizacao } from "../guards/autorizacao.guard.ts";
 import { Roles } from "../models/roles.ts";
 import { cadenciaGuards } from "../guards/cadenciaGuards.guard.ts";
+import AcessoNaoAutorizado from "../pages/AcessoNaoAutorizado.tsx";
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
 
@@ -85,6 +86,7 @@ const router = createBrowserRouter([
       ])
     ),
   },
+  { path: "/AcessoNaoAutorizado", element: <AcessoNaoAutorizado/>},
   { path: "*", element: <NotFoundPage /> },
 ]);
 

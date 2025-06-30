@@ -6,7 +6,7 @@ export function GuardiaoAutorizacao(roles_requeridas: number[]): LoaderFunction 
     const role = Number(localStorage.getItem("role"));
     console.log("Autorizacao guard");
     if (!roles_requeridas.includes(role)) {
-        throw redirect("/AcessoNegado");
+        throw redirect("/AcessoNaoAutorizado");
     }
 
     return null;

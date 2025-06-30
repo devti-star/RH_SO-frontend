@@ -14,7 +14,7 @@ const theme = createTheme({
   },
 })
 
-localStorage.setItem("role", String(Roles.MEDICO));
+localStorage.setItem("role", String(Roles.PADRAO));
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
