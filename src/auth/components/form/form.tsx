@@ -1,8 +1,6 @@
 import {
   Box,
   Typography,
-  TextField,
-  Button,
   IconButton,
   InputAdornment,
   FormControl,
@@ -16,16 +14,17 @@ import "./styles.css";
 import CustomButton from "../../../shared/customButton";
 import { handleLogin } from "./services";
 import type { login } from "../../../models/login";
+import { useNavigate } from "react-router-dom";
 
-
-interface FormProps extends BoxProps{
-  espacamento?: string
+interface FormProps extends BoxProps {
+  espacamento?: string;
 }
 
-export default function Form({espacamento = "100px 50px 130px 50px", ...props}: FormProps) {
+export default function Form({ espacamento = "100px 50px 130px 50px", ...props }: FormProps) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate(); // ✅ Correto: hook no topo
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -33,11 +32,8 @@ export default function Form({espacamento = "100px 50px 130px 50px", ...props}: 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    //Temporário
-    console.log("Autenticando com:", { email, senha });
-    const credenciais: login = {email, senha}
-    handleLogin(credenciais)
+    const credenciais: login = { email, senha };
+    handleLogin(credenciais);
   };
 
   return (
@@ -51,7 +47,7 @@ export default function Form({espacamento = "100px 50px 130px 50px", ...props}: 
         alignItems: "center",
         boxSizing: "border-box",
         padding: espacamento,
-        ...props.sx
+        ...props.sx,
       }}
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
@@ -66,9 +62,8 @@ export default function Form({espacamento = "100px 50px 130px 50px", ...props}: 
             label="E-mail"
             placeholder="Insira seu email aqui"
             onChange={(e) => setEmail(e.target.value)}
-          ></OutlinedInput>
+          />
         </FormControl>
-
 
         <Box className="recuperar-senha">
           <a href="#">Esqueceu Sua Senha?</a>
@@ -93,18 +88,18 @@ export default function Form({espacamento = "100px 50px 130px 50px", ...props}: 
                 </IconButton>
               </InputAdornment>
             }
-          ></OutlinedInput>
+          />
         </FormControl>
 
         <CustomButton
           payload="Entrar"
           type="submit"
-          sx={{ fontFamily: "Poppins, sans-serif" }}
-        ></CustomButton>
+          sx={{ fontFamily: "Poppins, sans-serif", marginTop: "20px" }}
+        />
 
         <CustomButton
           payload="Criar Conta"
-          onClick={() => {}}
+          onClick={() => navigate("/cadastro")}
           sx={{
             alignItems: "center",
             backgroundColor: "white",
@@ -113,8 +108,10 @@ export default function Form({espacamento = "100px 50px 130px 50px", ...props}: 
             borderStyle: "solid",
             borderColor: "#08123d",
             borderWidth: "1px",
+            fontFamily: "Poppins, sans-serif",
+            marginTop: "10px",
           }}
-        ></CustomButton>
+        />
       </Box>
     </Box>
   );
