@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../../interceptors/token.intercept";
 import { useSnackbarStore } from "../../../shared/useSnackbar";
 import { ServicoArmazenamento } from "../../../shared/services/storage.service";
-import type { Usuario } from "../../../models/usuario.interface";
+import type { LoginResponse, Usuario } from "../../../models/usuario.interface";
 
 export class AuthService {
   private static readonly baseAPI = apiURL;
@@ -25,12 +25,15 @@ export class AuthService {
   async login(credenciais: login): Promise<void> {
     try {
       const navigate = useNavigate();
-      const response = await api.post<Usuario>(
+      const response = await api.post<LoginResponse>(
         AuthService.baseAPI + "",
         credenciais
       );
 
-      const usuario = response.data;
+      const token = response.data;
+
+      const response_usuario = await api.post<Usuario>(AuthService.baseAPI + "/me");
+      const usuario = response_usuario.data;
 
       if (usuario) AuthService.servicoArmazenamento.set("usuario", usuario);
 
