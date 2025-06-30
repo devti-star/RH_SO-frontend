@@ -66,21 +66,21 @@ const EnvioAtestado = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Paper elevation={4} sx={{ p: 5, borderRadius: 4, backgroundColor: '#f9f9f9' }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: '#173557' }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Paper elevation={4} sx={{ p: 3, borderRadius: 4, backgroundColor: '#f9f9f9' }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: '#173557', textAlign: 'center' }}>
           Envio de atestado para o SESMT
         </Typography>
 
-        <Grid container spacing={4} alignItems="flex-start">
-          <Grid item xs={12} md={6}>
-            <Box sx={{ maxWidth: 400 }}>
+        <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
+          <Grid item xs={12} md={5}>
+            <Box>
               <Button
                 component="label"
                 variant="outlined"
                 fullWidth
                 startIcon={<UploadFileIcon />}
-                sx={{ height: 48, borderRadius: 2 }}
+                sx={{ height: 40, borderRadius: 2 }}
               >
                 Anexar Documento
                 <input
@@ -95,7 +95,7 @@ const EnvioAtestado = () => {
                 <Chip
                   icon={<InsertDriveFileIcon />}
                   label={file.name}
-                  sx={{ mt: 2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  sx={{ mt: 1.5, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}
                 />
               )}
 
@@ -107,13 +107,12 @@ const EnvioAtestado = () => {
                 margin="normal"
                 value={observacao}
                 onChange={(e) => setObservacao(e.target.value)}
-                sx={{ mt: 2 }}
               />
 
               <Button
                 variant="contained"
                 fullWidth
-                sx={{ mt: 3, backgroundColor: '#173557', ':hover': { backgroundColor: '#0f223a' }, height: 48 }}
+                sx={{ mt: 2, backgroundColor: '#173557', ':hover': { backgroundColor: '#0f223a' }, height: 40 }}
                 onClick={handleSubmit}
               >
                 Enviar
@@ -139,7 +138,7 @@ const EnvioAtestado = () => {
           <Box mt={2}>{renderPreview()}</Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalOpen(false)} color="secondary">Cancelar</Button>
+          <Button onClick={() => setModalOpen(false)} sx={{color: '#FF0808' }}>Cancelar</Button>
           <Button onClick={handleConfirm} variant="contained" sx={{ backgroundColor: '#173557' }}>
             Confirmar
           </Button>
