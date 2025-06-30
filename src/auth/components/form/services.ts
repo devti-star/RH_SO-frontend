@@ -12,8 +12,9 @@ export const handleLogin = async(credenciais: login) => {
 
         const token = response.data.acces_token;
 
-        localStorage.setItem("token", token);
+        if (token) localStorage.setItem("token", token);
 
+        // TODO: A página a ser carregada depende da role do usuário
         navigate('/');
         
 
