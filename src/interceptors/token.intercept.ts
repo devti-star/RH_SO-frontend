@@ -1,6 +1,7 @@
 import { apiURL } from "../config";
 import axios from "axios";
 import { useSnackbarStore } from "../shared/useSnackbar";
+import { ServicoArmazenamento } from "../shared/services/storage.service";
 
 const api = axios.create({
   baseURL: apiURL,
@@ -8,10 +9,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const servicoArmazenamento = ServicoArmazenamento.getInstance();
+    const usuario = servicoArmazenamento.get("usuario");
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (usuario) {
+      config.headers.Authorization = `${usuario.token_type} ${usuario.acces_token}`;
     }
     return config;
   },
@@ -29,7 +31,6 @@ api.interceptors.response.use(
     } else {
       showSnackbar('Erro ao processar requisição.', 'error');
     }
-    console.log("Entrou aqui!!!!!!!!!!")
     return Promise.reject(error);
   }
 );

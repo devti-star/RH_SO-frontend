@@ -21,12 +21,11 @@ import AcessoNaoAutorizado from "../pages/AcessoNaoAutorizado.tsx";
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   {
-    path: "/",
-    // loader: GuardiaoAutenticacao,
     element: <Page />,
+    loader: GuardiaoAutenticacao,
     children: [
       {
-        path: "/meus-dados",
+        path: "meus-dados",
         element: <MeusDados />,
         loader: GuardiaoAutorizacao([
           Roles.ADMIN,
@@ -39,17 +38,17 @@ const router = createBrowserRouter([
         ]),
       },
       {
-        path: "/solicitacaoCarimbo",
+        path: "solicitacaoCarimbo",
         element: <SolicitacaoCarimbo />,
         loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
       {
-        path: "/solicitacaoCracha",
+        path: "solicitacaoCracha",
         element: <SolicitacaoCracha />,
         loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
       {
-        path: "/admin",
+        path: "admin",
         element: <AdminDashboard />,
         loader: GuardiaoAutorizacao([
           Roles.MEDICO,
@@ -59,12 +58,12 @@ const router = createBrowserRouter([
         ]),
       },
       {
-        path: "/MinhasSolicitacoes",
+        path: "MinhasSolicitacoes",
         element: <MinhasSolicitacoes />,
         loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
       {
-        path: "/enviar-atestado",
+        path: "enviar-atestado",
         element: <EnviarAtestadoSESMT />,
         loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },

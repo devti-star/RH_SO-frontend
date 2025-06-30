@@ -12,9 +12,9 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState } from "react";
 import "./styles.css";
 import CustomButton from "../../../shared/customButton";
-import { handleLogin } from "./services";
 import type { login } from "../../../models/login";
 import { useNavigate } from "react-router-dom";
+import { AuthService } from "./auth.service";
 
 interface FormProps extends BoxProps {
   espacamento?: string;
@@ -33,7 +33,8 @@ export default function Form({ espacamento = "100px 50px 130px 50px", ...props }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const credenciais: login = { email, senha };
-    handleLogin(credenciais);
+    const servicoAutenticacao = AuthService.getInstance();
+    servicoAutenticacao.login(credenciais);
   };
 
   return (
