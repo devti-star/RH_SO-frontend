@@ -9,20 +9,19 @@ import TelaCadastro from "../pages/TelaCadastro/TelaCadastro.tsx";
 import MinhasSolicitacoes from "../pages/MinhasSolicitacoes.tsx";
 import MeusDados from "../pages/meus-dados.tsx";
 import EnviarAtestadoSESMT from "../pages/enviar-atestado.tsx";
-import Page from "../pages/Page"; 
-
+import Page from "../pages/Page";
+import { GuardiaoAutenticacao } from "../guards/autenticacao.guard.ts";
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
 
 const router = createBrowserRouter([
-
   { path: "/login", element: <Login /> },
   {
     path: "/",
+    loader: GuardiaoAutenticacao,
     element: <Page />,
     children: [
-
-      {path: "/meus-dados", element: <MeusDados/>},
+      { path: "/meus-dados", element: <MeusDados /> },
       { path: "/solicitacaoCarimbo", element: <SolicitacaoCarimbo /> },
       { path: "/solicitacaoCracha", element: <SolicitacaoCracha /> },
       { path: "/admin", element: <AdminDashboard /> },
@@ -30,9 +29,12 @@ const router = createBrowserRouter([
       { path: "/enviar-atestado", element: <EnviarAtestadoSESMT /> },
     ],
   },
-  { path: "/Cadastro", element: <TelaCadastro/>},
+  {
+    path: "/Cadastro",
+    element: <TelaCadastro />,
+    loader: GuardiaoAutenticacao,
+  },
   { path: "*", element: <NotFoundPage /> },
-
 ]);
 
 export default router;
