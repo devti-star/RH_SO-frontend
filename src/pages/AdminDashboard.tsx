@@ -43,6 +43,7 @@ const CHECKLIST = [
   "Inciso VI - Assinatura e carimbo ou número de registro no Conselho Regional de Medicina, quando manuscrito;",
   "Inciso VII - Dados de contato profissional (telefone e/ou e-mail);",
   "Inciso VIII - Endereço profissional ou residencial do médico;",
+  "Período maior de 3 dias",
 ];
 
 //TODO 
@@ -61,7 +62,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 1",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -72,7 +73,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 2",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -83,7 +84,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 3",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -94,7 +95,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 4",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -106,7 +107,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 5",
     arquivo: "arquivo1.pdf",
     status: "medico",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -117,7 +118,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 6",
     arquivo: "arquivo1.pdf",
     status: "enfermeiro",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: "reprovado",
     observacao: "Laudo incosistente.",
     expanded: false,
@@ -129,7 +130,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 7",
     arquivo: "arquivo1.pdf",
     status: "ajustes",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "Precisa reenvio.",
     expanded: false,
@@ -141,7 +142,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 8",
     arquivo: "arquivo1.pdf",
     status: "finalizado",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: "aprovado",
     observacao: "",
     expanded: false,
@@ -152,7 +153,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 9",
     arquivo: "arquivo1.pdf",
     status: "finalizado",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: "reprovado",
     observacao: "Assinatura inválida.",
     expanded: false,
@@ -164,7 +165,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 10",
     arquivo: "arquivo1.pdf",
     status: "medico",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -175,7 +176,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 11",
     arquivo: "arquivo1.pdf",
     status: "medico",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -187,7 +188,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 12",
     arquivo: "arquivo1.pdf",
     status: "finalizado",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: "aprovado",
     observacao: "",
     expanded: false,
@@ -198,7 +199,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 13",
     arquivo: "arquivo1.pdf",
     status: "finalizado",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: "reprovado",
     observacao: "Médico não autorizado.",
     expanded: false,
@@ -210,7 +211,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 14",
     arquivo: "arquivo1.pdf",
     status: "finalizado",
-    checklist: [true, true, true, true, true, true, true, true],
+    checklist: [true, true, true, true, true, true, true, true, false],
     aprovado: "aprovado",
     observacao: "",
     expanded: false,
@@ -221,7 +222,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 1",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -232,7 +233,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 16",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -243,7 +244,7 @@ const MOCK_ATESTADOS = [
     texto: "Atestado 16",
     arquivo: "arquivo1.pdf",
     status: "triagem",
-    checklist: [false, false, false, false, false, false, false, false],
+    checklist: [false, false, false, false, false, false, false, false, false],
     aprovado: null,
     observacao: "",
     expanded: false,
@@ -290,7 +291,7 @@ function getConfig(perfil) {
         return [];
       },
       canAprovar: (checklist, aprovado) =>
-        checklist.every((c) => c) && !aprovado,
+        checklist.slice(0, -1).every((c) => c) && !aprovado,
     };
   if (perfil === "medico")
     return {
@@ -408,8 +409,33 @@ export default function AdminDashboard() {
     );
   };
 
+  const solicitarExameMedico = async (atestado) => {
+    try {
+      await fetch('/api/solicitar-exame-medico', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          atestadoId: atestado.id,
+          // outros dados úteis...
+        }),
+      });
+      // Pode mostrar toast/alerta, se quiser
+    } catch (error) {
+      // Pode tratar erro, exibir mensagem, etc.
+    }
+  };
+
+
   // Aprovar
   const handleAprovar = (id) => {
+    const atestado = atestados.find((a) => a.id === id);
+
+    // Se o último item do checklist ("Período maior de 3 dias") está marcado:
+    if (atestado.checklist[CHECKLIST.length - 1]) {
+      solicitarExameMedico(atestado);
+    }
+
+    // Segue o fluxo normal de aprovação:
     setAtestados((ats) =>
       ats.map((a) =>
         a.id === id
@@ -428,6 +454,7 @@ export default function AdminDashboard() {
       )
     );
   };
+
 
   // Justificar (reprovar, ajustes, informar)
   const handleJustificar = (id, acao) => {
@@ -472,7 +499,7 @@ export default function AdminDashboard() {
     <Box
       sx={{
         width: "100vw",
-        height: "100vh",
+        height: "85vh",
         bgcolor: "#f8f8f8",
         display: "flex",
         alignItems: isMobile ? "flex-start" : "center",
@@ -588,7 +615,7 @@ export default function AdminDashboard() {
                   </Typography>
                 )}
                 {paginatedAtestados.map((a) => {
-                  const checklistPreenchido = a.checklist?.every?.((v) => v);
+                  const checklistPreenchido = a.checklist?.slice(0, -1)?.every?.((v) => v);
 
                   // Ícone de aprovado/reprovado para finalizados
                   let statusIcon = null;
@@ -798,10 +825,12 @@ export default function AdminDashboard() {
                             sx={{
                               display: "flex",
                               gap: 2,
-                              flexWrap: isMobile ? "wrap" : "nowrap",
+                              flexWrap: "wrap",      // Sempre wrap, nunca nowrap!
                               mt: 1,
+                              alignItems: "center",  // Garante alinhamento vertical
                             }}
                           >
+
                             <Button
                               variant="outlined"
                               size="small"
@@ -809,7 +838,15 @@ export default function AdminDashboard() {
                                 setSelectedDoc(a.id);
                                 if (isMobile) setMobileDocOpen(true);
                               }}
-                              sx={{ borderRadius: 2 }}
+                              sx={{ 
+                                borderRadius: 2,
+                                minHeight: 38,
+                                maxHeight: 38,
+                                minWidth: 120,
+                                flexShrink: 0,
+                                flexGrow: 0,
+                                px: 2, 
+                               }}
                             >
                               VER DOCUMENTO
                             </Button>
@@ -821,7 +858,15 @@ export default function AdminDashboard() {
                                 variant="contained"
                                 color="success"
                                 size="small"
-                                sx={{ borderRadius: 2 }}
+                                sx={{ 
+                                  borderRadius: 2,
+                                  minHeight: 38,
+                                  maxHeight: 38,
+                                  minWidth: 120,
+                                  flexShrink: 0,
+                                  flexGrow: 0,
+                                  px: 2, 
+                                }}
                                 disabled={
                                   !config.canAprovar(a.checklist, a.aprovado)
                                 }
@@ -837,7 +882,15 @@ export default function AdminDashboard() {
                                 variant="contained"
                                 color="error"
                                 size="small"
-                                sx={{ borderRadius: 2 }}
+                                sx={{ 
+                                  borderRadius: 2,
+                                  minHeight: 38,
+                                  maxHeight: 38,
+                                  minWidth: 120,
+                                  flexShrink: 0,
+                                  flexGrow: 0,
+                                  px: 2, 
+                                 }}
                                 disabled={!!a.aprovado}
                                 onClick={() =>
                                   handleJustificar(a.id, "reprovar")
@@ -854,6 +907,12 @@ export default function AdminDashboard() {
                                 size="small"
                                 sx={{
                                   borderRadius: 2,
+                                  minHeight: 38,
+                                  maxHeight: 38,
+                                  minWidth: 120,
+                                  flexShrink: 0,
+                                  flexGrow: 0,
+                                  px: 2, 
                                   bgcolor: "#ffcc00",
                                   color: "#222",
                                 }}
