@@ -1,0 +1,16 @@
+@media (max-width: 619px){
+    .campo {
+        width: 80% !important;
+    }
+}
+
+.campo {
+    width: 45%;
+}
+
+.titulo-form {
+    font-size: 30px !important;
+    font-weight: 530 !important;
+    font-family: Poppins, sans-serif !important;
+    margin-bottom: 10px !important;
+}

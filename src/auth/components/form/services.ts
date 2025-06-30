@@ -1,4 +1,3 @@
-import axios from "axios"
 import { apiURL } from "../../../config"
 import type { login } from "../../../models/login"
 import type { token } from "../../../models/token";
@@ -16,7 +15,7 @@ export const handleLogin = async(credenciais: login) => {
         localStorage.setItem("token", token);
 
         navigate('/');
-
+        
 
     } catch (error){
         const { showSnackbar } = useSnackbarStore.getState();
