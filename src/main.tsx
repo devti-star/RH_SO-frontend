@@ -6,12 +6,15 @@ import router from './routes/routesConfig.tsx';
 import '@fontsource/poppins/500.css';
 import { createTheme, ThemeProvider } from '@mui/material';
 import { GlobalSnackbar } from './shared/GlobalSnackbar.tsx';
+import { Roles } from './models/roles.ts';
 
 const theme = createTheme({
   palette: {
     mode: "light",
   },
 })
+
+localStorage.setItem("role", String(Roles.MEDICO));
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

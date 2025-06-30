@@ -11,6 +11,9 @@ import MeusDados from "../pages/meus-dados.tsx";
 import EnviarAtestadoSESMT from "../pages/enviar-atestado.tsx";
 import Page from "../pages/Page";
 import { GuardiaoAutenticacao } from "../guards/autenticacao.guard.ts";
+import { GuardiaoAutorizacao } from "../guards/autorizacao.guard.ts";
+import { Roles } from "../models/roles.ts";
+import { cadenciaGuards } from "../guards/cadenciaGuards.guard.ts";
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
 
@@ -18,21 +21,69 @@ const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   {
     path: "/",
-    loader: GuardiaoAutenticacao,
+    // loader: GuardiaoAutenticacao,
     element: <Page />,
     children: [
-      { path: "/meus-dados", element: <MeusDados /> },
-      { path: "/solicitacaoCarimbo", element: <SolicitacaoCarimbo /> },
-      { path: "/solicitacaoCracha", element: <SolicitacaoCracha /> },
-      { path: "/admin", element: <AdminDashboard /> },
-      { path: "/MinhasSolicitacoes", element: <MinhasSolicitacoes /> },
-      { path: "/enviar-atestado", element: <EnviarAtestadoSESMT /> },
+      {
+        path: "/meus-dados",
+        element: <MeusDados />,
+        loader: GuardiaoAutorizacao([
+          Roles.ADMIN,
+          Roles.MEDICO,
+          Roles.ENFERMEIRO,
+          Roles.PADRAO,
+          Roles.RH,
+          Roles.PS,
+          Roles.TRIAGEM,
+        ]),
+      },
+      {
+        path: "/solicitacaoCarimbo",
+        element: <SolicitacaoCarimbo />,
+        loader: GuardiaoAutorizacao([Roles.PADRAO]),
+      },
+      {
+        path: "/solicitacaoCracha",
+        element: <SolicitacaoCracha />,
+        loader: GuardiaoAutorizacao([Roles.PADRAO]),
+      },
+      {
+        path: "/admin",
+        element: <AdminDashboard />,
+        loader: GuardiaoAutorizacao([
+          Roles.MEDICO,
+          Roles.ENFERMEIRO,
+          Roles.TRIAGEM,
+          Roles.ADMIN,
+        ]),
+      },
+      {
+        path: "/MinhasSolicitacoes",
+        element: <MinhasSolicitacoes />,
+        loader: GuardiaoAutorizacao([Roles.PADRAO]),
+      },
+      {
+        path: "/enviar-atestado",
+        element: <EnviarAtestadoSESMT />,
+        loader: GuardiaoAutorizacao([Roles.PADRAO]),
+      },
     ],
   },
   {
     path: "/Cadastro",
     element: <TelaCadastro />,
-    loader: GuardiaoAutenticacao,
+    loader: cadenciaGuards(
+      GuardiaoAutenticacao,
+      GuardiaoAutorizacao([
+        Roles.ADMIN,
+        Roles.MEDICO,
+        Roles.ENFERMEIRO,
+        Roles.PADRAO,
+        Roles.RH,
+        Roles.PS,
+        Roles.TRIAGEM,
+      ])
+    ),
   },
   { path: "*", element: <NotFoundPage /> },
 ]);

@@ -1,6 +1,6 @@
-import { redirect } from "react-router-dom";
+import { redirect, type LoaderFunction } from "react-router-dom";
 
-export async function GuardiaoAutenticacao(){
+export const GuardiaoAutenticacao: LoaderFunction = async () => {
     const isAuthenticated = !!localStorage.getItem("token");
     if (!isAuthenticated) throw redirect("/login");
 }
