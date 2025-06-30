@@ -93,10 +93,10 @@ export default function MinhasSolicitacoes() {
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
     return matchesSearch && matchesStatus;
   });
+const openPdf = () => {
+  setSelectedPdf('/arquivo1.pdf'); // Acessa diretamente o PDF salvo na pasta public
+};
 
-  const openPdf = (nome: string) => {
-    setSelectedPdf(`/mockpdfs/${nome.replace(/ /g, '_')}.pdf`);
-  };
 
   return (
     <Box sx={{ display: 'flex', mt: 4, position: 'relative',mb: 15  }}>
@@ -164,7 +164,7 @@ export default function MinhasSolicitacoes() {
                   </CardContent>
 
                   <CardActions sx={{ pl: 2, pb: 2 }}>
-                    <Button size="small" variant="outlined" onClick={() => openPdf(item.nome)}>
+                    <Button size="small" variant="outlined" onClick={openPdf}>
                       Ver Documento
                     </Button>
 
@@ -442,6 +442,11 @@ export default function MinhasSolicitacoes() {
     </Paper>
   </Box>
 )}
+
+
+
+
+
 
 
     </Box>
