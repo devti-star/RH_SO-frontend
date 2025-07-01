@@ -1,5 +1,4 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "../App.tsx";
 import NotFoundPage from "../pages/notFoundPage.tsx";
 import AdminDashboard from "../pages/AdminDashboard.tsx";
 import SolicitacaoCarimbo from "../pages/solicitacaoCarimbo.tsx";
@@ -21,6 +20,7 @@ import AcessoNaoAutorizado from "../pages/AcessoNaoAutorizado.tsx";
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   {
+    path: "/",
     element: <Page />,
     loader: GuardiaoAutenticacao,
     children: [

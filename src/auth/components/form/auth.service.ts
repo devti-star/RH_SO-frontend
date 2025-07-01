@@ -1,10 +1,10 @@
 import { apiURL } from "../../../config";
 import type { login } from "../../../models/login";
 import { useNavigate } from "react-router-dom";
-import api from "../../../interceptors/token.intercept";
 import { useSnackbarStore } from "../../../shared/useSnackbar";
 import { ServicoArmazenamento } from "../../../shared/services/storage.service";
 import type { LoginResponse, Usuario } from "../../../models/usuario.interface";
+import axios from "axios";
 
 export class AuthService {
   private static readonly baseAPI = apiURL;
@@ -25,14 +25,13 @@ export class AuthService {
   async login(credenciais: login): Promise<void> {
     try {
       const navigate = useNavigate();
-      const response = await api.post<LoginResponse>(
+      const response = await axios.post<LoginResponse>(
         AuthService.baseAPI + "",
         credenciais
       );
-
       const token = response.data;
-
-      const response_usuario = await api.post<Usuario>(AuthService.baseAPI + "/me");
+      const headers = {Authorization: `${token.token_type} ${token.acces_token}`};
+      const response_usuario = await axios.get<Usuario>(AuthService.baseAPI + "/me", {headers: headers});
       const usuario = response_usuario.data;
 
       if (usuario) AuthService.servicoArmazenamento.set("usuario", usuario);
