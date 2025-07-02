@@ -22,15 +22,15 @@
     "axios": "^1.10.0",
     "imask": "^7.6.1",
     "mui": "^0.0.1",
+    "pdfjs-dist": "^4.8.69",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-imask": "^7.6.1",
     "react-input-mask": "^2.0.4",
+    "react-pdf": "^9.2.1",
     "react-router-dom": "^7.6.2",
-    "zustand": "^5.0.5",
-    "pdfjs-dist": "^4.8.69",
-    "react-pdf": "^9.2.1"
-
+    "secure-ls": "^2.0.0",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
