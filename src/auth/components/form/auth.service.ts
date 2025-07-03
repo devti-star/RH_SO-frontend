@@ -26,14 +26,15 @@ export class AuthService {
   async login(credenciais: login, navigate: NavigateFunction): Promise<void> {
     try {
       console.log("BaseAPI: ", AuthService.baseAPI );
-      // const navigate = useNavigate();
+      // const navigate = useNavigate();  >
       const response = await axios.post<LoginResponse>(
         AuthService.baseAPI + "/auth/login",
-        credenciais
+        credenciais, 
       );
 
       const token = response.data;
       const headers = {Authorization: `${token.token_type} ${token.access_token}`};
+
       const response_usuario = await axios.get<Usuario>(AuthService.baseAPI + "/auth/me", {headers: headers});
       const usuario = response_usuario.data;
       if (usuario) AuthService.servicoArmazenamento.set("usuario", usuario);
