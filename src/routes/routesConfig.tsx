@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import NotFoundPage from "../pages/notFoundPage.tsx";
-import AdminDashboard from "../pages/AdminDashboard.tsx";
+import SesmtDashboard from "../pages/SesmtDashboard/SesmtDashboard.tsx";
 import SolicitacaoCarimbo from "../pages/solicitacaoCarimbo.tsx";
 import SolicitacaoCracha from "../pages/SolicitacaoCracha.tsx";
 import Login from "../auth/login.tsx";
@@ -37,7 +37,7 @@ const router = createBrowserRouter([
       },
       {
         path: "admin",
-        element: <AdminDashboard />,
+        element: <SesmtDashboard />,
         loader: GuardiaoAutorizacao([
           Roles.MEDICO,
           Roles.ENFERMEIRO,
