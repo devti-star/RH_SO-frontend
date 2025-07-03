@@ -17,6 +17,7 @@ import Collapse from '@mui/material/Collapse'; // Adicionado para submenus móve
 import ListItemIcon from '@mui/material/ListItemIcon'; // Adicionado para ícones de submenu
 import ExpandMore from '@mui/icons-material/ExpandMore'; // Adicionado para indicador de submenu
 import ExpandLess from '@mui/icons-material/ExpandLess'; // Adicionado para indicador de submenu
+import { AuthService } from '../auth/components/form/auth.service';
 
 type RouteItem = {
   label: string;
@@ -49,6 +50,7 @@ function ResponsiveAppBar() {
   const [hoverDropdown, setHoverDropdown] = React.useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const authService: AuthService = AuthService.getInstance();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -337,7 +339,7 @@ function ResponsiveAppBar() {
                   handleCloseUserMenu();
                   if (setting === 'Meus Dados') navigate('/meus-dados');
                   if (setting === 'Sair') {
-                    //  limpar o token ou redirecionar Aqui 
+                    authService.logout();
                     navigate('/login');
                   }
                 }}

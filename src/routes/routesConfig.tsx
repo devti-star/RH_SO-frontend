@@ -12,7 +12,6 @@ import Page from "../pages/Page";
 import { GuardiaoAutenticacao } from "../guards/autenticacao.guard.ts";
 import { GuardiaoAutorizacao } from "../guards/autorizacao.guard.ts";
 import { Roles } from "../models/roles.ts";
-import { cadenciaGuards } from "../guards/cadenciaGuards.guard.ts";
 import AcessoNaoAutorizado from "../pages/AcessoNaoAutorizado.tsx";
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
@@ -27,25 +26,14 @@ const router = createBrowserRouter([
       {
         path: "meus-dados",
         element: <MeusDados />,
-        loader: GuardiaoAutorizacao([
-          Roles.ADMIN,
-          Roles.MEDICO,
-          Roles.ENFERMEIRO,
-          Roles.PADRAO,
-          Roles.RH,
-          Roles.PS,
-          Roles.TRIAGEM,
-        ]),
       },
       {
         path: "solicitacaoCarimbo",
         element: <SolicitacaoCarimbo />,
-        loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
       {
         path: "solicitacaoCracha",
         element: <SolicitacaoCracha />,
-        loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
       {
         path: "admin",
@@ -60,30 +48,17 @@ const router = createBrowserRouter([
       {
         path: "MinhasSolicitacoes",
         element: <MinhasSolicitacoes />,
-        loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
       {
         path: "enviar-atestado",
         element: <EnviarAtestadoSESMT />,
-        loader: GuardiaoAutorizacao([Roles.PADRAO]),
       },
     ],
   },
   {
     path: "/Cadastro",
     element: <TelaCadastro />,
-    loader: cadenciaGuards(
-      GuardiaoAutenticacao,
-      GuardiaoAutorizacao([
-        Roles.ADMIN,
-        Roles.MEDICO,
-        Roles.ENFERMEIRO,
-        Roles.PADRAO,
-        Roles.RH,
-        Roles.PS,
-        Roles.TRIAGEM,
-      ])
-    ),
+    loader: GuardiaoAutenticacao,
   },
   { path: "/AcessoNaoAutorizado", element: <AcessoNaoAutorizado/>},
   { path: "*", element: <NotFoundPage /> },

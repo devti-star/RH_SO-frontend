@@ -1,19 +1,21 @@
 // services/ApiFactory.ts
 import axios, { type AxiosInstance } from "axios";
-import { ServicoArmazenamento } from "../../shared/services/storage.service";
 import { useSnackbarStore } from "../../shared/useSnackbar";
 import { apiURL } from "../../config";
+import { AuthService } from "../../auth/components/form/auth.service";
 
 export class ApiFactory {
+  private static authService: AuthService = AuthService.getInstance();
+
   static create(baseURL: string = apiURL): AxiosInstance {
     const instance = axios.create({ baseURL });
 
     instance.interceptors.request.use((config) => {
-      const storage = ServicoArmazenamento.getInstance();
-      const usuario = storage.get("usuario");
+      
+      const usuario = this.authService.getUserStorage();
 
       if (usuario) {
-        config.headers.Authorization = `${usuario.token_type} ${usuario.acces_token}`;
+        config.headers.Authorization = `${usuario.token_type} ${usuario.access_token}`;
       }
 
       return config;
@@ -26,7 +28,7 @@ export class ApiFactory {
 
         if (error.response?.status === 401) {
           showSnackbar("Sessão expirada. Faça login novamente.", "error");
-          localStorage.removeItem("token");
+          this.authService.logout();
         } else {
           showSnackbar("Erro ao processar requisição.", "error");
         }
