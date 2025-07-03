@@ -80,7 +80,6 @@ export default function SesmtDashboard() {
         {!ds.isMobile && (
           <DocumentViewer
             docSelecionado={ds.docSelecionado}
-            handlePdfLoad={ds.handlePdfLoad}
             isMobile={false}
             mobileDocOpen={ds.mobileDocOpen}
             setMobileDocOpen={ds.setMobileDocOpen}
@@ -98,7 +97,6 @@ export default function SesmtDashboard() {
       {ds.isMobile && (
         <DocumentViewer
           docSelecionado={ds.docSelecionado}
-          handlePdfLoad={ds.handlePdfLoad}
           isMobile
           mobileDocOpen={ds.mobileDocOpen}
           setMobileDocOpen={ds.setMobileDocOpen}

@@ -1,16 +1,11 @@
 import React from "react";
 import { Box, Typography, IconButton, Dialog } from "@mui/material";
-import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { Document, Page, pdfjs } from "react-pdf";
-
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
-import type { PDFDocumentProxy } from "pdfjs-dist";
 import type { Atestado } from "../../../models/atestados";
+import PdfViewer from "../../../shared/PdfViewer";
 
 interface Props {
   docSelecionado: Atestado | undefined;
-  handlePdfLoad: (pdf: PDFDocumentProxy) => void;
   isMobile: boolean;
   mobileDocOpen: boolean;
   setMobileDocOpen: (o: boolean) => void;
@@ -18,7 +13,6 @@ interface Props {
 
 export default function DocumentViewer({
   docSelecionado,
-  handlePdfLoad,
   isMobile,
   mobileDocOpen,
   setMobileDocOpen,
@@ -32,11 +26,9 @@ export default function DocumentViewer({
             <CancelIcon />
           </IconButton>
         </Box>
-        <Box sx={{ width: "100vw", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#222", p: 0, pt: 2 }}>
+        <Box sx={{ width: "100vw", height: "100%", bgcolor: "#222", p: 0, pt: 2 }}>
           {docSelecionado && (
-            <Document file={`/${docSelecionado.arquivo}`} loading="Carregando PDF..." onLoadSuccess={handlePdfLoad}>
-              <Page pageNumber={1} width={window.innerWidth - 24} />
-            </Document>
+            <PdfViewer url={`/${docSelecionado.arquivo}`} height="100%" width="100%" />
           )}
         </Box>
       </Dialog>
@@ -61,11 +53,6 @@ export default function DocumentViewer({
         <Typography sx={{ fontWeight: 500, fontSize: 18, color: "#111", flex: 1 }}>
           {docSelecionado ? docSelecionado.arquivo : "Nome do arquivo.pdf"}
         </Typography>
-        {docSelecionado && (
-          <IconButton onClick={() => window.open(`/${docSelecionado.arquivo}`, "_blank")} title="Abrir PDF em nova aba">
-            <FullscreenIcon />
-          </IconButton>
-        )}
       </Box>
       <Box
         sx={{
@@ -84,9 +71,7 @@ export default function DocumentViewer({
         }}
       >
         {docSelecionado ? (
-          <Document file={`/${docSelecionado.arquivo}`} loading="Carregando PDF..." onLoadSuccess={handlePdfLoad}>
-            <Page pageNumber={1} width={500} height={330} />
-          </Document>
+          <PdfViewer url={`/${docSelecionado.arquivo}`} height="100%" width="100%" />
         ) : (
           "DOCUMENTO"
         )}

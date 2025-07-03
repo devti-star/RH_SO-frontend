@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import PdfViewer from '../shared/PdfViewer';
 
 const EnvioAtestado = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -54,13 +55,7 @@ const EnvioAtestado = () => {
         />
       );
     } else if (file.type === 'application/pdf') {
-      return (
-        <iframe
-          title="PDF Preview"
-          src={previewUrl}
-          style={{ width: '100%', height: '500px', border: 'none', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
-        />
-      );
+      return <PdfViewer url={previewUrl} height="500px" width="100%" />;
     }
     return <Typography variant="body2">Arquivo não suportado para visualização.</Typography>;
   };
