@@ -34,7 +34,8 @@ export default function Form({ espacamento = "100px 50px 130px 50px", ...props }
     e.preventDefault();
     const credenciais: login = { email, senha };
     const servicoAutenticacao = AuthService.getInstance();
-    servicoAutenticacao.login(credenciais);
+    servicoAutenticacao.login(credenciais, navigate);
+    
   };
 
   return (

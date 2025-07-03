@@ -1,10 +1,11 @@
 import { apiURL } from "../../../config";
 import type { login } from "../../../models/login";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate, type NavigateFunction } from "react-router-dom";
 import { useSnackbarStore } from "../../../shared/useSnackbar";
 import { ServicoArmazenamento } from "../../../shared/services/storage.service";
 import type { LoginResponse, Usuario } from "../../../models/usuario.interface";
 import axios from "axios";
+import { Roles } from "../../../models/roles";
 
 export class AuthService {
   private static readonly baseAPI = apiURL;
@@ -22,25 +23,31 @@ export class AuthService {
     return AuthService.instance;
   }
 
-  async login(credenciais: login): Promise<void> {
+  async login(credenciais: login, navigate: NavigateFunction): Promise<void> {
     try {
-      const navigate = useNavigate();
+      console.log("BaseAPI: ", AuthService.baseAPI );
+      // const navigate = useNavigate();
       const response = await axios.post<LoginResponse>(
-        AuthService.baseAPI + "",
+        AuthService.baseAPI + "/auth/login",
         credenciais
       );
-      const token = response.data;
-      const headers = {Authorization: `${token.token_type} ${token.acces_token}`};
-      const response_usuario = await axios.get<Usuario>(AuthService.baseAPI + "/me", {headers: headers});
-      const usuario = response_usuario.data;
 
+      const token = response.data;
+      const headers = {Authorization: `${token.token_type} ${token.access_token}`};
+      const response_usuario = await axios.get<Usuario>(AuthService.baseAPI + "/auth/me", {headers: headers});
+      const usuario = response_usuario.data;
       if (usuario) AuthService.servicoArmazenamento.set("usuario", usuario);
 
-      // TODO: A página a ser carregada depende da role do usuário
-      navigate("/");
+      if (usuario.role === Roles.PADRAO) {
+        navigate("/MinhasSolicitacoes");
+      } else {
+        navigate("/admin");
+      }
+      
     } catch (error) {
       const { showSnackbar } = useSnackbarStore.getState();
-      showSnackbar("E-mail ou senha incorretos", "error");
+      showSnackbar(`E-mail ou senha incorretos ${error}`, "error");
+      console.log(error);
     }
   }
 
@@ -51,14 +58,13 @@ export class AuthService {
   isLoggedIn(): boolean {
     const usuario = this.getUserStorage();
 
-    return !!(usuario && usuario.acces_token !== null);
+    return !!(usuario && usuario.access_token !== null);
   }
 
   getUserStorage(isRediret: boolean = true): Usuario | null {
     let usuario: Usuario | null = null;
     try {
       usuario = AuthService.servicoArmazenamento.get("usuario");
-      console.log("No authService");
     } catch (error) {
       this.logout();
       if (isRediret) {
