@@ -23,6 +23,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import { Document, Page, pdfjs } from "react-pdf";
+import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
@@ -33,8 +34,39 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
+type Perfil = "triagem" | "medico" | "enfermeiro";
+type Status = Perfil | "ajustes" | "finalizado";
+type Aprovacao = "aprovado" | "reprovado" | null;
+
+interface Atestado {
+  id: number;
+  nome: string;
+  texto: string;
+  arquivo: string;
+  status: Status;
+  checklist: boolean[];
+  aprovado: Aprovacao;
+  observacao: string;
+  expanded: boolean;
+  foto?: string;
+}
+
+interface TabItem {
+  label: string;
+  status: Status[];
+}
+
+interface Config {
+  tabs: TabItem[];
+  mostraChecklist: (tab: number) => boolean;
+  statusLabel: (a: Atestado, tab: number) => React.ReactNode;
+  observacaoStyle: (tab: number) => React.CSSProperties;
+  botoes: (tab: number, checklist?: boolean[], aprovado?: Aprovacao) => string[];
+  canAprovar: (checklist: boolean[], aprovado: Aprovacao) => boolean;
+}
+
 // Checklist base (triagem)
-const CHECKLIST = [
+const CHECKLIST: string[] = [
   "Inciso I - Identificação do médico: nome e CRM/UF;",
   "Inciso II - Registro de Qualificação de Especialista (RQE), quando houver;",
   "Inciso III - Identificação do paciente: nome e número do CPF, quando houver;",
@@ -51,10 +83,10 @@ const CHECKLIST = [
 // Ordenar por data de movimentação
 
 // Troque aqui para "triagem" | "medico" | "enfermeiro"
-const perfilAtual = "triagem";
+const perfilAtual: Perfil = "triagem";
 
 // Mock de atestados - de arquivo1.pdf a arquivo14.pdf, todos checklist colapsados inicialmente
-const MOCK_ATESTADOS = [
+const MOCK_ATESTADOS: Atestado[] = [
   // Triagem pendentes
   {
     id: 1,
@@ -251,7 +283,7 @@ const MOCK_ATESTADOS = [
   },
 ];
 
-function getConfig(perfil) {
+function getConfig(perfil: Perfil): Config {
   if (perfil === "triagem")
     return {
       tabs: [
@@ -328,7 +360,14 @@ function getConfig(perfil) {
       botoes: (tab) => (tab === 0 ? ["informar"] : []),
       canAprovar: () => false,
     };
-  return { tabs: [] };
+  return {
+    tabs: [],
+    mostraChecklist: () => false,
+    statusLabel: () => null,
+    observacaoStyle: () => ({}),
+    botoes: () => [],
+    canAprovar: () => false,
+  };
 }
 
 export default function AdminDashboard() {
@@ -336,31 +375,33 @@ export default function AdminDashboard() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const config = getConfig(perfilAtual);
 
-  const [tab, setTab] = React.useState(0);
-  const [busca, setBusca] = React.useState("");
-  const [atestados, setAtestados] = React.useState(
+  const [tab, setTab] = React.useState<number>(0);
+  const [busca, setBusca] = React.useState<string>("");
+  const [atestados, setAtestados] = React.useState<Atestado[]>(
     MOCK_ATESTADOS.map((a) => ({ ...a }))
   );
-  const [selectedDoc, setSelectedDoc] = React.useState(null);
-  const [justifyOpen, setJustifyOpen] = React.useState(false);
-  const [justifyValue, setJustifyValue] = React.useState("");
-  const [acaoJustificar, setAcaoJustificar] = React.useState("");
-  const [atualId, setAtualId] = React.useState(null);
+  const [selectedDoc, setSelectedDoc] = React.useState<number | null>(null);
+  const [justifyOpen, setJustifyOpen] = React.useState<boolean>(false);
+  const [justifyValue, setJustifyValue] = React.useState<string>("");
+  const [acaoJustificar, setAcaoJustificar] = React.useState<
+    "reprovar" | "ajustes" | "informar" | ""
+  >("");
+  const [atualId, setAtualId] = React.useState<number | null>(null);
 
   // PDF
-  const [mobileDocOpen, setMobileDocOpen] = React.useState(false);
-  const [numPages, setNumPages] = React.useState(1);
-  const handlePdfLoad = (pdf) => setNumPages(pdf.numPages);
+  const [mobileDocOpen, setMobileDocOpen] = React.useState<boolean>(false);
+  const [numPages, setNumPages] = React.useState<number>(1);
+  const handlePdfLoad = (pdf: PDFDocumentProxy) => setNumPages(pdf.numPages);
 
-  const [page, setPage] = React.useState(1);
+  const [page, setPage] = React.useState<number>(1);
   const itemsPerPage = 5; // Altere para quantos cards quiser por página
 
 
   // Filtro
-  const filtrarAtestados = React.useCallback(() => {
+  const filtrarAtestados = React.useCallback((): Atestado[] => {
     const statusArr = config.tabs[tab].status;
     return atestados.filter(
-      (a) =>
+      (a: Atestado) =>
         statusArr.includes(a.status) &&
         (a.nome.toLowerCase().includes(busca.toLowerCase()) ||
           a.texto.toLowerCase().includes(busca.toLowerCase()))
@@ -381,7 +422,7 @@ export default function AdminDashboard() {
 
 
   // Badge de notificação (apenas pendentes)
-  const getBadge = (tabIdx) => {
+  const getBadge = (tabIdx: number) => {
     if (!config.tabs[tabIdx].status) return 0;
     return atestados.filter((a) =>
       config.tabs[tabIdx].status.includes(a.status)
@@ -389,7 +430,7 @@ export default function AdminDashboard() {
   };
 
   // Checklist handler (triagem)
-  const handleCheckChange = (a, idx) => {
+  const handleCheckChange = (a: Atestado, idx: number) => {
     setAtestados((ats) =>
       ats.map((at) =>
         at.id === a.id
@@ -403,13 +444,13 @@ export default function AdminDashboard() {
   };
 
   // Expand/Collapse handler para checklist (só triagem pendente)
-  const handleExpandChecklist = (a) => {
+  const handleExpandChecklist = (a: Atestado) => {
     setAtestados((ats) =>
       ats.map((at) => (at.id === a.id ? { ...at, expanded: !at.expanded } : at))
     );
   };
 
-  const solicitarExameMedico = async (atestado) => {
+  const solicitarExameMedico = async (atestado: Atestado) => {
     try {
       await fetch('/api/solicitar-exame-medico', {
         method: 'POST',
@@ -427,7 +468,7 @@ export default function AdminDashboard() {
 
 
   // Aprovar
-  const handleAprovar = (id) => {
+  const handleAprovar = (id: number) => {
     const atestado = atestados.find((a) => a.id === id);
 
     // Se o último item do checklist ("Período maior de 3 dias") está marcado:
@@ -457,13 +498,16 @@ export default function AdminDashboard() {
 
 
   // Justificar (reprovar, ajustes, informar)
-  const handleJustificar = (id, acao) => {
+  const handleJustificar = (
+    id: number,
+    acao: "reprovar" | "ajustes" | "informar"
+  ) => {
     setJustifyOpen(true);
     setAcaoJustificar(acao);
     setAtualId(id);
     setJustifyValue("");
   };
-  const confirmarJustificar = () => {
+  const confirmarJustificar = (): void => {
     setJustifyOpen(false);
     setAtestados((ats) =>
       ats.map((a) =>
@@ -492,7 +536,7 @@ export default function AdminDashboard() {
   };
 
   // Docs
-  const docSelecionado = atestados.find((a) => a.id === selectedDoc);
+  const docSelecionado = atestados.find((a: Atestado) => a.id === selectedDoc);
 
   // Render
   return (
@@ -547,7 +591,10 @@ export default function AdminDashboard() {
           >
             <Tabs
               value={tab}
-              onChange={(_, v) => setTab(v)}
+              onChange={(
+                _: React.SyntheticEvent,
+                v: number
+              ) => setTab(v)}
               sx={{
                 mb: 2,
                 ".MuiTabs-flexContainer": {
@@ -590,7 +637,8 @@ export default function AdminDashboard() {
               size="small"
               sx={{ width: "100%", mb: 2 }}
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setBusca(e.target.value)}
               InputProps={{
                 endAdornment: (
                   <IconButton size="small" onClick={() => setBusca("")}>
@@ -1084,7 +1132,8 @@ export default function AdminDashboard() {
             multiline
             minRows={2}
             value={justifyValue}
-            onChange={(e) => setJustifyValue(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setJustifyValue(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
