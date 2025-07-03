@@ -50,7 +50,7 @@ export default function PdfViewer({ url, height = "100%", width = "100%" }: PdfV
         >
           {Array.from(new Array(numPages), (_, index) => (
             <Page
-              key={`page_${index + 1}`}
+              key={`page_${index + 1}_${zoom}`}
               pageNumber={index + 1}
               scale={zoom}
               width={undefined}
