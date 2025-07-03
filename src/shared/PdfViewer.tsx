@@ -5,6 +5,9 @@ import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import PrintIcon from "@mui/icons-material/Print";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
+
 
 interface PdfViewerProps {
   url: string;
@@ -44,6 +47,7 @@ export default function PdfViewer({ url, height = "100%", width = "100%" }: PdfV
       </Box>
       <Box sx={{ flex: 1, overflow: "auto" }}>
         <Document
+          key={`${url}_${zoom}`}
           file={url}
           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
           loading={null}
