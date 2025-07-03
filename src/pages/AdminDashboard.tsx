@@ -472,7 +472,7 @@ export default function AdminDashboard() {
     const atestado = atestados.find((a) => a.id === id);
 
     // Se o último item do checklist ("Período maior de 3 dias") está marcado:
-    if (atestado.checklist[CHECKLIST.length - 1]) {
+    if (atestado && atestado.checklist[CHECKLIST.length - 1]) {
       solicitarExameMedico(atestado);
     }
 

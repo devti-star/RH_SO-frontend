@@ -21,7 +21,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Page />,
-    loader: GuardiaoAutenticacao,
+    //loader: GuardiaoAutenticacao,
     children: [
       {
         path: "meus-dados",
