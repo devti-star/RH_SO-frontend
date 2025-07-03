@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Box, IconButton } from "@mui/material";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import PrintIcon from "@mui/icons-material/Print";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { Document, Page, pdfjs } from "react-pdf";
 
 interface PdfViewerProps {
   url: string;
@@ -11,13 +12,18 @@ interface PdfViewerProps {
   width?: string | number;
 }
 
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+
 export default function PdfViewer({ url, height = "100%", width = "100%" }: PdfViewerProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [zoom, setZoom] = useState(1);
+  const [numPages, setNumPages] = useState(0);
 
   const zoomIn = () => setZoom((z) => Math.min(z + 0.1, 3));
   const zoomOut = () => setZoom((z) => Math.max(z - 0.1, 0.5));
-  const handlePrint = () => iframeRef.current?.contentWindow?.print();
+  const handlePrint = () => {
+    const win = window.open(url, "_blank");
+    win?.print();
+  };
   const openNewTab = () => window.open(url, "_blank");
 
   return (
@@ -37,18 +43,20 @@ export default function PdfViewer({ url, height = "100%", width = "100%" }: PdfV
         </IconButton>
       </Box>
       <Box sx={{ flex: 1, overflow: "auto" }}>
-        <iframe
-          ref={iframeRef}
-          src={`${url}#toolbar=0`}
-          style={{
-            width: "100%",
-            height: "100%",
-            border: "none",
-            transform: `scale(${zoom})`,
-            transformOrigin: "top left",
-          }}
-          title="Visualizador de PDF"
-        />
+        <Document
+          file={url}
+          onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+          loading={null}
+        >
+          {Array.from(new Array(numPages), (_, index) => (
+            <Page
+              key={`page_${index + 1}`}
+              pageNumber={index + 1}
+              scale={zoom}
+              width={undefined}
+            />
+          ))}
+        </Document>
       </Box>
     </Box>
   );
