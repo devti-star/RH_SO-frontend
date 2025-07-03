@@ -10,7 +10,7 @@ export interface TabItem {
   status: Status[];
 }
 
-interface Config {
+export interface Config {
   tabs: TabItem[];
   mostraChecklist: (tab: number) => boolean;
   statusLabel: (a: Atestado, tab: number) => React.ReactNode;

@@ -2,7 +2,9 @@ import React from "react";
 import { Box, Typography, IconButton, Dialog } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { Document, Page } from "react-pdf";
+import { Document, Page, pdfjs } from "react-pdf";
+
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import type { Atestado } from "../../../models/atestados";
 
