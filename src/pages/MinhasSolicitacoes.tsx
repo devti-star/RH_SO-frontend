@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
+import PdfViewer from '../shared/PdfViewer';
 
 const atestados = [
   {
@@ -431,13 +432,7 @@ const openPdf = () => {
           borderRadius: 1,
         }}
       >
-        <iframe
-          src={selectedPdf}
-          width="100%"
-          height="100%"
-          style={{ border: 'none' }}
-          title="Visualizador de PDF"
-        />
+        <PdfViewer url={selectedPdf} height="100%" width="100%" />
       </Box>
     </Paper>
   </Box>

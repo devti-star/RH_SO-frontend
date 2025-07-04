@@ -1,6 +1,5 @@
 import React from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
-import type { PDFDocumentProxy } from "pdfjs-dist";
 import type { Atestado, Perfil, Status, Aprovacao } from "../../models/atestados";
 import { CHECKLIST, MOCK_ATESTADOS } from "./mockData";
 import { solicitarExameMedico } from "./sesmt.service";
@@ -117,8 +116,6 @@ export default function useSesmtDashboard() {
   const [acaoJustificar, setAcaoJustificar] = React.useState<"reprovar" | "ajustes" | "informar" | "">("");
   const [atualId, setAtualId] = React.useState<number | null>(null);
   const [mobileDocOpen, setMobileDocOpen] = React.useState(false);
-  const [numPages, setNumPages] = React.useState(1);
-  const handlePdfLoad = (pdf: PDFDocumentProxy) => setNumPages(pdf.numPages);
   const [page, setPage] = React.useState(1);
   const itemsPerPage = 5;
 
@@ -231,8 +228,6 @@ export default function useSesmtDashboard() {
     setSelectedDoc,
     mobileDocOpen,
     setMobileDocOpen,
-    numPages,
-    handlePdfLoad,
     justifyOpen,
     setJustifyOpen,
     justifyValue,
