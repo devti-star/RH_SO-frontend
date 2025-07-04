@@ -81,6 +81,7 @@ export default function FormCadastro({
   const [cpf, setCPF] = useState("");
   const [departamento, setDepartamento] = useState("");
   const [rg, setRG] = useState("");
+  const [orgaoExpeditor, setOrgaoExpeditor] = useState("");
   const [matricula, setMatricula] = useState("");
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
@@ -116,6 +117,7 @@ export default function FormCadastro({
         cpf: cpf.replace(/[().-\s+]/g,''),
         departamento: departamento.trim(),
         rg: rg.replace(/[().-\s+]/g,''),
+        orgaoExpeditor: orgaoExpeditor.trim(),
         matricula: matricula.trim(),
         email: email.trim(),
         cargo: cargo.trim(),
@@ -316,6 +318,22 @@ export default function FormCadastro({
               pattern: "[0-9]{2}\\.[0-9]{3}\\.[0-9]{3}-[0-9a-z]",
               title: "Formato esperado: 11.111.111-x",
             }}
+          ></OutlinedInput>
+        </FormControl>
+
+        <FormControl
+          variant="outlined"
+          sx={{ marginTop: "10px" }}
+          className="campo"
+          required
+        >
+          <InputLabel htmlFor="campo-orgao-expeditor">Orgão Expeditor do RG</InputLabel>
+          <OutlinedInput
+            id="campo-orgao-expeditor"
+            type="text"
+            label="Orgão Expeditor do RG"
+            placeholder="Informe o orgão expedidor"
+            onChange={(e) => setOrgaoExpeditor(e.target.value)}
           ></OutlinedInput>
         </FormControl>
 
