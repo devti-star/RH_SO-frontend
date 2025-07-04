@@ -27,7 +27,6 @@ export default function PdfViewer({ url, height = "100%", width = "100%" }: PdfV
     const win = window.open(url, "_blank");
     win?.print();
   };
-  const openNewTab = () => window.open(url, "_blank");
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height, width }}>
@@ -40,9 +39,6 @@ export default function PdfViewer({ url, height = "100%", width = "100%" }: PdfV
         </IconButton>
         <IconButton size="small" onClick={zoomIn} title="Zoom in">
           <ZoomInIcon />
-        </IconButton>
-        <IconButton size="small" onClick={openNewTab} title="Abrir em nova aba">
-          <OpenInNewIcon />
         </IconButton>
       </Box>
       <Box sx={{ flex: 1, overflow: "auto" }}>
