@@ -4,6 +4,7 @@ export interface Cadastro {
     cpf: string,
     departamento: string,
     rg: string,
+    orgaoExpeditor: string,
     matricula: string,
     email: string,
     cargo: string,
