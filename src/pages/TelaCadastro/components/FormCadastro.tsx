@@ -126,7 +126,9 @@ export default function FormCadastro({
       
       sucesso = await handleCadastro(cadastro);
       console.log("Cadastro: ",cadastro);
-      setMostrarModal(true);
+      if (sucesso) {
+        setMostrarModal(true);
+      }
     }
   };
 
