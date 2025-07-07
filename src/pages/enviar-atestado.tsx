@@ -16,6 +16,10 @@ import {
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PdfViewer from '../shared/PdfViewer';
+import { ApiService } from '../interceptors/Api/api.intercept';
+import { useSnackbarStore } from '../shared/useSnackbar';
+import { ServicoArmazenamento } from '../shared/services/storage.service';
+import { apiURL } from '../config';
 
 const EnvioAtestado = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -38,9 +42,50 @@ const EnvioAtestado = () => {
     setModalOpen(true);
   };
 
-  const handleConfirm = () => {
-    console.log('Enviado com sucesso:', { file, observacao });
-    setModalOpen(false);
+  const handleConfirm = async () => {
+    const { showSnackbar } = useSnackbarStore.getState();
+
+    if (!file) {
+      showSnackbar('Selecione um arquivo para enviar.', 'error');
+      return;
+    }
+
+    try {
+      const servicoArmazenamento = ServicoArmazenamento.getInstance();
+      const usuario = servicoArmazenamento.get('usuario');
+      const usuarioId = usuario?.id_usuario; // ajuste se o campo do usuário for diferente
+
+      const api = ApiService.getInstance();
+
+      const requerimentoResp = await api.post(`${apiURL}/requerimentos`, {
+        tipo: 0, // ATESTADO
+        status: 2, // EM_PROCESSO
+        etapa: 0, // TRIAGEM
+        assinatura: '',
+        observacao,
+        usuarioId,
+      });
+
+      const requerimentoId = requerimentoResp.data.id; // ajustar chave conforme retorno do backend
+
+      const formData = new FormData();
+      formData.append('arquivo', file); // ajustar nome do campo conforme backend
+      formData.append('requerimentoId', requerimentoId.toString());
+
+      await api.post(`${apiURL}/documentos`, formData, {
+        headers: {
+          // o axios define automaticamente o Content-Type multipart/form-data
+        },
+      });
+
+      showSnackbar('Atestado enviado com sucesso!', 'success');
+      setModalOpen(false);
+      setFile(null);
+      setPreviewUrl(null);
+      setObservacao('');
+    } catch (error) {
+      showSnackbar('Erro ao enviar atestado.', 'error');
+    }
   };
 
   const renderPreview = () => {
