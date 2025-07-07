@@ -58,7 +58,6 @@ const router = createBrowserRouter([
   {
     path: "/Cadastro",
     element: <TelaCadastro />,
-    loader: GuardiaoAutenticacao,
   },
   { path: "/AcessoNaoAutorizado", element: <AcessoNaoAutorizado/>},
   { path: "*", element: <NotFoundPage /> },

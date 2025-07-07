@@ -27,9 +27,10 @@ import {
   mascaraTelefone,
 } from "../../../shared/mascaras/services";
 import type { Cadastro } from "../../../models/cadastro.interface";
-import { handleCadastro } from "./service";
+import { cadastrarUsuario, uploadFotoUsuario } from "./service";
 import { useNavigate } from "react-router-dom";
 import AceitacaoEmail from "../../../shared/aceitacaoEmail";
+import { Roles } from "../../../models/roles";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -102,35 +103,48 @@ export default function FormCadastro({
   const [mostrarModal,setMostrarModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    let sucesso: boolean;
-    
+      e.preventDefault();
 
-    if (senha !== senhaConfirm) {
-      setErroSenhas(true);
-    } else {
+      if (senha !== senhaConfirm) {
+          setErroSenhas(true);
+          return;
+      }
+
       setErroSenhas(false);
-      
+
       const cadastro: Cadastro = {
-        nome: nome.trim(),
-        secretaria: secretaria,
-        cpf: cpf.replace(/[().-\s+]/g,''),
-        departamento: departamento.trim(),
-        rg: rg.replace(/[().-\s+]/g,''),
-        orgaoExpeditor: orgaoExpeditor.trim(),
-        matricula: matricula.trim(),
-        email: email.trim(),
-        cargo: cargo.trim(),
-        telefone: telefone.replace(/[().-\s+]/g,''),
-        foto: foto,
-        senha: senha
+          role: Roles.PADRAO,
+          nomeCompleto: nome.trim(),
+          secretaria: secretaria,
+          cpf: cpf.replace(/[().-\s+]/g, ''),
+          departamento: departamento.trim(),
+          rg: rg.replace(/[().-\s+]/g, ''),
+          orgaoExpeditor: orgaoExpeditor.trim(),
+          matricula: matricula.trim(),
+          email: email.trim(),
+          cargo: cargo.trim(),
+          telefone: telefone.replace(/[().-\s+]/g, ''),
+          foto: foto,
+          senha: senha
       };
-      
-      sucesso = await handleCadastro(cadastro);
-      console.log("Cadastro: ",cadastro);
+
+      // 1º passo: cadastrar usuário (dados, sem foto)
+      const resp = await cadastrarUsuario(cadastro);
+
+      if (!resp.success || !resp.userId) {
+          // O erro já será mostrado pelo snackbar do service!
+          return;
+      }
+
+      // 2º passo: se selecionou foto, enviar foto
+      if (cadastro.foto instanceof File) {
+          const fotoEnviada = await uploadFotoUsuario(resp.userId, cadastro.foto);
+          // Se der erro aqui, o cadastro já existe, só faltou a foto
+      }
+
       setMostrarModal(true);
-    }
   };
+
 
   const handleClick = () => {
     inputRef.current?.click();
@@ -258,7 +272,7 @@ export default function FormCadastro({
             }}
           >
             {secretarias.map((sec) => {
-              return <MenuItem value={sec.id}>{sec.secretaria}</MenuItem>;
+              return <MenuItem value={sec.secretaria}>{sec.secretaria}</MenuItem>;
             })}
           </Select>
         </FormControl>
