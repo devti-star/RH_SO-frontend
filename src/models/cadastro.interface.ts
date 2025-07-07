@@ -1,5 +1,5 @@
 export interface Cadastro {
-    nome: string,
+    nomeCompleto: string,
     secretaria: string,
     cpf: string,
     departamento: string,
@@ -9,6 +9,7 @@ export interface Cadastro {
     email: string,
     cargo: string,
     telefone: string,
+    role: number,
     foto: File | null,
     senha: string,
     
