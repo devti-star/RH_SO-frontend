@@ -36,8 +36,10 @@ export class AuthService {
       const headers = {Authorization: `${token.token_type} ${token.access_token}`};
 
       const response_usuario = await axios.get<Usuario>(AuthService.baseAPI + "/auth/me", {headers: headers});
-      const usuario = response_usuario.data;
+      let usuario = response_usuario.data;
+      usuario = {...usuario, ...token};
       if (usuario) AuthService.servicoArmazenamento.set("usuario", usuario);
+      console.log(usuario);
 
       if (usuario.role === Roles.PADRAO) {
         navigate("/MinhasSolicitacoes");
