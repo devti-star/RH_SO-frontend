@@ -67,6 +67,7 @@ const PerfilUsuario: React.FC = () => {
         setLoading(false);
         return;
       }
+
       try {
         const data = await getUsuario(usuario.id);
         const camposUsuario: UsuarioCampos = {
