@@ -18,5 +18,5 @@ export interface Usuario extends Partial<LoginResponse>{
     secretaria: string,
     telefone: string,
     cargo: string,
-    foto: any, //TODO: coisa feia isso aqui, se faz necessário decidir como a foto será recebida do backend
+    foto: string | null,
 }

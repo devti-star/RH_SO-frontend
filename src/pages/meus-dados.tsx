@@ -25,7 +25,7 @@ import WorkIcon from "@mui/icons-material/Work";
 import EmailIcon from "@mui/icons-material/Email";
 import { AuthService } from "../auth/components/form/auth.service";
 import { useSnackbarStore } from "../shared/useSnackbar";
-import { decodeJwt } from "../shared/jwt";
+import { decodeJwt, type JwtPayload } from "../shared/jwt";
 import { getUsuario, patchFotoUsuario, patchUsuario } from "./meus-dados.service";
 
 const azulPrimario = "#050A24";
@@ -61,11 +61,12 @@ const PerfilUsuario: React.FC = () => {
 
   const authService = AuthService.getInstance();
   const usuario = authService.getUserStorage();
-  const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
+  const decoded: JwtPayload | null = decodeJwt(usuario?.access_token);
+  const usuarioId: number | undefined = usuario?.id ?? (decoded ? Number(decoded.sub) : undefined);
   console.log(`usuario: ${JSON.stringify(usuario)}`);
   console.log(`usuario.rg: ${usuario?.rg}`);
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       if (!usuarioId) {
         setLoading(false);
         return;
@@ -101,7 +102,7 @@ const PerfilUsuario: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
     if (file) {
       setFotoFile(file);
@@ -110,19 +111,19 @@ const PerfilUsuario: React.FC = () => {
     }
   };
 
-  const handleChangeCampo = (campo: keyof UsuarioCampos, valor: string | null) => {
+  const handleChangeCampo = (campo: keyof UsuarioCampos, valor: string | null): void => {
     setCampos((prev) => (prev ? { ...prev, [campo]: valor } : prev));
   };
 
-  const abrirModalSenha = () => setOpenSenhaModal(true);
-  const fecharModalSenha = () => {
+  const abrirModalSenha = (): void => setOpenSenhaModal(true);
+  const fecharModalSenha = (): void => {
     setOpenSenhaModal(false);
     setSenhaAtual("");
     setNovaSenha("");
     setConfirmaSenha("");
   };
 
-  const salvarSenha = () => {
+  const salvarSenha = (): void => {
     if (novaSenha !== confirmaSenha) {
       showSnackbar("A nova senha e a confirmação devem ser iguais.", "error");
       return;
@@ -135,7 +136,7 @@ const PerfilUsuario: React.FC = () => {
     fecharModalSenha();
   };
 
-  const hasChanges = () => {
+  const hasChanges = (): boolean => {
     if (!campos || !originais) return false;
     return (
       campos.nomeCompleto !== originais.nomeCompleto ||
@@ -147,7 +148,7 @@ const PerfilUsuario: React.FC = () => {
     );
   };
 
-  const salvarAlteracoes = async () => {
+  const salvarAlteracoes = async (): Promise<void> => {
     if (!usuarioId || !campos || !originais) return;
     setSaving(true);
     try {
