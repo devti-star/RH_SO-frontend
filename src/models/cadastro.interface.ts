@@ -10,7 +10,6 @@ export interface Cadastro {
     cargo: string,
     telefone: string,
     role: number,
-    foto: File | null,
     senha: string,
     
 }

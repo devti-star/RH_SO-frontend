@@ -27,10 +27,11 @@ import {
   mascaraTelefone,
 } from "../../../shared/mascaras/services";
 import type { Cadastro } from "../../../models/cadastro.interface";
-import { cadastrarUsuario, uploadFotoUsuario } from "./service";
+
 import { useNavigate } from "react-router-dom";
 import AceitacaoEmail from "../../../shared/aceitacaoEmail";
 import { Roles } from "../../../models/roles";
+import { cadastrarUsuario } from "./service";
 
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
@@ -88,12 +89,6 @@ export default function FormCadastro({
   const [cargo, setCargo] = useState("");
   const [telefone, setTelefone] = useState("");
 
-  //Para a imagem
-  const [foto, setFoto] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [previaFoto, setPreviaFoto] = useState<string | undefined>(undefined);
-  const [modalAberto, setModalAberto] = useState(false);
-
   const [senha, setSenha] = useState("");
   const [senhaConfirm, setSenhaConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -124,11 +119,10 @@ export default function FormCadastro({
           email: email.trim(),
           cargo: cargo.trim(),
           telefone: telefone.replace(/[().-\s+]/g, ''),
-          foto: foto,
           senha: senha
       };
 
-      // 1º passo: cadastrar usuário (dados, sem foto)
+      // cadastrar usuário (dados, sem foto)
       const resp = await cadastrarUsuario(cadastro);
 
       if (!resp.success || !resp.userId) {
@@ -136,36 +130,7 @@ export default function FormCadastro({
           return;
       }
 
-      // 2º passo: se selecionou foto, enviar foto
-      if (cadastro.foto instanceof File) {
-          const fotoEnviada = await uploadFotoUsuario(resp.userId, cadastro.foto);
-          // Se der erro aqui, o cadastro já existe, só faltou a foto
-      }
-
       setMostrarModal(true);
-  };
-
-
-  const handleClick = () => {
-    inputRef.current?.click();
-  };
-
-  const modificarModal = () => setModalAberto(!modalAberto);
-
-  useEffect(() => {
-    return () => {
-      if (previaFoto) {
-        URL.revokeObjectURL(previaFoto);
-      }
-    };
-  }, [previaFoto]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFoto(file);
-      setPreviaFoto(URL.createObjectURL(file)); //Criação de URL temporária para visualização da foto carregada
-    }
   };
 
   const handleTogglePassword = () => {
@@ -420,71 +385,6 @@ export default function FormCadastro({
           ></OutlinedInput>
         </FormControl>
 
-        <FormControl
-          variant="outlined"
-          className="campo"
-          sx={{ marginTop: "10px" }}
-          required
-        >
-          <FormLabel sx={{ mb: 0, color: "black" }}>Foto</FormLabel>
-          <input
-            type="file"
-            hidden
-            ref={inputRef}
-            onChange={handleFileChange}
-            accept=".png, .jpg, .jpeg"
-          ></input>
-          <CustomButton
-            payload="Carregar foto .png, .jpg ou .jpeg"
-            onClick={handleClick}
-            sx={{ mt: 0 }}
-          ></CustomButton>
-
-          {foto && previaFoto && (
-            <>
-              <Typography
-                variant="body2"
-                sx={{
-                  mt: 2,
-                  mb: 1,
-                  cursor: "pointer",
-                  width: "fit-content",
-                  color: "rgb(0, 102, 204)",
-                }}
-                onClick={modificarModal}
-              >
-                {foto.name}
-              </Typography>
-              <Dialog
-                open={modalAberto}
-                onClose={modificarModal}
-                maxWidth="sm"
-                fullWidth
-                slotProps={{ paper: { sx: { borderRadius: "15px" } } }}
-              >
-                <DialogTitle
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  Pré-visualização da Imagem
-                  <IconButton onClick={modificarModal}>
-                    <CloseIcon />
-                  </IconButton>
-                </DialogTitle>
-                <DialogContent>
-                  <img
-                    src={previaFoto}
-                    alt="Pré-visualização"
-                    style={{ width: "100%", borderRadius: 8 }}
-                  />
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
-        </FormControl>
 
         <FormControl
           variant="outlined"
