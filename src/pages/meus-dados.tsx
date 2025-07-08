@@ -71,6 +71,7 @@ const PerfilUsuario: React.FC = () => {
       }
       try {
         const data = await getUsuario(usuarioId);
+
         const camposUsuario: UsuarioCampos = {
           nomeCompleto: data.nomeCompleto ?? "",
           departamento: data.departamento ?? "",
@@ -162,6 +163,7 @@ const PerfilUsuario: React.FC = () => {
       }
       if (fotoFile) {
         await patchFotoUsuario(usuarioId, fotoFile);
+
       }
       setOriginais({ ...campos });
       setFotoFile(null);
