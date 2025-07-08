@@ -6,8 +6,8 @@ export interface LoginResponse{
 }
 
 
-export interface Usuario extends LoginResponse{
-    id_usuario: number,
+export interface Usuario extends Partial<LoginResponse>{
+    id: number,
     nomeCompleto: string;
     role: number;
     email: string,
