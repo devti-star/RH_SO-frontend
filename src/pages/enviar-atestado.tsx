@@ -20,6 +20,7 @@ import { ApiService } from '../interceptors/Api/api.intercept';
 import { useSnackbarStore } from '../shared/useSnackbar';
 import { ServicoArmazenamento } from '../shared/services/storage.service';
 import { apiURL } from '../config';
+import { AuthService } from '../auth/components/form/auth.service';
 
 const EnvioAtestado = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -51,10 +52,9 @@ const EnvioAtestado = () => {
     }
 
     try {
-      const servicoArmazenamento = ServicoArmazenamento.getInstance();
-      const usuario = servicoArmazenamento.get('usuario');
-      const usuarioId = usuario?.id_usuario; // ajuste se o campo do usuário for diferente
-
+      const servicoArmazenamento = AuthService.getInstance();
+      const usuario = servicoArmazenamento.getUserStorage();
+      const usuarioId = usuario?.id; // ajuste se o campo do usuário for diferente
       const api = ApiService.getInstance();
 
       const requerimentoResp = await api.post(`${apiURL}/requerimentos`, {
@@ -66,7 +66,6 @@ const EnvioAtestado = () => {
         usuarioId,
       });
 
-      console.log(requerimentoResp.data);
       const requerimentoId = requerimentoResp.data.id; // ajustar chave conforme retorno do backend
       const formData = new FormData();
       formData.append('arquivo', file); // ajustar nome do campo conforme backend
