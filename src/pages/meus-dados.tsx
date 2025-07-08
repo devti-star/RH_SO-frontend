@@ -47,7 +47,6 @@ interface UsuarioCampos {
 const PerfilUsuario: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const authService = AuthService.getInstance();
   const { showSnackbar } = useSnackbarStore.getState();
 
   const [campos, setCampos] = useState<UsuarioCampos | null>(null);
@@ -60,9 +59,11 @@ const PerfilUsuario: React.FC = () => {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmaSenha, setConfirmaSenha] = useState("");
 
-  const usuario = authService.getUserStorage(false);
+  const authService = AuthService.getInstance();
+  const usuario = authService.getUserStorage();
   const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
-
+  console.log(`usuario: ${JSON.stringify(usuario)}`);
+  console.log(`usuario.rg: ${usuario?.rg}`);
   useEffect(() => {
     const fetchData = async () => {
       if (!usuarioId) {
@@ -82,7 +83,11 @@ const PerfilUsuario: React.FC = () => {
           email: data.email ?? "",
           matricula: data.matricula ?? "",
           cpf: data.cpf ?? "",
-          rg: data.rg ?? "",
+          rg:
+          typeof data.rg === "object" && data.rg !== null
+            ? [data.rg.numeroRG, data.rg.orgãoExpeditor].filter(Boolean).join(" - ")
+            : (data.rg || ""),
+
         };
         setCampos(camposUsuario);
         setOriginais(camposUsuario);
