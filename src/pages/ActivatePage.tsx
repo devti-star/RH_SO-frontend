@@ -1,28 +1,35 @@
-import { useEffect, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { apiURL } from '../config';
-import { Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import { apiURL } from "../config";
 
-const ActivatePage = () => {
+const ActivatePage: React.FC = () => {
+    const { token } = useParams<{ token: string }>();
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const { token } = useParams<{ token: string }>();
-    const [message, setMessage] = useState<string>('Ativando...');
-    const [loading, setLoading] = useState(true);
-    const [success, setSuccess] = useState(false);
-
     useEffect(() => {
-        if (!token) return;
+        const activateUser = async () => {
+            try {
+                const response = await axios.get(`${apiURL}/activate/${token}`);
 
-        fetch(`${apiURL}/activate/${token}`)
-            .then((res) => {
-                if (!res.ok) throw new Error('Erro na ativação');
-                setSuccess(true);
-            })
-            .catch((err) => {
+                if (response.status === 202) {
+                    setSuccess(true);
+                    setError(null); // limpa qualquer erro anterior
+                } else {
+                    setSuccess(false);
+                    setError("Erro ao ativar conta.");
+                }
+            } catch (err) {
                 setSuccess(false);
-            })
-            .finally(() => setLoading(false));
+                setError("Erro ao ativar conta.");
+            }
+        };
+
+        activateUser();
     }, [token]);
 
     const [modalAberto, setModalAberto] = useState(true);
@@ -34,8 +41,7 @@ const ActivatePage = () => {
     }
 
 
-    return (<>
-
+    return (
         <Dialog
             open={modalAberto}
             onClose={modificarModal}
@@ -61,14 +67,15 @@ const ActivatePage = () => {
                 </p>
             </DialogContent>)
             }
-            {!success && (<DialogContent>
+            {error && (<DialogContent>
                 <p>
                     Não foi possivel ativar sua conta.
                 </p>
             </DialogContent>)
             }
         </Dialog>
-    </>);
+
+    );
 };
 
 export default ActivatePage;
