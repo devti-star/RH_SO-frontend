@@ -1,40 +1,106 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Grid,
-  Typography,
-  TextField,
-  Button,
   Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  InputAdornment,
   Paper,
+  TextField,
+  Typography,
   useMediaQuery,
   useTheme,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import LockResetIcon from "@mui/icons-material/LockReset";
+import PersonIcon from "@mui/icons-material/Person";
+import BusinessIcon from "@mui/icons-material/Business";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import PhoneIcon from "@mui/icons-material/Phone";
+import WorkIcon from "@mui/icons-material/Work";
+import EmailIcon from "@mui/icons-material/Email";
+import { AuthService } from "../auth/components/form/auth.service";
+import { useSnackbarStore } from "../shared/useSnackbar";
+import { getUsuario, patchFotoUsuario, patchUsuario } from "./meus-dados.service";
 
 const azulPrimario = "#050A24";
 const azulClaro = "#173557";
 
+interface UsuarioCampos {
+  nomeCompleto: string;
+  departamento: string;
+  secretaria: string;
+  telefone: string;
+  cargo: string;
+  foto: string | null;
+  email: string;
+  matricula: string;
+  cpf: string;
+  rg: string;
+}
+
 const PerfilUsuario: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const authService = AuthService.getInstance();
+  const { showSnackbar } = useSnackbarStore.getState();
+
+  const [campos, setCampos] = useState<UsuarioCampos | null>(null);
+  const [originais, setOriginais] = useState<UsuarioCampos | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [openSenhaModal, setOpenSenhaModal] = useState(false);
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmaSenha, setConfirmaSenha] = useState("");
 
+  const usuario = authService.getUserStorage();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!usuario) return;
+      try {
+        const data = await getUsuario(usuario.id);
+        const camposUsuario: UsuarioCampos = {
+          nomeCompleto: data.nomeCompleto ?? "",
+          departamento: data.departamento ?? "",
+          secretaria: data.secretaria ?? "",
+          telefone: data.telefone ?? "",
+          cargo: data.cargo ?? "",
+          foto: data.foto ?? null,
+          email: data.email ?? "",
+          matricula: data.matricula ?? "",
+          cpf: data.cpf ?? "",
+          rg: data.rg ?? "",
+        };
+        setCampos(camposUsuario);
+        setOriginais(camposUsuario);
+      } catch {
+        showSnackbar("Erro ao carregar dados do usuário", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setFotoFile(file);
       const imageURL = URL.createObjectURL(file);
-      setProfileImage(imageURL);
+      setCampos((prev) => (prev ? { ...prev, foto: imageURL } : prev));
     }
+  };
+
+  const handleChangeCampo = (campo: keyof UsuarioCampos, valor: string | null) => {
+    setCampos((prev) => (prev ? { ...prev, [campo]: valor } : prev));
   };
 
   const abrirModalSenha = () => setOpenSenhaModal(true);
@@ -47,16 +113,68 @@ const PerfilUsuario: React.FC = () => {
 
   const salvarSenha = () => {
     if (novaSenha !== confirmaSenha) {
-      alert("A nova senha e a confirmação devem ser iguais.");
+      showSnackbar("A nova senha e a confirmação devem ser iguais.", "error");
       return;
     }
     if (!senhaAtual || !novaSenha || !confirmaSenha) {
-      alert("Por favor, preencha todos os campos.");
+      showSnackbar("Por favor, preencha todos os campos.", "error");
       return;
     }
-    alert("Senha alterada com sucesso!");
+    showSnackbar("Senha alterada com sucesso!", "success");
     fecharModalSenha();
   };
+
+  const hasChanges = () => {
+    if (!campos || !originais) return false;
+    return (
+      campos.nomeCompleto !== originais.nomeCompleto ||
+      campos.departamento !== originais.departamento ||
+      campos.secretaria !== originais.secretaria ||
+      campos.telefone !== originais.telefone ||
+      campos.cargo !== originais.cargo ||
+      fotoFile !== null
+    );
+  };
+
+  const salvarAlteracoes = async () => {
+    if (!usuario || !campos || !originais) return;
+    setSaving(true);
+    try {
+      const dadosAtualizados: Partial<UsuarioCampos> = {};
+      if (campos.nomeCompleto !== originais.nomeCompleto)
+        dadosAtualizados.nomeCompleto = campos.nomeCompleto;
+      if (campos.departamento !== originais.departamento)
+        dadosAtualizados.departamento = campos.departamento;
+      if (campos.secretaria !== originais.secretaria)
+        dadosAtualizados.secretaria = campos.secretaria;
+      if (campos.telefone !== originais.telefone)
+        dadosAtualizados.telefone = campos.telefone;
+      if (campos.cargo !== originais.cargo)
+        dadosAtualizados.cargo = campos.cargo;
+
+      if (Object.keys(dadosAtualizados).length > 0) {
+        await patchUsuario(usuario.id, dadosAtualizados);
+      }
+      if (fotoFile) {
+        await patchFotoUsuario(usuario.id, fotoFile);
+      }
+      setOriginais({ ...campos });
+      setFotoFile(null);
+      showSnackbar("Dados atualizados com sucesso!", "success");
+    } catch {
+      showSnackbar("Erro ao salvar dados.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading || !campos) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -84,8 +202,13 @@ const PerfilUsuario: React.FC = () => {
           alignItems: isMobile ? "center" : "stretch",
         }}
       >
-        <Grid container spacing={4} alignItems="stretch" justifyContent={isMobile ? "center" : "flex-start"}
-          sx={{ width: isMobile ? "100vw" : "auto", px: isMobile ? 2 : 0 }}>
+        <Grid
+          container
+          spacing={4}
+          alignItems="stretch"
+          justifyContent={isMobile ? "center" : "flex-start"}
+          sx={{ width: isMobile ? "100vw" : "auto", px: isMobile ? 2 : 0 }}
+        >
           <Grid
             item
             xs={12}
@@ -103,7 +226,7 @@ const PerfilUsuario: React.FC = () => {
               Foto
             </Typography>
             <Avatar
-              src={profileImage ?? undefined}
+              src={campos.foto ?? undefined}
               sx={{
                 width: 140,
                 height: 140,
@@ -116,6 +239,7 @@ const PerfilUsuario: React.FC = () => {
             <Button
               variant="contained"
               component="label"
+              disabled={saving}
               sx={{
                 backgroundColor: azulPrimario,
                 textTransform: "none",
@@ -127,13 +251,8 @@ const PerfilUsuario: React.FC = () => {
                 },
               }}
             >
-              Editar Perfil
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageChange}
-              />
+              Alterar Foto
+              <input type="file" accept="image/*" hidden onChange={handleImageChange} />
             </Button>
           </Grid>
 
@@ -143,22 +262,55 @@ const PerfilUsuario: React.FC = () => {
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Nome Completo" defaultValue="Murilo Nascimento Carvalho" />
+                <TextField
+                  fullWidth
+                  label="Nome Completo"
+                  value={campos.nomeCompleto}
+                  onChange={(e) => handleChangeCampo("nomeCompleto", e.target.value)}
+                  disabled={saving}
+                  InputProps={{ startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ) }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Cargo" defaultValue="Desenvolvedor Fullstack" />
+                <TextField
+                  fullWidth
+                  label="Cargo"
+                  value={campos.cargo}
+                  onChange={(e) => handleChangeCampo("cargo", e.target.value)}
+                  disabled={saving}
+                  InputProps={{ startAdornment: (
+                    <InputAdornment position="start">
+                      <WorkIcon />
+                    </InputAdornment>
+                  ) }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="CPF" defaultValue="666.666.666-66" />
+                <TextField fullWidth label="CPF" value={campos.cpf} disabled />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Matrícula" defaultValue="35715978936" />
+                <TextField fullWidth label="Matrícula" value={campos.matricula} disabled />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="RG" defaultValue="99.999.99-X" />
+                <TextField fullWidth label="RG" value={campos.rg} disabled />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Telefone/Whatsapp" defaultValue="(18) 91234-6978" />
+                <TextField
+                  fullWidth
+                  label="Telefone/Whatsapp"
+                  value={campos.telefone}
+                  onChange={(e) => handleChangeCampo("telefone", e.target.value)}
+                  disabled={saving}
+                  InputProps={{ startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ) }}
+                />
               </Grid>
             </Grid>
 
@@ -168,10 +320,32 @@ const PerfilUsuario: React.FC = () => {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Departamento" defaultValue="T.I" />
+                  <TextField
+                    fullWidth
+                    label="Departamento"
+                    value={campos.departamento}
+                    onChange={(e) => handleChangeCampo("departamento", e.target.value)}
+                    disabled={saving}
+                    InputProps={{ startAdornment: (
+                      <InputAdornment position="start">
+                        <BusinessIcon />
+                      </InputAdornment>
+                    ) }}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Secretaria" defaultValue="DPTI" />
+                  <TextField
+                    fullWidth
+                    label="Secretaria"
+                    value={campos.secretaria}
+                    onChange={(e) => handleChangeCampo("secretaria", e.target.value)}
+                    disabled={saving}
+                    InputProps={{ startAdornment: (
+                      <InputAdornment position="start">
+                        <ApartmentIcon />
+                      </InputAdornment>
+                    ) }}
+                  />
                 </Grid>
               </Grid>
             </Box>
@@ -182,7 +356,17 @@ const PerfilUsuario: React.FC = () => {
               </Typography>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Email" defaultValue="murilo_nasci_carv@gmail.com" />
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    value={campos.email}
+                    disabled
+                    InputProps={{ startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon />
+                      </InputAdornment>
+                    ) }}
+                  />
                 </Grid>
                 <Grid
                   item
@@ -195,6 +379,7 @@ const PerfilUsuario: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={abrirModalSenha}
+                    disabled={saving}
                     sx={{ textTransform: "none", fontWeight: 600, backgroundColor: azulPrimario, "&:hover": { backgroundColor: azulClaro } }}
                     startIcon={<LockResetIcon />}
                   >
@@ -205,6 +390,23 @@ const PerfilUsuario: React.FC = () => {
             </Box>
           </Grid>
         </Grid>
+
+        <Box mt={4} display="flex" justifyContent="center">
+          <Button
+            variant="contained"
+            onClick={salvarAlteracoes}
+            disabled={!hasChanges() || saving}
+            sx={{
+              px: 6,
+              backgroundColor: hasChanges() ? azulPrimario : "#bdbdbd",
+              "&:hover": {
+                backgroundColor: hasChanges() ? azulClaro : "#bdbdbd",
+              },
+            }}
+          >
+            {saving ? <CircularProgress size={24} color="inherit" /> : "Salvar"}
+          </Button>
+        </Box>
 
         <Dialog open={openSenhaModal} onClose={fecharModalSenha} fullWidth maxWidth="sm">
           <DialogTitle sx={{ fontWeight: 700, color: azulPrimario, textAlign: "center" }}>
