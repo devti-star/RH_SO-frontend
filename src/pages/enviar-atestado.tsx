@@ -66,8 +66,8 @@ const EnvioAtestado = () => {
         usuarioId,
       });
 
+      console.log(requerimentoResp.data);
       const requerimentoId = requerimentoResp.data.id; // ajustar chave conforme retorno do backend
-
       const formData = new FormData();
       formData.append('arquivo', file); // ajustar nome do campo conforme backend
       formData.append('requerimentoId', requerimentoId.toString());
@@ -85,6 +85,7 @@ const EnvioAtestado = () => {
       setObservacao('');
     } catch (error) {
       showSnackbar('Erro ao enviar atestado.', 'error');
+      console.log(`Erro: ${error}`)
     }
   };
 
