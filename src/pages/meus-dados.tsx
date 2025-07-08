@@ -25,7 +25,8 @@ import WorkIcon from "@mui/icons-material/Work";
 import EmailIcon from "@mui/icons-material/Email";
 import { AuthService } from "../auth/components/form/auth.service";
 import { useSnackbarStore } from "../shared/useSnackbar";
-import { decodeJwt } from "../shared/jwt";
+import { decodeJwt, type JwtPayload } from "../shared/jwt";
+import type { Usuario } from "../models/usuario.interface";
 import { getUsuario, patchFotoUsuario, patchUsuario } from "./meus-dados.service";
 
 const azulPrimario = "#050A24";
@@ -51,21 +52,22 @@ const PerfilUsuario: React.FC = () => {
 
   const [campos, setCampos] = useState<UsuarioCampos | null>(null);
   const [originais, setOriginais] = useState<UsuarioCampos | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
-  const [openSenhaModal, setOpenSenhaModal] = useState(false);
-  const [senhaAtual, setSenhaAtual] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
-  const [confirmaSenha, setConfirmaSenha] = useState("");
+  const [openSenhaModal, setOpenSenhaModal] = useState<boolean>(false);
+  const [senhaAtual, setSenhaAtual] = useState<string>("");
+  const [novaSenha, setNovaSenha] = useState<string>("");
+  const [confirmaSenha, setConfirmaSenha] = useState<string>("");
 
-  const authService = AuthService.getInstance();
-  const usuario = authService.getUserStorage();
-  const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
+  const authService: AuthService = AuthService.getInstance();
+  const usuario: Usuario | null = authService.getUserStorage();
+  const decodedToken = decodeJwt(usuario?.access_token) as JwtPayload | null;
+  const usuarioId: number | undefined = usuario?.id ?? decodedToken?.sub;
   console.log(`usuario: ${JSON.stringify(usuario)}`);
   console.log(`usuario.rg: ${usuario?.rg}`);
-  useEffect(() => {
-    const fetchData = async () => {
+  useEffect((): void => {
+    const fetchData = async (): Promise<void> => {
       if (!usuarioId) {
         setLoading(false);
         return;
@@ -101,7 +103,7 @@ const PerfilUsuario: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
     if (file) {
       setFotoFile(file);
@@ -110,19 +112,22 @@ const PerfilUsuario: React.FC = () => {
     }
   };
 
-  const handleChangeCampo = (campo: keyof UsuarioCampos, valor: string | null) => {
+  const handleChangeCampo = (
+    campo: keyof UsuarioCampos,
+    valor: string | null
+  ): void => {
     setCampos((prev) => (prev ? { ...prev, [campo]: valor } : prev));
   };
 
-  const abrirModalSenha = () => setOpenSenhaModal(true);
-  const fecharModalSenha = () => {
+  const abrirModalSenha = (): void => setOpenSenhaModal(true);
+  const fecharModalSenha = (): void => {
     setOpenSenhaModal(false);
     setSenhaAtual("");
     setNovaSenha("");
     setConfirmaSenha("");
   };
 
-  const salvarSenha = () => {
+  const salvarSenha = (): void => {
     if (novaSenha !== confirmaSenha) {
       showSnackbar("A nova senha e a confirmação devem ser iguais.", "error");
       return;
@@ -135,7 +140,7 @@ const PerfilUsuario: React.FC = () => {
     fecharModalSenha();
   };
 
-  const hasChanges = () => {
+  const hasChanges = (): boolean => {
     if (!campos || !originais) return false;
     return (
       campos.nomeCompleto !== originais.nomeCompleto ||
@@ -147,7 +152,7 @@ const PerfilUsuario: React.FC = () => {
     );
   };
 
-  const salvarAlteracoes = async () => {
+  const salvarAlteracoes = async (): Promise<void> => {
     if (!usuarioId || !campos || !originais) return;
     setSaving(true);
     try {
@@ -278,7 +283,9 @@ const PerfilUsuario: React.FC = () => {
                   fullWidth
                   label="Nome Completo"
                   value={campos.nomeCompleto}
-                  onChange={(e) => handleChangeCampo("nomeCompleto", e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChangeCampo("nomeCompleto", e.target.value)
+                  }
                   disabled={saving}
                   InputProps={{ startAdornment: (
                     <InputAdornment position="start">
@@ -292,7 +299,9 @@ const PerfilUsuario: React.FC = () => {
                   fullWidth
                   label="Cargo"
                   value={campos.cargo}
-                  onChange={(e) => handleChangeCampo("cargo", e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChangeCampo("cargo", e.target.value)
+                  }
                   disabled={saving}
                   InputProps={{ startAdornment: (
                     <InputAdornment position="start">
@@ -315,7 +324,9 @@ const PerfilUsuario: React.FC = () => {
                   fullWidth
                   label="Telefone/Whatsapp"
                   value={campos.telefone}
-                  onChange={(e) => handleChangeCampo("telefone", e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChangeCampo("telefone", e.target.value)
+                  }
                   disabled={saving}
                   InputProps={{ startAdornment: (
                     <InputAdornment position="start">
@@ -336,7 +347,9 @@ const PerfilUsuario: React.FC = () => {
                     fullWidth
                     label="Departamento"
                     value={campos.departamento}
-                    onChange={(e) => handleChangeCampo("departamento", e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleChangeCampo("departamento", e.target.value)
+                    }
                     disabled={saving}
                     InputProps={{ startAdornment: (
                       <InputAdornment position="start">
@@ -350,7 +363,9 @@ const PerfilUsuario: React.FC = () => {
                     fullWidth
                     label="Secretaria"
                     value={campos.secretaria}
-                    onChange={(e) => handleChangeCampo("secretaria", e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleChangeCampo("secretaria", e.target.value)
+                    }
                     disabled={saving}
                     InputProps={{ startAdornment: (
                       <InputAdornment position="start">
@@ -432,7 +447,9 @@ const PerfilUsuario: React.FC = () => {
                 fullWidth
                 margin="normal"
                 value={senhaAtual}
-                onChange={(e) => setSenhaAtual(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSenhaAtual(e.target.value)
+                }
               />
               <TextField
                 label="Nova Senha"
@@ -440,7 +457,9 @@ const PerfilUsuario: React.FC = () => {
                 fullWidth
                 margin="normal"
                 value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNovaSenha(e.target.value)
+                }
               />
               <TextField
                 label="Confirme a Senha"
@@ -448,7 +467,9 @@ const PerfilUsuario: React.FC = () => {
                 fullWidth
                 margin="normal"
                 value={confirmaSenha}
-                onChange={(e) => setConfirmaSenha(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfirmaSenha(e.target.value)
+                }
               />
             </Box>
           </DialogContent>
