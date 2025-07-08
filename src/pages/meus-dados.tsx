@@ -25,6 +25,7 @@ import WorkIcon from "@mui/icons-material/Work";
 import EmailIcon from "@mui/icons-material/Email";
 import { AuthService } from "../auth/components/form/auth.service";
 import { useSnackbarStore } from "../shared/useSnackbar";
+import { decodeJwt } from "../shared/jwt";
 import { getUsuario, patchFotoUsuario, patchUsuario } from "./meus-dados.service";
 
 const azulPrimario = "#050A24";
@@ -60,16 +61,17 @@ const PerfilUsuario: React.FC = () => {
   const [confirmaSenha, setConfirmaSenha] = useState("");
 
   const usuario = authService.getUserStorage(false);
+  const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!usuario || !usuario.id) {
+      if (!usuarioId) {
         setLoading(false);
         return;
       }
-
       try {
-        const data = await getUsuario(usuario.id);
+        const data = await getUsuario(usuarioId);
+
         const camposUsuario: UsuarioCampos = {
           nomeCompleto: data.nomeCompleto ?? "",
           departamento: data.departamento ?? "",
@@ -141,7 +143,7 @@ const PerfilUsuario: React.FC = () => {
   };
 
   const salvarAlteracoes = async () => {
-    if (!usuario || !usuario.id || !campos || !originais) return;
+    if (!usuarioId || !campos || !originais) return;
     setSaving(true);
     try {
       const dadosAtualizados: Partial<UsuarioCampos> = {};
@@ -157,10 +159,11 @@ const PerfilUsuario: React.FC = () => {
         dadosAtualizados.cargo = campos.cargo;
 
       if (Object.keys(dadosAtualizados).length > 0) {
-        await patchUsuario(usuario.id, dadosAtualizados);
+        await patchUsuario(usuarioId, dadosAtualizados);
       }
       if (fotoFile) {
-        await patchFotoUsuario(usuario.id, fotoFile);
+        await patchFotoUsuario(usuarioId, fotoFile);
+
       }
       setOriginais({ ...campos });
       setFotoFile(null);
