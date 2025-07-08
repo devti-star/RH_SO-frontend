@@ -59,11 +59,15 @@ const PerfilUsuario: React.FC = () => {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmaSenha, setConfirmaSenha] = useState("");
 
-  const usuario = authService.getUserStorage();
+  const usuario = authService.getUserStorage(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!usuario) return;
+      if (!usuario || !usuario.id) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const data = await getUsuario(usuario.id);
         const camposUsuario: UsuarioCampos = {
@@ -137,7 +141,7 @@ const PerfilUsuario: React.FC = () => {
   };
 
   const salvarAlteracoes = async () => {
-    if (!usuario || !campos || !originais) return;
+    if (!usuario || !usuario.id || !campos || !originais) return;
     setSaving(true);
     try {
       const dadosAtualizados: Partial<UsuarioCampos> = {};
