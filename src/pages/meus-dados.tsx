@@ -26,7 +26,13 @@ import EmailIcon from "@mui/icons-material/Email";
 import { AuthService } from "../auth/components/form/auth.service";
 import { useSnackbarStore } from "../shared/useSnackbar";
 import { decodeJwt } from "../shared/jwt";
-import { getUsuario, patchFotoUsuario, patchUsuario } from "./meus-dados.service";
+import {
+  changePassword,
+  getUsuario,
+  patchFotoUsuario,
+  patchUsuario,
+} from "./meus-dados.service";
+import type { ChangePassword } from "../models/changePassword";
 
 const azulPrimario = "#050A24";
 const azulClaro = "#173557";
@@ -62,8 +68,8 @@ const PerfilUsuario: React.FC = () => {
   const authService = AuthService.getInstance();
   const usuario = authService.getUserStorage();
   const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
-  console.log(`usuario: ${JSON.stringify(usuario)}`);
-  console.log(`usuario.rg: ${usuario?.rg}`);
+  // console.log(`usuario: ${JSON.stringify(usuario)}`);
+  // console.log(`usuario.rg: ${usuario?.rg}`);
   useEffect(() => {
     const fetchData = async () => {
       if (!usuarioId) {
@@ -84,10 +90,11 @@ const PerfilUsuario: React.FC = () => {
           matricula: data.matricula ?? "",
           cpf: data.cpf ?? "",
           rg:
-          typeof data.rg === "object" && data.rg !== null
-            ? [data.rg.numeroRG, data.rg.orgãoExpeditor].filter(Boolean).join(" - ")
-            : (data.rg || ""),
-
+            typeof data.rg === "object" && data.rg !== null
+              ? [data.rg.numeroRG, data.rg.orgãoExpeditor]
+                  .filter(Boolean)
+                  .join(" - ")
+              : data.rg || "",
         };
         setCampos(camposUsuario);
         setOriginais(camposUsuario);
@@ -110,7 +117,10 @@ const PerfilUsuario: React.FC = () => {
     }
   };
 
-  const handleChangeCampo = (campo: keyof UsuarioCampos, valor: string | null) => {
+  const handleChangeCampo = (
+    campo: keyof UsuarioCampos,
+    valor: string | null
+  ) => {
     setCampos((prev) => (prev ? { ...prev, [campo]: valor } : prev));
   };
 
@@ -122,16 +132,30 @@ const PerfilUsuario: React.FC = () => {
     setConfirmaSenha("");
   };
 
-  const salvarSenha = () => {
+  const salvarSenha = async () => {
+
     if (novaSenha !== confirmaSenha) {
       showSnackbar("A nova senha e a confirmação devem ser iguais.", "error");
       return;
     }
+
     if (!senhaAtual || !novaSenha || !confirmaSenha) {
       showSnackbar("Por favor, preencha todos os campos.", "error");
       return;
     }
-    showSnackbar("Senha alterada com sucesso!", "success");
+
+    try {
+      const dados: ChangePassword = {
+        currentPassword: senhaAtual,
+        newPassword: novaSenha,
+      };
+      console.error(JSON.stringify(dados));
+      const result = await changePassword(dados);
+
+      if (result) showSnackbar("Senha alterada com sucesso!", "success");
+    } catch (error: any) {
+      showSnackbar(`${error.message}`, "error");
+    }
     fecharModalSenha();
   };
 
@@ -168,7 +192,6 @@ const PerfilUsuario: React.FC = () => {
       }
       if (fotoFile) {
         await patchFotoUsuario(usuarioId, fotoFile);
-
       }
       setOriginais({ ...campos });
       setFotoFile(null);
@@ -182,7 +205,14 @@ const PerfilUsuario: React.FC = () => {
 
   if (loading || !campos) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -234,7 +264,11 @@ const PerfilUsuario: React.FC = () => {
               height: "100%",
             }}
           >
-            <Typography variant="subtitle1" fontWeight={600} sx={{ color: azulPrimario }}>
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{ color: azulPrimario }}
+            >
               Foto
             </Typography>
             <Avatar
@@ -264,12 +298,30 @@ const PerfilUsuario: React.FC = () => {
               }}
             >
               Alterar Foto
-              <input type="file" accept="image/*" hidden onChange={handleImageChange} />
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageChange}
+              />
             </Button>
           </Grid>
 
-          <Grid item xs={12} md={9} sx={{ textAlign: { xs: "center", md: "left" }, width: isMobile ? "100vw" : "auto" }}>
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom sx={{ color: azulPrimario }}>
+          <Grid
+            item
+            xs={12}
+            md={9}
+            sx={{
+              textAlign: { xs: "center", md: "left" },
+              width: isMobile ? "100vw" : "auto",
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              fontWeight={700}
+              gutterBottom
+              sx={{ color: azulPrimario }}
+            >
               Dados Pessoais
             </Typography>
             <Grid container spacing={2}>
@@ -278,13 +330,17 @@ const PerfilUsuario: React.FC = () => {
                   fullWidth
                   label="Nome Completo"
                   value={campos.nomeCompleto}
-                  onChange={(e) => handleChangeCampo("nomeCompleto", e.target.value)}
+                  onChange={(e) =>
+                    handleChangeCampo("nomeCompleto", e.target.value)
+                  }
                   disabled={saving}
-                  InputProps={{ startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon />
-                    </InputAdornment>
-                  ) }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -294,18 +350,25 @@ const PerfilUsuario: React.FC = () => {
                   value={campos.cargo}
                   onChange={(e) => handleChangeCampo("cargo", e.target.value)}
                   disabled={saving}
-                  InputProps={{ startAdornment: (
-                    <InputAdornment position="start">
-                      <WorkIcon />
-                    </InputAdornment>
-                  ) }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <WorkIcon />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth label="CPF" value={campos.cpf} disabled />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Matrícula" value={campos.matricula} disabled />
+                <TextField
+                  fullWidth
+                  label="Matrícula"
+                  value={campos.matricula}
+                  disabled
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth label="RG" value={campos.rg} disabled />
@@ -315,19 +378,28 @@ const PerfilUsuario: React.FC = () => {
                   fullWidth
                   label="Telefone/Whatsapp"
                   value={campos.telefone}
-                  onChange={(e) => handleChangeCampo("telefone", e.target.value)}
+                  onChange={(e) =>
+                    handleChangeCampo("telefone", e.target.value)
+                  }
                   disabled={saving}
-                  InputProps={{ startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon />
-                    </InputAdornment>
-                  ) }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneIcon />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
             </Grid>
 
             <Box mt={4}>
-              <Typography variant="subtitle2" fontWeight={700} gutterBottom sx={{ color: azulPrimario }}>
+              <Typography
+                variant="subtitle2"
+                fontWeight={700}
+                gutterBottom
+                sx={{ color: azulPrimario }}
+              >
                 Dados do Trabalho
               </Typography>
               <Grid container spacing={2}>
@@ -336,13 +408,17 @@ const PerfilUsuario: React.FC = () => {
                     fullWidth
                     label="Departamento"
                     value={campos.departamento}
-                    onChange={(e) => handleChangeCampo("departamento", e.target.value)}
+                    onChange={(e) =>
+                      handleChangeCampo("departamento", e.target.value)
+                    }
                     disabled={saving}
-                    InputProps={{ startAdornment: (
-                      <InputAdornment position="start">
-                        <BusinessIcon />
-                      </InputAdornment>
-                    ) }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <BusinessIcon />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -350,20 +426,29 @@ const PerfilUsuario: React.FC = () => {
                     fullWidth
                     label="Secretaria"
                     value={campos.secretaria}
-                    onChange={(e) => handleChangeCampo("secretaria", e.target.value)}
+                    onChange={(e) =>
+                      handleChangeCampo("secretaria", e.target.value)
+                    }
                     disabled={saving}
-                    InputProps={{ startAdornment: (
-                      <InputAdornment position="start">
-                        <ApartmentIcon />
-                      </InputAdornment>
-                    ) }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <ApartmentIcon />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
               </Grid>
             </Box>
 
             <Box mt={4}>
-              <Typography variant="subtitle2" fontWeight={700} gutterBottom sx={{ color: azulPrimario }}>
+              <Typography
+                variant="subtitle2"
+                fontWeight={700}
+                gutterBottom
+                sx={{ color: azulPrimario }}
+              >
                 Informações de Login
               </Typography>
               <Grid container spacing={2} alignItems="center">
@@ -373,11 +458,13 @@ const PerfilUsuario: React.FC = () => {
                     label="Email"
                     value={campos.email}
                     disabled
-                    InputProps={{ startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon />
-                      </InputAdornment>
-                    ) }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
                 <Grid
@@ -392,7 +479,12 @@ const PerfilUsuario: React.FC = () => {
                     color="primary"
                     onClick={abrirModalSenha}
                     disabled={saving}
-                    sx={{ textTransform: "none", fontWeight: 600, backgroundColor: azulPrimario, "&:hover": { backgroundColor: azulClaro } }}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      backgroundColor: azulPrimario,
+                      "&:hover": { backgroundColor: azulClaro },
+                    }}
                     startIcon={<LockResetIcon />}
                   >
                     Alterar Senha
@@ -420,8 +512,15 @@ const PerfilUsuario: React.FC = () => {
           </Button>
         </Box>
 
-        <Dialog open={openSenhaModal} onClose={fecharModalSenha} fullWidth maxWidth="sm">
-          <DialogTitle sx={{ fontWeight: 700, color: azulPrimario, textAlign: "center" }}>
+        <Dialog
+          open={openSenhaModal}
+          onClose={fecharModalSenha}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle
+            sx={{ fontWeight: 700, color: azulPrimario, textAlign: "center" }}
+          >
             Alterar Senha
           </DialogTitle>
           <DialogContent>
@@ -456,7 +555,14 @@ const PerfilUsuario: React.FC = () => {
             <Button onClick={fecharModalSenha} color="secondary">
               Cancelar
             </Button>
-            <Button onClick={salvarSenha} variant="contained" sx={{ backgroundColor: azulPrimario, "&:hover": { backgroundColor: azulClaro } }}>
+            <Button
+              onClick={salvarSenha}
+              variant="contained"
+              sx={{
+                backgroundColor: azulPrimario,
+                "&:hover": { backgroundColor: azulClaro },
+              }}
+            >
               Salvar
             </Button>
           </DialogActions>

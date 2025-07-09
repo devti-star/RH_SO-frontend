@@ -49,7 +49,7 @@ export class AuthService {
       
     } catch (error) {
       const { showSnackbar } = useSnackbarStore.getState();
-      showSnackbar(`E-mail ou senha incorretos ${error}`, "error");
+      showSnackbar(`E-mail ou senha incorretos`, "error");
       console.log(error);
     }
   }
