@@ -10,6 +10,7 @@ import {
   DialogTitle,
   Grid,
   InputAdornment,
+  IconButton,
   Paper,
   TextField,
   Typography,
@@ -17,6 +18,7 @@ import {
   useTheme,
 } from "@mui/material";
 import LockResetIcon from "@mui/icons-material/LockReset";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
 import BusinessIcon from "@mui/icons-material/Business";
 import ApartmentIcon from "@mui/icons-material/Apartment";
@@ -33,6 +35,7 @@ import {
   patchUsuario,
 } from "./meus-dados.service";
 import type { ChangePassword } from "../models/changePassword";
+import { ApiService } from "../interceptors/Api/api.intercept";
 
 const azulPrimario = "#050A24";
 const azulClaro = "#173557";
@@ -60,16 +63,20 @@ const PerfilUsuario: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
+  const [fotoPerfilUrl, setFotoPerfilUrl] = useState<string | null>(null);
+
   const [openSenhaModal, setOpenSenhaModal] = useState(false);
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmaSenha, setConfirmaSenha] = useState("");
+  const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false);
+  const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
+  const [mostrarConfirmaSenha, setMostrarConfirmaSenha] = useState(false);
 
   const authService = AuthService.getInstance();
   const usuario = authService.getUserStorage();
   const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
-  // console.log(`usuario: ${JSON.stringify(usuario)}`);
-  // console.log(`usuario.rg: ${usuario?.rg}`);
+  
   useEffect(() => {
     const fetchData = async () => {
       if (!usuarioId) {
@@ -108,6 +115,38 @@ const PerfilUsuario: React.FC = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!usuarioId || !campos) return;
+    if (fotoFile) return;
+
+    // Só busca se houver caminho salvo
+    if (!campos.foto) {
+      setFotoPerfilUrl(null);
+      return;
+    }
+
+    const buscarFoto = async () => {
+      try {
+        const api = ApiService.getInstance();
+        const resp = await api.get(`/usuarios/foto/${usuarioId}`, { responseType: "blob" });
+        const url = URL.createObjectURL(resp.data);
+        setFotoPerfilUrl(url);
+      } catch {
+        setFotoPerfilUrl(null);
+      }
+    };
+
+    buscarFoto();
+
+    return () => {
+      if (fotoPerfilUrl) URL.revokeObjectURL(fotoPerfilUrl);
+    };
+  }, [usuarioId, fotoFile, campos?.foto]); // <- use campos?.foto, não só campos!
+
+
+
+
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -132,8 +171,15 @@ const PerfilUsuario: React.FC = () => {
     setConfirmaSenha("");
   };
 
-  const salvarSenha = async () => {
 
+  const toggleMostrarSenhaAtual = () =>
+    setMostrarSenhaAtual((prev) => !prev);
+  const toggleMostrarNovaSenha = () =>
+    setMostrarNovaSenha((prev) => !prev);
+  const toggleMostrarConfirmaSenha = () =>
+    setMostrarConfirmaSenha((prev) => !prev);
+
+  const salvarSenha = async () => {
     if (novaSenha !== confirmaSenha) {
       showSnackbar("A nova senha e a confirmação devem ser iguais.", "error");
       return;
@@ -192,11 +238,17 @@ const PerfilUsuario: React.FC = () => {
       }
       if (fotoFile) {
         await patchFotoUsuario(usuarioId, fotoFile);
+        setFotoFile(null);
+        // Recarrega usuário após upload
+        const data = await getUsuario(usuarioId);
+        setCampos((prev) => prev ? { ...prev, foto: data.foto ?? null } : prev);
       }
+
+
       setOriginais({ ...campos });
       setFotoFile(null);
       showSnackbar("Dados atualizados com sucesso!", "success");
-    } catch {
+    } catch (err) {
       showSnackbar("Erro ao salvar dados.", "error");
     } finally {
       setSaving(false);
@@ -272,7 +324,11 @@ const PerfilUsuario: React.FC = () => {
               Foto
             </Typography>
             <Avatar
-              src={campos.foto ?? undefined}
+              src={
+                fotoFile
+                  ? URL.createObjectURL(fotoFile)
+                  : fotoPerfilUrl ?? undefined
+              }
               sx={{
                 width: 140,
                 height: 140,
@@ -282,6 +338,9 @@ const PerfilUsuario: React.FC = () => {
                 mb: 2,
               }}
             />
+
+
+
             <Button
               variant="contained"
               component="label"
@@ -527,27 +586,66 @@ const PerfilUsuario: React.FC = () => {
             <Box component="form" noValidate autoComplete="off" sx={{ mt: 1 }}>
               <TextField
                 label="Senha Atual"
-                type="password"
+                type={mostrarSenhaAtual ? "text" : "password"}
                 fullWidth
                 margin="normal"
                 value={senhaAtual}
                 onChange={(e) => setSenhaAtual(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={toggleMostrarSenhaAtual}
+                        edge="end"
+                        aria-label="Mostrar ou ocultar a senha"
+                      >
+                        {mostrarSenhaAtual ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <TextField
                 label="Nova Senha"
-                type="password"
+                type={mostrarNovaSenha ? "text" : "password"}
                 fullWidth
                 margin="normal"
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={toggleMostrarNovaSenha}
+                        edge="end"
+                        aria-label="Mostrar ou ocultar a senha"
+                      >
+                        {mostrarNovaSenha ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <TextField
                 label="Confirme a Senha"
-                type="password"
+                type={mostrarConfirmaSenha ? "text" : "password"}
                 fullWidth
                 margin="normal"
                 value={confirmaSenha}
                 onChange={(e) => setConfirmaSenha(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={toggleMostrarConfirmaSenha}
+                        edge="end"
+                        aria-label="Mostrar ou ocultar a senha"
+                      >
+                        {mostrarConfirmaSenha ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Box>
           </DialogContent>

@@ -38,3 +38,4 @@ export const changePassword = async (
 
   return result.status === 200;
 };
+

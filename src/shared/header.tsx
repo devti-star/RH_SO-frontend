@@ -18,6 +18,9 @@ import ListItemIcon from '@mui/material/ListItemIcon'; // Adicionado para ícone
 import ExpandMore from '@mui/icons-material/ExpandMore'; // Adicionado para indicador de submenu
 import ExpandLess from '@mui/icons-material/ExpandLess'; // Adicionado para indicador de submenu
 import { AuthService } from '../auth/components/form/auth.service';
+import { getUsuario } from "../shared/services/usuario.service"; // já deve ter ou adicionar
+import { ApiService } from "../interceptors/Api/api.intercept"; // já deve ter ou adicionar
+
 
 type RouteItem = {
   label: string;
@@ -50,7 +53,40 @@ function ResponsiveAppBar() {
   const [hoverDropdown, setHoverDropdown] = React.useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+
   const authService: AuthService = AuthService.getInstance();
+  const usuario = authService.getUserStorage();
+  const usuarioId = usuario?.id ?? null;
+  const [fotoPerfilUrl, setFotoPerfilUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!usuarioId) return;
+
+    const buscarFoto = async () => {
+      try {
+        const usuario = await getUsuario(usuarioId);
+        if (!usuario.foto) {
+          setFotoPerfilUrl(null);
+          return;
+        }
+        const api = ApiService.getInstance();
+        const resp = await api.get(`/usuarios/foto/${usuarioId}`, { responseType: "blob" });
+        const url = URL.createObjectURL(resp.data);
+        setFotoPerfilUrl(url);
+      } catch {
+        setFotoPerfilUrl(null);
+      }
+    };
+
+    buscarFoto();
+
+    return () => {
+      if (fotoPerfilUrl) URL.revokeObjectURL(fotoPerfilUrl);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuarioId]);
+
+
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -318,7 +354,7 @@ function ResponsiveAppBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Abrir configurações">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Usuário" />
+                <Avatar alt="Usuário" src={fotoPerfilUrl ?? undefined} />
               </IconButton>
             </Tooltip>
             <Menu
