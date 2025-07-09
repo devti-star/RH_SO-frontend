@@ -27,6 +27,7 @@ import { AuthService } from "../auth/components/form/auth.service";
 import { useSnackbarStore } from "../shared/useSnackbar";
 import { decodeJwt } from "../shared/jwt";
 import { getUsuario, patchFotoUsuario, patchUsuario } from "./meus-dados.service";
+import { ApiService } from "../interceptors/Api/api.intercept";
 
 const azulPrimario = "#050A24";
 const azulClaro = "#173557";
@@ -54,6 +55,8 @@ const PerfilUsuario: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
+  const [fotoPerfilUrl, setFotoPerfilUrl] = useState<string | null>(null);
+
   const [openSenhaModal, setOpenSenhaModal] = useState(false);
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
@@ -62,8 +65,6 @@ const PerfilUsuario: React.FC = () => {
   const authService = AuthService.getInstance();
   const usuario = authService.getUserStorage();
   const usuarioId = usuario?.id ?? decodeJwt(usuario?.access_token)?.sub;
-  console.log(`usuario: ${JSON.stringify(usuario)}`);
-  console.log(`usuario.rg: ${usuario?.rg}`);
   useEffect(() => {
     const fetchData = async () => {
       if (!usuarioId) {
@@ -100,6 +101,34 @@ const PerfilUsuario: React.FC = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!usuarioId) return;
+
+    // Só busca se não for foto alterada localmente
+    if (fotoFile) return;
+
+    const buscarFoto = async () => {
+      try {
+        // Use seu próprio interceptador/api para garantir JWT nos headers
+        const api = ApiService.getInstance();
+        const resp = await api.get(`/usuarios/foto/${usuarioId}`, { responseType: "blob" });
+        const url = URL.createObjectURL(resp.data);
+        setFotoPerfilUrl(url);
+      } catch {
+        setFotoPerfilUrl(null); // ou uma foto padrão
+      }
+    };
+
+    buscarFoto();
+
+    // Cleanup para evitar memory leak
+    return () => {
+      if (fotoPerfilUrl) URL.revokeObjectURL(fotoPerfilUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuarioId, fotoFile]);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -168,13 +197,18 @@ const PerfilUsuario: React.FC = () => {
       }
       if (fotoFile) {
         await patchFotoUsuario(usuarioId, fotoFile);
-
+        console.log('Upload OK');
+        setFotoFile(null);
+        // Força reload da foto do backend:
+        setFotoPerfilUrl(null);
       }
+
       setOriginais({ ...campos });
       setFotoFile(null);
       showSnackbar("Dados atualizados com sucesso!", "success");
-    } catch {
+    } catch (err) {
       showSnackbar("Erro ao salvar dados.", "error");
+      console.error('Erro ao enviar foto:', err);
     } finally {
       setSaving(false);
     }
@@ -238,7 +272,12 @@ const PerfilUsuario: React.FC = () => {
               Foto
             </Typography>
             <Avatar
-              src={campos.foto ?? undefined}
+              src={
+                // Se estiver com uma foto em edição (ainda não salva), mostra preview local
+                fotoFile
+                  ? URL.createObjectURL(fotoFile)
+                  : fotoPerfilUrl ?? undefined // Senão, mostra a buscada segura do backend
+              }
               sx={{
                 width: 140,
                 height: 140,
@@ -248,6 +287,8 @@ const PerfilUsuario: React.FC = () => {
                 mb: 2,
               }}
             />
+
+
             <Button
               variant="contained"
               component="label"

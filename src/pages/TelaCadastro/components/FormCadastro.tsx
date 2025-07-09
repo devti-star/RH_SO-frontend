@@ -188,6 +188,9 @@ export default function FormCadastro({
         <Typography variant="h1" className="titulo-form" sx={{ width: "100%" }}>
           Cadastrar
         </Typography>
+        <Typography color="info.main" sx={{ mb: 3, fontSize: 17, fontWeight: 500, width: "100%" }}>
+          A foto de perfil poderá ser adicionada após a criação da conta, na área de perfil.
+        </Typography>
 
         <FormControl
           variant="outlined"
