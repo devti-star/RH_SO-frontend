@@ -96,6 +96,7 @@ export default function FormCadastro({
   const [erroSenhas, setErroSenhas] = useState(false);
 
   const [mostrarModal,setMostrarModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -461,6 +462,22 @@ export default function FormCadastro({
             payload="Criar conta"
             type="submit"
             sx={{ fontFamily: "Poppins, sans-serif", width: "80%" }}
+          ></CustomButton>
+          <CustomButton
+            payload="Voltar"
+            onClick={() => navigate("/login")}
+            sx={{
+              alignItems: "center",
+              backgroundColor: "white",
+              color: "#08123d",
+              borderRadius: "8px",
+              borderStyle: "solid",
+              borderColor: "#08123d",
+              borderWidth: "1px",
+              fontFamily: "Poppins, sans-serif",
+              marginTop: "10px",
+              width: "80%",
+            }}
           ></CustomButton>
         </Box>
       </Box>
