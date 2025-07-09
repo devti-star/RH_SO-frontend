@@ -103,31 +103,35 @@ const PerfilUsuario: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!usuarioId) return;
-
-    // Só busca se não for foto alterada localmente
+    if (!usuarioId || !campos) return;
     if (fotoFile) return;
+
+    // Só busca se houver caminho salvo
+    if (!campos.foto) {
+      setFotoPerfilUrl(null);
+      return;
+    }
 
     const buscarFoto = async () => {
       try {
-        // Use seu próprio interceptador/api para garantir JWT nos headers
         const api = ApiService.getInstance();
         const resp = await api.get(`/usuarios/foto/${usuarioId}`, { responseType: "blob" });
         const url = URL.createObjectURL(resp.data);
         setFotoPerfilUrl(url);
       } catch {
-        setFotoPerfilUrl(null); // ou uma foto padrão
+        setFotoPerfilUrl(null);
       }
     };
 
     buscarFoto();
 
-    // Cleanup para evitar memory leak
     return () => {
       if (fotoPerfilUrl) URL.revokeObjectURL(fotoPerfilUrl);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usuarioId, fotoFile]);
+  }, [usuarioId, fotoFile, campos?.foto]); // <- use campos?.foto, não só campos!
+
+
+
 
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,18 +201,18 @@ const PerfilUsuario: React.FC = () => {
       }
       if (fotoFile) {
         await patchFotoUsuario(usuarioId, fotoFile);
-        console.log('Upload OK');
         setFotoFile(null);
-        // Força reload da foto do backend:
-        setFotoPerfilUrl(null);
+        // Recarrega usuário após upload
+        const data = await getUsuario(usuarioId);
+        setCampos((prev) => prev ? { ...prev, foto: data.foto ?? null } : prev);
       }
+
 
       setOriginais({ ...campos });
       setFotoFile(null);
       showSnackbar("Dados atualizados com sucesso!", "success");
     } catch (err) {
       showSnackbar("Erro ao salvar dados.", "error");
-      console.error('Erro ao enviar foto:', err);
     } finally {
       setSaving(false);
     }
@@ -273,10 +277,9 @@ const PerfilUsuario: React.FC = () => {
             </Typography>
             <Avatar
               src={
-                // Se estiver com uma foto em edição (ainda não salva), mostra preview local
                 fotoFile
                   ? URL.createObjectURL(fotoFile)
-                  : fotoPerfilUrl ?? undefined // Senão, mostra a buscada segura do backend
+                  : fotoPerfilUrl ?? undefined
               }
               sx={{
                 width: 140,
@@ -287,6 +290,7 @@ const PerfilUsuario: React.FC = () => {
                 mb: 2,
               }}
             />
+
 
 
             <Button
