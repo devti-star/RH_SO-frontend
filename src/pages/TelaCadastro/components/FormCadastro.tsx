@@ -1,11 +1,11 @@
 import {
   Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
+  // Dialog,
+  // DialogContent,
+  // DialogTitle,
   FormControl,
   FormHelperText,
-  FormLabel,
+  // FormLabel,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -16,11 +16,13 @@ import {
   type BoxProps,
 } from "@mui/material";
 import CustomButton from "../../../shared/customButton";
-import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
+// import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
+import React, { useState, type ChangeEvent } from "react";
+
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./styles.css";
 import type { secretaria } from "../../../models/secretaria.interface";
-import CloseIcon from "@mui/icons-material/Close";
+// import CloseIcon from "@mui/icons-material/Close";
 import {
   mascaraCPF,
   mascaraRG,
@@ -96,6 +98,7 @@ export default function FormCadastro({
   const [erroSenhas, setErroSenhas] = useState(false);
 
   const [mostrarModal,setMostrarModal] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -454,6 +457,7 @@ export default function FormCadastro({
           sx={{
             width: "100%",
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -463,7 +467,7 @@ export default function FormCadastro({
             type="submit"
             sx={{ fontFamily: "Poppins, sans-serif", width: "80%" }}
           ></CustomButton>
-          <CustomButton
+             <CustomButton
             payload="Voltar"
             onClick={() => navigate("/login")}
             sx={{
@@ -475,7 +479,7 @@ export default function FormCadastro({
               borderColor: "#08123d",
               borderWidth: "1px",
               fontFamily: "Poppins, sans-serif",
-              marginTop: "10px",
+              marginTop: "1vw",
               width: "80%",
             }}
           ></CustomButton>
