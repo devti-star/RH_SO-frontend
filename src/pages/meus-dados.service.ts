@@ -27,3 +27,5 @@ export const patchFotoUsuario = async (
   formData.append("foto", foto);
   await api.patch(`${apiURL}/usuarios/foto/${id}`, formData, { headers: {} });
 };
+export { ApiService };
+
