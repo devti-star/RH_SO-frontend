@@ -21,8 +21,9 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import type { Cadastro } from "../../../models/cadastro.interface";
 import { useParams, useNavigate } from "react-router-dom";
-import AceitacaoEmail from "../../../shared/aceitacaoEmail";
+import AceitacaoEmail from "./modal_confirmacao";
 import { resetPassword } from "./services/submit";
+import Modal from "./modal_confirmacao";
 
 
 interface FormCadastroProps extends BoxProps {
@@ -193,7 +194,7 @@ export default function FormCadastro({
                     ></CustomButton>
                 </Box>
             </Box>
-            {mostrarModal && (<AceitacaoEmail></AceitacaoEmail>)}
+            {mostrarModal && (<Modal></Modal>)}
         </Box>
     );
 }
