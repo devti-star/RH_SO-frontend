@@ -14,11 +14,16 @@ import { GuardiaoAutorizacao } from "../guards/autorizacao.guard.ts";
 import { Roles } from "../models/roles.ts";
 import AcessoNaoAutorizado from "../pages/AcessoNaoAutorizado.tsx";
 import ActivatePage from "../pages/ActivatePage.tsx";
+import RecoveryPassword from "../pages/TelaRecuperacaoSenha/RecoveryPassword.tsx";
+import ForgotPassword from "../pages/TelaRecuperacaoSenha/ForgotPassword.tsx";
 
 /* alteraçoes que for feitas aqui devem alterar o shared/header*/
 
 const router = createBrowserRouter([
-  { path: "/login", element: <Login /> },
+  {
+    path: "/login", element: <Login />,
+
+  },
   {
     path: "/",
     element: <Page />,
@@ -59,6 +64,14 @@ const router = createBrowserRouter([
   {
     path: "/Cadastro",
     element: <TelaCadastro />,
+  },
+  {
+    path: "/login/forgotpassword",
+    element: <ForgotPassword />
+  },
+  {
+    path: "/recovery/:token",
+    element: <RecoveryPassword />,
   },
   {
     path: "/activate/:token",
