@@ -35,8 +35,7 @@ export default function Modal() {
             </DialogTitle>
             <DialogContent>
                 <p>
-                    Um email foi enviado para confirmar a alteração da sua conta foi enviado para o e-mail cadastrado.
-                    Acesse a sua conta para poder utilizar o sistema.
+                    Um email foi enviado para confirmar a alteração de senha da sua conta. Volte a página de login e acessse sua conta novamente.
                 </p>
             </DialogContent>
         </Dialog>
