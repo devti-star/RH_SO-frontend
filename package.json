@@ -20,6 +20,7 @@
     "@mui/styles": "^6.4.12",
     "@mui/utils": "^7.1.1",
     "axios": "^1.10.0",
+    "brazilian-values": "^0.13.1",
     "imask": "^7.6.1",
     "mui": "^0.0.1",
     "pdfjs-dist": "^4.8.69",
