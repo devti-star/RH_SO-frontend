@@ -13,39 +13,51 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import Collapse from '@mui/material/Collapse'; // Adicionado para submenus móveis
-import ListItemIcon from '@mui/material/ListItemIcon'; // Adicionado para ícones de submenu
-import ExpandMore from '@mui/icons-material/ExpandMore'; // Adicionado para indicador de submenu
-import ExpandLess from '@mui/icons-material/ExpandLess'; // Adicionado para indicador de submenu
+import Collapse from '@mui/material/Collapse';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import ExpandLess from '@mui/icons-material/ExpandLess';
 import { AuthService } from '../auth/components/form/auth.service';
-import { getUsuario } from "../shared/services/usuario.service"; // já deve ter ou adicionar
-import { ApiService } from "../interceptors/Api/api.intercept"; // já deve ter ou adicionar
-
+import { getUsuario } from "../shared/services/usuario.service";
+import { ApiService } from "../interceptors/Api/api.intercept";
+import { Roles, type RolesType } from '../models/roles';
 
 type RouteItem = {
   label: string;
   path?: string;
   subItems?: Array<{ label: string; path: string }>;
+  roles?: RolesType[];
 };
 
 const routes: RouteItem[] = [
-  { label: 'Minhas Solicitações', path: '/MinhasSolicitacoes' },
-  { label: 'Enviar Atestado', path: '/enviar-atestado' },
-  { label: 'Painel SESMT', path: '/admin' },
-
-  //{ label: 'Requerimento RH' },
-  //{
-    //label: 'Solicitações',
-    //subItems: [
-     // { label: 'Solicitação de Carimbo', path: '/ferias' },
-      //{ label: 'Solicitação de Crachá', path: '/aumento-salarial' },
-    //],
-  //},
+  {
+    label: 'Minhas Solicitações',
+    path: '/MinhasSolicitacoes',
+    roles: [Roles.ADMIN, Roles.ENFERMEIRO, Roles.MEDICO, Roles.PADRAO, Roles.PS, Roles.RH, Roles.TRIAGEM]
+  },
+  {
+    label: 'Enviar Atestado',
+    path: '/enviar-atestado',
+    roles: [Roles.ADMIN, Roles.ENFERMEIRO, Roles.MEDICO, Roles.PADRAO, Roles.PS, Roles.RH, Roles.TRIAGEM]
+  },
+  {
+    label: 'Painel SESMT',
+    path: '/admin',
+    roles: [Roles.ADMIN, Roles.ENFERMEIRO, Roles.MEDICO, Roles.PS, Roles.RH, Roles.TRIAGEM]
+  },
 ];
 
-const settings = ['Meus Dados', 'Sair'];
+type SettingItem = {
+  label: string;
+  roles?: RolesType[];
+};
+
+const settings: SettingItem[] = [
+  { label: 'Meus Dados', roles: [Roles.PADRAO, Roles.ADMIN, Roles.RH, Roles.PS, Roles.TRIAGEM, Roles.MEDICO, Roles.ENFERMEIRO] },
+  { label: 'Sair', roles: [Roles.PADRAO, Roles.ADMIN, Roles.RH, Roles.PS, Roles.TRIAGEM, Roles.MEDICO, Roles.ENFERMEIRO] }
+];
 
 function ResponsiveAppBar() {
+
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const [mobileDropdownOpen, setMobileDropdownOpen] = React.useState<string | null>(null);
@@ -57,6 +69,9 @@ function ResponsiveAppBar() {
   const authService: AuthService = AuthService.getInstance();
   const usuario = authService.getUserStorage();
   const usuarioId = usuario?.id ?? null;
+  const usuarioRole = usuario?.role
+    ? Number(usuario.role) as RolesType
+    : undefined;
   const [fotoPerfilUrl, setFotoPerfilUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -83,10 +98,34 @@ function ResponsiveAppBar() {
     return () => {
       if (fotoPerfilUrl) URL.revokeObjectURL(fotoPerfilUrl);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId]);
 
+  // Filtrar rotas baseado na role do usuário (CORRIGIDO)
+  const visibleRoutes = React.useMemo(() => {
+    return routes.filter(route =>
+      !route.roles || (usuarioRole !== undefined && route.roles.includes(usuarioRole))
+    );
+  }, [usuarioRole]);
 
+  // Filtrar configurações baseado na role (CORRIGIDO)
+  const visibleSettings = React.useMemo(() => {
+    return settings.filter(setting =>
+      !setting.roles || (usuarioRole !== undefined && setting.roles.includes(usuarioRole))
+    );
+  }, [usuarioRole]);
+
+  // Determinar home baseado na role
+  const getHomePath = () => {
+    if (usuarioRole === undefined) return '/login';
+
+    switch (usuarioRole) {
+      case Roles.PADRAO:
+        return '/MinhasSolicitacoes'
+      default:
+        return '/admin';
+    }
+  };
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -130,9 +169,12 @@ function ResponsiveAppBar() {
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#050a24' }}>
+
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ height: 100, px: 2 }}>
-          {/* Menu Hamburguer (visível apenas em mobile) */}
+          {/* Menu Hamburguer (mobile) */}
+
+
           <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 2 }}>
             <IconButton
               size="large"
@@ -146,24 +188,28 @@ function ResponsiveAppBar() {
             </IconButton>
           </Box>
 
-          {/* Logo */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            mr: { xs: 'auto', md: 4 },
-            flexGrow: { xs: 1, md: 0 }
-          }}>
+          {/* Logo - Agora clicável */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mr: { xs: 'auto', md: 4 },
+              flexGrow: { xs: 1, md: 0 },
+              cursor: 'pointer'
+            }}
+            onClick={() => navigate(getHomePath())}
+          >
             <Box component="img" sx={{ height: 60, width: 'auto' }} src="src/assets/logoBranca.png" />
           </Box>
 
-          {/* Botões centralizados (visível apenas em desktop) */}
-          <Box sx={{ 
-            flexGrow: 1, 
-            display: { xs: 'none', md: 'flex' }, 
-            justifyContent: 'center', 
-            alignItems: 'center' 
+          {/* Botões centralizados (desktop) */}
+          <Box sx={{
+            flexGrow: 1,
+            display: { xs: 'none', md: 'flex' },
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
-            {routes.map((route) => {
+            {visibleRoutes.map((route) => {
               if (route.subItems) {
                 const active = isActive(route.path, route.subItems);
                 return (
@@ -221,7 +267,7 @@ function ResponsiveAppBar() {
                         },
                       }}
                     >
-                      {route.subItems.map((subItem) => (
+                      {route.subItems?.map((subItem) => (
                         <MenuItem
                           key={subItem.path}
                           onClick={() => {
@@ -280,7 +326,7 @@ function ResponsiveAppBar() {
             })}
           </Box>
 
-          {/* Menu Hamburguer (conteúdo) */}
+          {/* Menu Hamburguer (conteúdo mobile) */}
           <Menu
             id="menu-appbar"
             anchorEl={anchorElNav}
@@ -289,7 +335,7 @@ function ResponsiveAppBar() {
             transformOrigin={{ vertical: 'top', horizontal: 'left' }}
             open={Boolean(anchorElNav)}
             onClose={() => handleCloseNavMenu()}
-            sx={{ 
+            sx={{
               display: { xs: 'block', md: 'none' },
               '& .MuiPaper-root': {
                 backgroundColor: '#050a24',
@@ -299,30 +345,30 @@ function ResponsiveAppBar() {
               }
             }}
           >
-            {routes.map((route) => {
+            {visibleRoutes.map((route) => {
               if (route.subItems) {
                 return (
                   <React.Fragment key={route.label}>
-                    <MenuItem 
+                    <MenuItem
                       onClick={() => handleOpenMobileDropdown(route.label)}
                       sx={{ py: 1.5 }}
                     >
                       <Typography variant="body1">{route.label}</Typography>
-                      {mobileDropdownOpen === route.label ? 
-                        <ExpandLess sx={{ ml: 'auto' }} /> : 
+                      {mobileDropdownOpen === route.label ?
+                        <ExpandLess sx={{ ml: 'auto' }} /> :
                         <ExpandMore sx={{ ml: 'auto' }} />
                       }
                     </MenuItem>
-                    
+
                     <Collapse in={mobileDropdownOpen === route.label} timeout="auto" unmountOnExit>
                       {route.subItems.map((subItem) => (
                         <MenuItem
                           key={subItem.path}
                           onClick={() => handleCloseNavMenu(subItem.path)}
-                          sx={{ 
+                          sx={{
                             py: 1.5,
                             pl: 4,
-                            backgroundColor: location.pathname === subItem.path ? 
+                            backgroundColor: location.pathname === subItem.path ?
                               'rgba(255, 255, 255, 0.1)' : 'transparent',
                           }}
                         >
@@ -337,9 +383,9 @@ function ResponsiveAppBar() {
                   <MenuItem
                     key={route.label}
                     onClick={() => route.path && handleCloseNavMenu(route.path)}
-                    sx={{ 
+                    sx={{
                       py: 1.5,
-                      backgroundColor: isActive(route.path) ? 
+                      backgroundColor: isActive(route.path) ?
                         'rgba(255, 255, 255, 0.1)' : 'transparent',
                     }}
                   >
@@ -368,23 +414,22 @@ function ResponsiveAppBar() {
               onClose={handleCloseUserMenu}
               PaperProps={{ sx: { backgroundColor: '#050a24', color: 'white' } }}
             >
-              {settings.map((setting) => (
-              <MenuItem
-                key={setting}
-                onClick={() => {
-                  handleCloseUserMenu();
-                  if (setting === 'Meus Dados') navigate('/meus-dados');
-                  if (setting === 'Sair') {
-                    authService.logout();
-                    navigate('/login');
-                  }
-                }}
-                sx={{ backgroundColor: '#050a24', color: '#ffffff' }}
-              >
-                <Typography textAlign="center">{setting}</Typography>
-              </MenuItem>
-            ))}
-
+              {visibleSettings.map((setting) => (
+                <MenuItem
+                  key={setting.label}
+                  onClick={() => {
+                    handleCloseUserMenu();
+                    if (setting.label === 'Meus Dados') navigate('/meus-dados');
+                    if (setting.label === 'Sair') {
+                      authService.logout();
+                      navigate('/login');
+                    }
+                  }}
+                  sx={{ backgroundColor: '#050a24', color: '#ffffff' }}
+                >
+                  <Typography textAlign="center">{setting.label}</Typography>
+                </MenuItem>
+              ))}
             </Menu>
           </Box>
         </Toolbar>

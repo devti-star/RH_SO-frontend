@@ -7,3 +7,5 @@ export const Roles = {
     PS: 5,
     TRIAGEM: 6,
 } as const;
+
+export type RolesType = typeof Roles[keyof typeof Roles];
