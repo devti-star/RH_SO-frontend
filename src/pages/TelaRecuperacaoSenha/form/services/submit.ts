@@ -4,10 +4,10 @@ import { apiURL } from '../../../../config';
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
-    const response = await axios.post(
+    const response = await axios.patch(
       `${apiURL}/usuarios/recoverypassword/${token}`,
       {
-        "newPassoward": newPassword
+        "newPassword": newPassword
       }
     );
     return response.data;

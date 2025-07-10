@@ -20,7 +20,7 @@ import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import type { Cadastro } from "../../../models/cadastro.interface";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import AceitacaoEmail from "../../../shared/aceitacaoEmail";
 import { resetPassword } from "./services/submit";
 
@@ -42,10 +42,10 @@ export default function FormCadastro({
     const [erroSenhas, setErroSenhas] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const location = useLocation(); // Adicione este hook
+    const { token } = useParams<{ token: string }>();
     const [mostrarModal, setMostrarModal] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (senha !== senhaConfirm) {
@@ -56,12 +56,9 @@ export default function FormCadastro({
         setErroSenhas(false);
         setLoading(true);
         setErrorMessage('');
-        
+
         try {
-            // Extrai o token da URL
-            const queryParams = new URLSearchParams(location.search);
-            const token = queryParams.get('token');
-            
+            // Token agora vem diretamente de useParams()
             if (!token) {
                 throw new Error('Token inválido ou expirado');
             }
@@ -70,8 +67,8 @@ export default function FormCadastro({
             setMostrarModal(true);
         } catch (error) {
             setErrorMessage(
-                error instanceof Error 
-                    ? error.message 
+                error instanceof Error
+                    ? error.message
                     : 'Erro ao redefinir senha'
             );
         } finally {
