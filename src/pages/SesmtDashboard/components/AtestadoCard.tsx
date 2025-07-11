@@ -16,6 +16,21 @@ import type { Atestado } from "../../../models/atestados";
 import type { Config } from "../useSesmtDashboard";
 import { CHECKLIST } from "../mockData";
 
+// Pegando perfil do usuário logado
+import { AuthService } from "../../../auth/components/form/auth.service"; 
+import { Roles } from "../../../models/roles"; 
+
+function mapRoleToPerfil(role: number) {
+  switch (role) {
+    case Roles.TRIAGEM: return "triagem";
+    case Roles.MEDICO: return "medico";
+    case Roles.ENFERMEIRO: return "enfermeiro";
+    default: return "triagem";
+  }
+}
+const usuario = AuthService.getInstance().getUserStorage();
+const perfilAtual = usuario ? mapRoleToPerfil(usuario.role) : "triagem";
+
 interface Props {
   atestado: Atestado;
   tab: number;
@@ -87,7 +102,12 @@ export default function AtestadoCard({
             <Box sx={{ border: "1px solid #e0e0e0", borderRadius: 2, px: 2, py: 1, mb: 1, bgcolor: "#fafafa" }}>
               {CHECKLIST.map((txt, i) => (
                 <Box key={i} sx={{ display: "flex", alignItems: "center" }}>
-                  <Checkbox checked={!!a.checklist[i]} disabled={!!a.aprovado} onChange={() => onCheckChange(a, i)} />
+                  <Checkbox
+                    checked={!!a.checklist[i]}
+                    // Médico só visualiza, não edita. Demais só editam se não está aprovado.
+                    disabled={perfilAtual === "medico" || !!a.aprovado}
+                    onChange={() => onCheckChange(a, i)}
+                  />
                   <Typography variant="body2">{txt}</Typography>
                 </Box>
               ))}
@@ -161,7 +181,9 @@ export default function AtestadoCard({
                 color="error"
                 size="small"
                 sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
-                disabled={!!a.aprovado}
+                disabled={
+                  perfilAtual !== "medico" && !!a.aprovado // Médico pode sempre reprovar, outros só se não aprovado
+                }
                 onClick={() => onJustificar(a.id, "reprovar")}
               >
                 Reprovar
@@ -179,7 +201,14 @@ export default function AtestadoCard({
               </Button>
             )}
             {config.botoes(tab, a.checklist, a.aprovado).includes("informar") && (
-              <Button variant="contained" size="small" sx={{ borderRadius: 2, bgcolor: "#1277be" }} onClick={() => onJustificar(a.id, "informar")}>Informar usuário</Button>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ borderRadius: 2, bgcolor: "#1277be" }}
+                onClick={() => onJustificar(a.id, "informar")}
+              >
+                Informar usuário
+              </Button>
             )}
           </Box>
         </Box>
@@ -187,4 +216,3 @@ export default function AtestadoCard({
     </Card>
   );
 }
-

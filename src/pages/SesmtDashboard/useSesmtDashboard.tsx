@@ -1,14 +1,33 @@
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Atestado, Perfil, Status, Aprovacao } from "../../models/atestados";
-import { CHECKLIST, MOCK_ATESTADOS } from "./mockData";
-import { solicitarExameMedico } from "./sesmt.service";
+import { CHECKLIST } from "./mockData";
+import { solicitarExameMedico, getRequerimentos, atualizarRequerimento } from "./sesmt.service";
+import { mapRequerimentosParaAtestados } from "./utils/mapper";
+import { AuthService } from "../../auth/components/form/auth.service";
+import { Roles } from "../../models/roles";
+import type { UpdateRequerimentoPayload } from "../../models/update-requerimento.interface";
+
+// -- Auxiliares de perfil e configuração
+function mapRoleToPerfil(role: number): Perfil {
+  switch (role) {
+    case Roles.TRIAGEM: return "triagem";
+    case Roles.MEDICO: return "medico";
+    case Roles.ENFERMEIRO: return "enfermeiro";
+    default: return "triagem";
+  }
+}
+
+const usuario = AuthService.getInstance().getUserStorage();
+let perfilAtual: Perfil;
+if (usuario) {
+  perfilAtual = mapRoleToPerfil(usuario.role);
+}
 
 export interface TabItem {
   label: string;
   status: Status[];
 }
-
 export interface Config {
   tabs: TabItem[];
   mostraChecklist: (tab: number) => boolean;
@@ -17,9 +36,6 @@ export interface Config {
   botoes: (tab: number, checklist?: boolean[], aprovado?: Aprovacao) => string[];
   canAprovar: (checklist: boolean[], aprovado: Aprovacao) => boolean;
 }
-
-const perfilAtual: Perfil = "triagem";
-
 function getConfig(perfil: Perfil): Config {
   if (perfil === "triagem")
     return {
@@ -54,27 +70,27 @@ function getConfig(perfil: Perfil): Config {
         return null;
       },
       observacaoStyle: (tab) => (tab === 2 ? { color: "#b68400" } : { color: "#1277be" }),
-      botoes: (tab) => (tab === 0 ? ["aprovar", "reprovar", "ajustes"] : []),
+      botoes: (tab, checklist, aprovado) => (tab === 0 ? ["aprovar", "reprovar", "ajustes"] : []),
       canAprovar: (checklist, aprovado) => checklist.slice(0, -1).every((c) => c) && !aprovado,
-    };
+  };
   if (perfil === "medico")
-    return {
-      tabs: [
-        { label: "Análise Pendente", status: ["medico"] },
-        { label: "Em Progresso", status: ["enfermeiro"] },
-        { label: "Finalizados", status: ["finalizado"] },
-      ],
-      mostraChecklist: () => false,
-      statusLabel: (a, tab) =>
-        tab === 1 ? (
-          <span style={{ color: "#b66400", fontWeight: 600 }}>
-            Aguardando justificativa do enfermeiro
-          </span>
-        ) : null,
-      observacaoStyle: () => ({ color: "#1277be" }),
-      botoes: (tab) => (tab === 0 ? ["aprovar", "reprovar"] : []),
-      canAprovar: () => true,
-    };
+  return {
+    tabs: [
+      { label: "Análise Pendente", status: ["medico"] },
+      { label: "Em Progresso", status: ["enfermeiro"] },
+      { label: "Finalizados", status: ["finalizado"] },
+    ],
+    mostraChecklist: () => false,
+    statusLabel: (a, tab) =>
+      tab === 1 ? (
+        <span style={{ color: "#b66400", fontWeight: 600 }}>
+          Aguardando justificativa do enfermeiro
+        </span>
+      ) : null,
+    observacaoStyle: () => ({ color: "#1277be" }),
+    botoes: (tab, checklist, aprovado) => (tab === 0 ? ["aprovar", "reprovar"] : []),
+    canAprovar: () => true, // Médico pode sempre aprovar ou reprovar
+  };
   if (perfil === "enfermeiro")
     return {
       tabs: [
@@ -89,7 +105,7 @@ function getConfig(perfil: Perfil): Config {
           </span>
         ) : null,
       observacaoStyle: () => ({ color: "#1277be" }),
-      botoes: (tab) => (tab === 0 ? ["informar"] : []),
+      botoes: (tab, checklist, aprovado) => (tab === 0 ? ["informar"] : []),
       canAprovar: () => false,
     };
   return {
@@ -102,29 +118,50 @@ function getConfig(perfil: Perfil): Config {
   };
 }
 
+// -- HOOK PRINCIPAL
 export default function useSesmtDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const config = React.useMemo(() => getConfig(perfilAtual), []);
+  const config = getConfig(perfilAtual);
 
-  const [tab, setTab] = React.useState(0);
-  const [busca, setBusca] = React.useState("");
-  const [atestados, setAtestados] = React.useState<Atestado[]>(MOCK_ATESTADOS.map((a) => ({ ...a })));
-  const [selectedDoc, setSelectedDoc] = React.useState<number | null>(null);
-  const [justifyOpen, setJustifyOpen] = React.useState(false);
-  const [justifyValue, setJustifyValue] = React.useState("");
-  const [acaoJustificar, setAcaoJustificar] = React.useState<"reprovar" | "ajustes" | "informar" | "">("");
-  const [atualId, setAtualId] = React.useState<number | null>(null);
-  const [mobileDocOpen, setMobileDocOpen] = React.useState(false);
-  const [page, setPage] = React.useState(1);
+  const [tab, setTab] = useState(0);
+  const [busca, setBusca] = useState("");
+  const [atestados, setAtestados] = useState<Atestado[]>([]);
+  const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
+  const [justifyOpen, setJustifyOpen] = useState(false);
+  const [justifyValue, setJustifyValue] = useState("");
+  const [acaoJustificar, setAcaoJustificar] = useState<"reprovar" | "ajustes" | "informar" | "">("");
+  const [atualId, setAtualId] = useState<number | null>(null);
+  const [mobileDocOpen, setMobileDocOpen] = useState(false);
+  const [page, setPage] = useState(1);
   const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
 
-  const filtrarAtestados = React.useCallback((): Atestado[] => {
-    const statusArr = config.tabs[tab].status;
+  // Carrega atestados no início e após cada atualização relevante
+  const carregarAtestados = useCallback(async () => {
+    setLoading(true);
+    try {
+      const reqs = await getRequerimentos();
+      setAtestados(mapRequerimentosParaAtestados(reqs));
+    } catch (e) {
+      console.error("Erro ao buscar dados do backend:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarAtestados();
+  }, [carregarAtestados]);
+
+  // Filtro/tab/paginação
+  const filtrarAtestados = useCallback((): Atestado[] => {
+    const statusArr = config.tabs[tab]?.status ?? [];
     return atestados.filter(
       (a) =>
         statusArr.includes(a.status) &&
-        (a.nome.toLowerCase().includes(busca.toLowerCase()) || a.texto.toLowerCase().includes(busca.toLowerCase()))
+        (a.nome.toLowerCase().includes(busca.toLowerCase()) ||
+          a.texto.toLowerCase().includes(busca.toLowerCase()))
     );
   }, [atestados, config.tabs, tab, busca]);
 
@@ -132,44 +169,101 @@ export default function useSesmtDashboard() {
   const totalPages = Math.ceil(atestadosFiltrados.length / itemsPerPage);
   const paginatedAtestados = atestadosFiltrados.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setPage(1);
   }, [busca, tab]);
 
   const getBadge = (tabIdx: number) => {
-    if (!config.tabs[tabIdx].status) return 0;
+    if (!config.tabs[tabIdx]?.status) return 0;
     return atestados.filter((a) => config.tabs[tabIdx].status.includes(a.status)).length;
   };
 
-  const handleCheckChange = (a: Atestado, idx: number) => {
-    setAtestados((ats) =>
-      ats.map((at) => (at.id === a.id ? { ...at, checklist: at.checklist.map((v, i) => (i === idx ? !v : v)) } : at))
+  // TRIAGEM: pode editar checklist; Médico/Enfermeiro não podem!
+  const handleCheckChange = async (a: Atestado, idx: number) => {
+    if (perfilAtual !== "triagem") return; // só TRIAGEM pode alterar
+    const novoChecklist = a.checklist.map((v, i) => (i === idx ? !v : v));
+    setAtestados(ats =>
+      ats.map(at =>
+        at.id === a.id ? { ...at, checklist: novoChecklist } : at
+      )
     );
+
+    // Salva no backend
+    const checklistObj = [{
+      incisoI: novoChecklist[0] ?? false,
+      incisoII: novoChecklist[1] ?? false,
+      incisoIII: novoChecklist[2] ?? false,
+      incisoIV: novoChecklist[3] ?? false,
+      incisoV: novoChecklist[4] ?? false,
+      incisoVI: novoChecklist[5] ?? false,
+      incisoVII: novoChecklist[6] ?? false,
+      incisoVIII: novoChecklist[7] ?? false,
+      periodoMaiorQue3Dias: novoChecklist[8] ?? false,
+    }];
+    try {
+      await atualizarRequerimento(a.requerimentoId, {
+        documentos: [{ id: a.id, checklist: checklistObj }]
+      });
+    } catch (err) {
+      console.error("Erro ao atualizar checklist:", err);
+    }
   };
 
   const handleExpandChecklist = (a: Atestado) => {
     setAtestados((ats) => ats.map((at) => (at.id === a.id ? { ...at, expanded: !at.expanded } : at)));
   };
 
-  const handleAprovar = (id: number) => {
+  // Aprovação principal (fluxo por perfil)
+  const handleAprovar = async (id: number) => {
     const atestado = atestados.find((a) => a.id === id);
-    if (atestado && atestado.checklist[CHECKLIST.length - 1]) {
-      solicitarExameMedico(atestado);
+    if (!atestado) return;
+
+    const checklistObj = [
+      {
+        incisoI: atestado.checklist[0] ?? false,
+        incisoII: atestado.checklist[1] ?? false,
+        incisoIII: atestado.checklist[2] ?? false,
+        incisoIV: atestado.checklist[3] ?? false,
+        incisoV: atestado.checklist[4] ?? false,
+        incisoVI: atestado.checklist[5] ?? false,
+        incisoVII: atestado.checklist[6] ?? false,
+        incisoVIII: atestado.checklist[7] ?? false,
+        periodoMaiorQue3Dias: atestado.checklist[8] ?? false,
+      }
+    ];
+
+    let novoStatus: number = 2;
+    let novaEtapa: number = 0;
+    let concluido: boolean | undefined = undefined;
+
+    if (perfilAtual === "triagem") {
+      novoStatus = 2; // EM_PROCESSO
+      novaEtapa = 1;  // MÉDICO
+    } else if (perfilAtual === "medico") {
+      novoStatus = 1; // DEFERIDO
+      novaEtapa = 1;
+      concluido = true; // Finaliza
     }
-    setAtestados((ats) =>
-      ats.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              aprovado: "aprovado",
-              status: perfilAtual === "triagem" ? "medico" : perfilAtual === "medico" ? "finalizado" : "finalizado",
-              observacao: "",
-            }
-          : a
-      )
-    );
+
+    try {
+      await atualizarRequerimento(atestado.requerimentoId, {
+        status: novoStatus,
+        etapa: novaEtapa,
+        documentos: [
+          {
+            id: atestado.id,
+            checklist: checklistObj,
+            ...(concluido !== undefined && { concluido })
+          }
+        ]
+      });
+      await carregarAtestados();
+    } catch (err) {
+      console.error("Erro ao aprovar:", err);
+    }
   };
 
+  // Ao clicar "Reprovar", "Ajustes" ou "Informar usuário"
   const handleJustificar = (id: number, acao: "reprovar" | "ajustes" | "informar") => {
     setJustifyOpen(true);
     setAcaoJustificar(acao);
@@ -177,31 +271,63 @@ export default function useSesmtDashboard() {
     setJustifyValue("");
   };
 
-  const confirmarJustificar = () => {
+  const confirmarJustificar = async () => {
     setJustifyOpen(false);
-    setAtestados((ats) =>
-      ats.map((a) =>
-        a.id === atualId
-          ? {
-              ...a,
-              aprovado: acaoJustificar === "reprovar" ? "reprovado" : a.aprovado,
-              observacao: justifyValue,
-              status:
-                acaoJustificar === "ajustes"
-                  ? "ajustes"
-                  : acaoJustificar === "reprovar"
-                  ? perfilAtual === "triagem"
-                    ? "finalizado"
-                    : perfilAtual === "medico"
-                    ? "enfermeiro"
-                    : "finalizado"
-                  : acaoJustificar === "informar"
-                  ? "finalizado"
-                  : a.status,
-            }
-          : a
-      )
-    );
+    const atestado = atestados.find((a) => a.id === atualId);
+    if (!atestado) return;
+
+    const checklistObj = [
+      {
+        incisoI: atestado.checklist[0] ?? false,
+        incisoII: atestado.checklist[1] ?? false,
+        incisoIII: atestado.checklist[2] ?? false,
+        incisoIV: atestado.checklist[3] ?? false,
+        incisoV: atestado.checklist[4] ?? false,
+        incisoVI: atestado.checklist[5] ?? false,
+        incisoVII: atestado.checklist[6] ?? false,
+        incisoVIII: atestado.checklist[7] ?? false,
+        periodoMaiorQue3Dias: atestado.checklist[8] ?? false,
+      }
+    ];
+
+    let novoStatus: number = 2;
+    let novaEtapa: number = 0;
+    let concluido: boolean | undefined = undefined;
+
+    if (perfilAtual === "triagem") {
+      if (acaoJustificar === "reprovar") {
+        novoStatus = 0; // INDEFERIDO
+        novaEtapa = 0;  // TRIAGEM
+        concluido = true; // Finaliza
+      } else if (acaoJustificar === "ajustes") {
+        novoStatus = 2; // EM_PROCESSO
+        novaEtapa = 3;  // AJUSTE
+      }
+    } else if (perfilAtual === "medico") {
+      if (acaoJustificar === "reprovar") {
+        novoStatus = 0; // INDEFERIDO
+        novaEtapa = 2;  // ENFERMEIRO
+        // Não finaliza ainda!
+      }
+    } else if (perfilAtual === "enfermeiro") {
+      novoStatus = 0;
+      novaEtapa = 2;
+      concluido = true; // Conclui após enfermeiro informar usuário
+    }
+
+    await atualizarRequerimento(atestado.requerimentoId, {
+      status: novoStatus,
+      etapa: novaEtapa,
+      documentos: [
+        {
+          id: atestado.id,
+          checklist: checklistObj,
+          justificativa: justifyValue,
+          ...(concluido !== undefined && { concluido })
+        }
+      ]
+    });
+    await carregarAtestados();
   };
 
   const docSelecionado = atestados.find((a) => a.id === selectedDoc);
@@ -234,6 +360,6 @@ export default function useSesmtDashboard() {
     setJustifyValue,
     acaoJustificar,
     docSelecionado,
+    loading,
   };
 }
-

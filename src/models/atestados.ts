@@ -4,6 +4,7 @@ export type Aprovacao = "aprovado" | "reprovado" | null;
 
 export interface Atestado {
   id: number;
+  requerimentoId: number; // Adicione este campo para vincular ao requerimento
   nome: string;
   texto: string;
   arquivo: string;
