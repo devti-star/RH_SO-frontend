@@ -1,16 +1,23 @@
 import { Box, Container, useMediaQuery } from "@mui/material";
 import Banner from "../../shared/banner";
-import logo from "../../shared/images/brasaoAzul.png"
-import FormCadastro from "./components/FormCadastro";
+import { useResponsiveImageWidth } from "../../shared/useResponsiveImageWidth";
+import logo from "../../shared/images/brasaoAzul.png";
+import { useState } from "react";
 import { useResponsivePadding } from "./Responsive/useResponsivePadding";
 import { useResponsiveHeight } from "./Responsive/useResponsiveHeight";
+import FormCadastro from "./form/form";
+import { useLocation } from "react-router-dom";
 
-export default function TelaCadastro() {
+
+export default function RecoveryPassword() {
   const isMobile = useMediaQuery("(max-width: 885px)");
   const isMobileTiny = useMediaQuery("(max-width: 619px)");
   const espacamento = useResponsivePadding();
   const altura = useResponsiveHeight();
+  const location = useLocation(); // Adicione este hook
 
+
+  
   return (
     <Container
       disableGutters
@@ -33,7 +40,7 @@ export default function TelaCadastro() {
             alignItems: "center",
           }}
         >
-          <Banner altura_imagem={405} />
+          <Banner largura_imagem={300} />
         </Box>
       )}
       <Box
@@ -48,7 +55,7 @@ export default function TelaCadastro() {
 
         }}
       >
-        <Box 
+        <Box
           sx={{
             minHeight: altura,
             width: "90%",
@@ -64,7 +71,7 @@ export default function TelaCadastro() {
           }}
         >
           {isMobile && <img src={logo} style={{ width: "200px" }} />}
-          <FormCadastro espacamento={espacamento} flex_direction={isMobileTiny ? "column" : "row"}/>
+          <FormCadastro espacamento={espacamento} flex_direction={isMobileTiny ? "column" : "row"} />
         </Box>
       </Box>
     </Container>

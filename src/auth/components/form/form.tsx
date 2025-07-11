@@ -68,7 +68,7 @@ export default function Form({ espacamento = "100px 50px 130px 50px", ...props }
         </FormControl>
 
         <Box className="recuperar-senha">
-          <a href="#">Esqueceu Sua Senha?</a>
+          <a href="/login/forgotpassword">Esqueceu Sua Senha?</a>
         </Box>
 
         <FormControl variant="outlined" fullWidth sx={{ marginTop: "10px" }}>

@@ -35,6 +35,8 @@ import AceitacaoEmail from "../../../shared/aceitacaoEmail";
 import { Roles } from "../../../models/roles";
 import { cadastrarUsuario } from "./service";
 
+import { isCPF } from "brazilian-values";
+
 interface FormCadastroProps extends BoxProps {
   espacamento?: string;
   flex_direction?: string;
@@ -83,6 +85,7 @@ export default function FormCadastro({
   const [nome, setNome] = useState("");
   const [secretaria, setSecretaria] = useState("");
   const [cpf, setCPF] = useState("");
+  const [errorCPF, setErrorCPF] = useState(false);
   const [departamento, setDepartamento] = useState("");
   const [rg, setRG] = useState("");
   const [orgaoExpeditor, setOrgaoExpeditor] = useState("");
@@ -97,44 +100,51 @@ export default function FormCadastro({
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [erroSenhas, setErroSenhas] = useState(false);
 
-  const [mostrarModal,setMostrarModal] = useState(false);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   const navigate = useNavigate();
 
+  const messageErrorCPF = "CPF inválido";
+
   const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+    e.preventDefault();
 
-      if (senha !== senhaConfirm) {
-          setErroSenhas(true);
-          return;
-      }
+    if (senha !== senhaConfirm) {
+      setErroSenhas(true);
+      return;
+    }
 
-      setErroSenhas(false);
+    if (!isCPF(cpf)) {
+      setErrorCPF(true);
+      return;
+    }
 
-      const cadastro: Cadastro = {
-          role: Roles.PADRAO,
-          nomeCompleto: nome.trim(),
-          secretaria: secretaria,
-          cpf: cpf.replace(/[().-\s+]/g, ''),
-          departamento: departamento.trim(),
-          rg: rg.replace(/[().-\s+]/g, ''),
-          orgaoExpeditor: orgaoExpeditor.trim(),
-          matricula: matricula.trim(),
-          email: email.trim(),
-          cargo: cargo.trim(),
-          telefone: telefone.replace(/[().-\s+]/g, ''),
-          senha: senha
-      };
+    setErroSenhas(false);
 
-      // cadastrar usuário (dados, sem foto)
-      const resp = await cadastrarUsuario(cadastro);
+    const cadastro: Cadastro = {
+      role: Roles.PADRAO,
+      nomeCompleto: nome.trim(),
+      secretaria: secretaria,
+      cpf: cpf.replace(/[().-\s+]/g, ""),
+      departamento: departamento.trim(),
+      rg: rg.replace(/[().-\s+]/g, ""),
+      orgaoExpeditor: orgaoExpeditor.trim(),
+      matricula: matricula.trim(),
+      email: email.trim(),
+      cargo: cargo.trim(),
+      telefone: telefone.replace(/[().-\s+]/g, ""),
+      senha: senha,
+    };
 
-      if (!resp.success || !resp.userId) {
-          // O erro já será mostrado pelo snackbar do service!
-          return;
-      }
+    // cadastrar usuário (dados, sem foto)
+    const resp = await cadastrarUsuario(cadastro);
 
-      setMostrarModal(true);
+    if (!resp.success || !resp.userId) {
+      // O erro já será mostrado pelo snackbar do service!
+      return;
+    }
+
+    setMostrarModal(true);
   };
 
   const handleTogglePassword = () => {
@@ -164,7 +174,8 @@ export default function FormCadastro({
   };
 
   return (
-    <Box className="teste"
+    <Box
+      className="teste"
       {...props}
       sx={{
         width: "100%",
@@ -192,8 +203,12 @@ export default function FormCadastro({
         <Typography variant="h1" className="titulo-form" sx={{ width: "100%" }}>
           Cadastrar
         </Typography>
-        <Typography color="info.main" sx={{ mb: 3, fontSize: 17, fontWeight: 500, width: "100%" }}>
-          A foto de perfil poderá ser adicionada após a criação da conta, na área de perfil.
+        <Typography
+          color="info.main"
+          sx={{ mb: 3, fontSize: 17, fontWeight: 500, width: "100%" }}
+        >
+          A foto de perfil poderá ser adicionada após a criação da conta, na
+          área de perfil.
         </Typography>
 
         <FormControl
@@ -244,7 +259,9 @@ export default function FormCadastro({
             }}
           >
             {secretarias.map((sec) => {
-              return <MenuItem value={sec.secretaria}>{sec.secretaria}</MenuItem>;
+              return (
+                <MenuItem value={sec.secretaria}>{sec.secretaria}</MenuItem>
+              );
             })}
           </Select>
         </FormControl>
@@ -268,6 +285,13 @@ export default function FormCadastro({
               title: "Formato esperado: 111.111.111-11",
             }}
           ></OutlinedInput>
+          {errorCPF && (
+            <FormHelperText
+              sx={{ m: 0, mt: 1, color: "red", fontSize: "15px" }}
+            >
+              {messageErrorCPF}
+            </FormHelperText>
+          )}
         </FormControl>
 
         <FormControl
@@ -313,7 +337,9 @@ export default function FormCadastro({
           className="campo"
           required
         >
-          <InputLabel htmlFor="campo-orgao-expeditor">Orgão Expeditor do RG</InputLabel>
+          <InputLabel htmlFor="campo-orgao-expeditor">
+            Orgão Expeditor do RG
+          </InputLabel>
           <OutlinedInput
             id="campo-orgao-expeditor"
             type="text"
@@ -392,7 +418,6 @@ export default function FormCadastro({
           ></OutlinedInput>
         </FormControl>
 
-
         <FormControl
           variant="outlined"
           sx={{ marginTop: "10px" }}
@@ -470,7 +495,7 @@ export default function FormCadastro({
             type="submit"
             sx={{ fontFamily: "Poppins, sans-serif", width: "80%" }}
           ></CustomButton>
-             <CustomButton
+          <CustomButton
             payload="Voltar"
             onClick={() => navigate("/login")}
             sx={{
@@ -488,7 +513,7 @@ export default function FormCadastro({
           ></CustomButton>
         </Box>
       </Box>
-      {mostrarModal && (<AceitacaoEmail></AceitacaoEmail>)}
+      {mostrarModal && <AceitacaoEmail></AceitacaoEmail>}
     </Box>
   );
 }
