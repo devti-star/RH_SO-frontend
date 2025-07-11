@@ -33,7 +33,7 @@ export default function TelaCadastro() {
             alignItems: "center",
           }}
         >
-          <Banner largura_imagem={300} />
+          <Banner altura_imagem={405} />
         </Box>
       )}
       <Box
