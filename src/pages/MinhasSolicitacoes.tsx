@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -22,20 +22,33 @@ import CloseIcon from '@mui/icons-material/Close';
 import PdfViewer from '../shared/PdfViewer';
 
 import axios from 'axios';
-import { apiURL } from '../config'; // ajuste o path se necessário
+import { apiURL } from '../config';
 import { AuthService } from '../auth/components/form/auth.service';
 
+// Tipos
+export interface Documento {
+  caminho: string;
+}
+export interface Requerimento {
+  id: number;
+  nome?: string;
+  status: number;
+  etapa: number;
+  tipo: number;
+  documentos: Documento[];
+  observacao?: string;
+}
+
 // Funções para detectar tipo do arquivo
-function isImageFile(filename: string | null): boolean {
+function isImageFile(filename: string | null | undefined): boolean {
   if (!filename) return false;
   return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(filename);
 }
-function isPdfFile(filename: string | null): boolean {
+function isPdfFile(filename: string | null | undefined): boolean {
   if (!filename) return false;
   return /\.pdf$/i.test(filename);
 }
 
-// --- Funções utilitárias para mapping dos enums do backend ---
 function getStatusInfo(status: number, etapa: number) {
   if (etapa === 3) return { label: "Ajuste Pendente pelo usuário", cor: "info" };
   switch (status) {
@@ -63,8 +76,7 @@ function getEtapa(etapa: number) {
   }
 }
 
-// --- Função que faz o fetch dos requerimentos do usuário ---
-async function fetchRequerimentosUsuario() {
+async function fetchRequerimentosUsuario(): Promise<Requerimento[]> {
   const usuario = AuthService.getInstance().getUserStorage(false);
   if (!usuario) throw new Error('Usuário não logado!');
   const idUsuario = usuario.id;
@@ -77,22 +89,24 @@ async function fetchRequerimentosUsuario() {
   return response.data;
 }
 
+// ---------- Componente ----------
 export default function MinhasSolicitacoes() {
   const theme = useTheme();
-  const [search, setSearch] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
-  // Alteração: agora armazena { url, name } ao invés de apenas string
-  const [selectedFile, setSelectedFile] = useState<{ url: string, name: string } | null>(null);
+  const [search, setSearch] = useState<string>('');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<{ url: string; name: string } | null>(null);
   const [expandedCardIndex, setExpandedCardIndex] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [observacaoIndex, setObservacaoIndex] = useState<number | null>(null);
   const [correcaoIndex, setCorrecaoIndex] = useState<number | null>(null);
   const [correcaoFile, setCorrecaoFile] = useState<File | null>(null);
 
-  // Estado para os dados do backend
-  const [requerimentos, setRequerimentos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [requerimentos, setRequerimentos] = useState<Requerimento[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Ref para scroll do modal
+  const docRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchRequerimentos();
@@ -106,6 +120,15 @@ export default function MinhasSolicitacoes() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Scrolla até o modal quando abrir
+  useEffect(() => {
+    if (selectedFile && docRef.current) {
+      setTimeout(() => {
+        docRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 120);
+    }
+  }, [selectedFile]);
+
   const fetchRequerimentos = async () => {
     setLoading(true);
     try {
@@ -116,15 +139,17 @@ export default function MinhasSolicitacoes() {
     }
   };
 
-  const filteredRequerimentos = requerimentos.filter(item => {
-    const protocoloNome = item.nome ?? `Protocolo ${item.id}`;
-    const matchesSearch = protocoloNome.toLowerCase().includes(search.toLowerCase());
-    const statusLabel = getStatusInfo(item.status, item.etapa).label;
-    const matchesStatus = statusFilter ? statusLabel === statusFilter : true;
-    return matchesSearch && matchesStatus;
-  });
+  // Cards em ordem decrescente
+  const filteredRequerimentos = [...requerimentos]
+    .filter((item: Requerimento) => {
+      const protocoloNome = item.nome ?? `Protocolo ${item.id}`;
+      const matchesSearch = protocoloNome.toLowerCase().includes(search.toLowerCase());
+      const statusLabel = getStatusInfo(item.status, item.etapa).label;
+      const matchesStatus = statusFilter ? statusLabel === statusFilter : true;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => b.id - a.id);
 
-  // NOVO: handler genérico para abrir arquivo (pdf ou imagem)
   const openFile = (documentoPath?: string) => {
     if (documentoPath) {
       setSelectedFile({
@@ -169,7 +194,6 @@ export default function MinhasSolicitacoes() {
     }
   };
 
-  // --- Renderização ---
   if (loading) {
     return <Box p={4}><Typography>Carregando...</Typography></Box>;
   }
@@ -252,7 +276,6 @@ export default function MinhasSolicitacoes() {
                   </CardContent>
 
                   <CardActions sx={{ pl: 2, pb: 2 }}>
-                    {/* Botão para abrir documento */}
                     {docPath && (
                       <Button
                         size="small"
@@ -314,6 +337,8 @@ export default function MinhasSolicitacoes() {
                         size="small"
                         sx={{ mb: 2 }}
                       />
+
+                      {/* Botão de upload */}
                       <Button
                         variant="contained"
                         component="label"
@@ -325,12 +350,50 @@ export default function MinhasSolicitacoes() {
                           type="file"
                           hidden
                           accept="application/pdf,image/*"
-                          onChange={(e) => {
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const file = e.target.files?.[0];
                             if (file) setCorrecaoFile(file);
                           }}
                         />
                       </Button>
+
+                      {/* Exibição do nome do arquivo e X para excluir */}
+                      {correcaoFile && (
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          sx={{
+                            background: "#f9f9f9",
+                            borderRadius: 1,
+                            px: 2,
+                            py: 1,
+                            mb: 2,
+                            boxShadow: 1,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: '80%',
+                            }}
+                          >
+                            {correcaoFile.name}
+                          </Typography>
+                          <IconButton
+                            aria-label="Remover arquivo"
+                            size="small"
+                            onClick={() => setCorrecaoFile(null)}
+                            sx={{ ml: 2 }}
+                          >
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      )}
+
                       <Button
                         variant="outlined"
                         color="primary"
@@ -347,7 +410,7 @@ export default function MinhasSolicitacoes() {
                   <Collapse in={isExpanded}>
                     <Box px={3} pb={3} position="relative">
                       <Box display="flex" justifyContent="space-between" alignItems="center" position="relative">
-                        {["Triagem","Médico","Enfermeiro"].map((nomeEtapa, i) => {
+                        {["Triagem", "Médico", "Enfermeiro"].map((nomeEtapa, i) => {
                           let circleColor = "#e0e0e0";
                           let statusLabel = "Pendente";
                           let statusDescricao = "Esta etapa ainda não foi iniciada.";
@@ -421,6 +484,7 @@ export default function MinhasSolicitacoes() {
                     </Box>
                   </Collapse>
 
+                  {/* Observação Final ou Motivo do Indeferimento */}
                   <Collapse in={observacaoIndex === index}>
                     <Box px={3} pb={3}>
                       <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -442,18 +506,18 @@ export default function MinhasSolicitacoes() {
         </Grid>
       </Container>
 
-      {/* Modal lateral/central para PDF ou imagem */}
+      {/* Modal centralizado, formato A4 */}
       {selectedFile && (
         <Box
+          ref={docRef}
           sx={{
-            width: isMobile ? '100vw' : '40vw',
-            height: isMobile ? '100vh' : '80vh',
-            position: isMobile ? 'absolute' : 'relative',
-            top: isMobile ? 0 : 'auto',
-            left: isMobile ? 0 : 'auto',
-            backgroundColor: isMobile ? 'white' : 'transparent',
-            zIndex: isMobile ? 1300 : 'auto',
-            boxShadow: isMobile ? 3 : 'none',
+            width: '100vw',
+            minHeight: '100vh',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            background: 'rgba(0,0,0,0.25)',
+            zIndex: 2000,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -461,11 +525,18 @@ export default function MinhasSolicitacoes() {
         >
           <Paper
             sx={{
-              width: '100%',
-              height: '100%',
+              width: { xs: '95vw', sm: '794px' },  // largura A4
+              height: { xs: 'auto', sm: '1123px' }, // altura A4
+              maxWidth: '100vw',
+              maxHeight: '98vh',
               p: 2,
               boxSizing: 'border-box',
               position: 'relative',
+              borderRadius: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              overflow: 'hidden',
             }}
           >
             <Box
@@ -473,6 +544,7 @@ export default function MinhasSolicitacoes() {
               justifyContent="space-between"
               alignItems="center"
               mb={2}
+              width="100%"
             >
               <Typography variant="h6">Documento</Typography>
               <IconButton
@@ -490,12 +562,15 @@ export default function MinhasSolicitacoes() {
             <Box
               sx={{
                 width: '100%',
-                height: 'calc(100% - 48px)',
-                overflow: 'hidden',
-                borderRadius: 1,
+                height: '100%',
+                minHeight: '90%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                borderRadius: 2,
+                background: '#f5f5f5',
+                boxShadow: 2,
+                overflow: 'auto'
               }}
             >
               {isPdfFile(selectedFile.name) ? (
