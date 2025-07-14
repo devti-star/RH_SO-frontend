@@ -37,6 +37,7 @@ export interface Requerimento {
   tipo: number;
   documentos: Documento[];
   observacao?: string;
+  criadoEm: string;
 }
 
 // Funções para detectar tipo do arquivo
@@ -247,7 +248,10 @@ export default function MinhasSolicitacoes() {
             const isAjuste = item.etapa === 3;
             const isFinalizado = item.status === 0 || item.status === 1;
             const isEmAndamento = item.status === 2 && !isAjuste;
-            const protocoloNome = item.nome ?? `Protocolo ${item.id}`;
+            const ano = item.criadoEm ? new Date(item.criadoEm).getFullYear() : '';
+            const protocolo = `${item.id}${ano ? '/' + ano : ''}`;
+            const protocoloNome = `Protocolo ${protocolo}`; 
+
             const docPath = item.documentos && item.documentos.length > 0 ? item.documentos[0].caminho : undefined;
 
             return (
