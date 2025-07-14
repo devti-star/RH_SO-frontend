@@ -6,5 +6,6 @@ export interface UpdateRequerimentoPayload {
     id: number;
     checklist?: any;
     justificativa?: string;
+    maior3dias?: boolean;
   }[];
 }

@@ -2,7 +2,7 @@ import type { Aprovacao, Atestado, Status } from "../../../models/atestados";
 import type { Requerimento } from "../../../models/requerimento.interface";
 
 // Função auxiliar para converter checklist do backend em array de booleanos para o frontend
-function checklistToBooleanArray(checklist: any): boolean[] {
+function checklistToBooleanArray(checklist: any, maior3dias: boolean): boolean[] {
   if (!checklist || !Array.isArray(checklist) || checklist.length === 0) {
     return [false, false, false, false, false, false, false, false, false];
   }
@@ -16,7 +16,7 @@ function checklistToBooleanArray(checklist: any): boolean[] {
     c.incisoVI ?? false,
     c.incisoVII ?? false,
     c.incisoVIII ?? false,
-    c.periodoMaiorQue3Dias ?? false,
+    maior3dias ?? false, // Adiciona o campo maior3dias como último elemento
   ];
 }
 
@@ -61,7 +61,7 @@ export function mapRequerimentosParaAtestados(requerimentos: Requerimento[]): At
       texto: req.observacao ?? "",
       arquivo: doc.caminho,
       status: mapStatusToAba(req, doc),   // <-- Aqui usa a função nova!
-      checklist: checklistToBooleanArray(doc.checklist),
+      checklist: checklistToBooleanArray(doc.checklist, doc.maior3dias),
       aprovado: aprovadoStatus(req),
       observacao: doc.justificativa ?? "",
       expanded: false,

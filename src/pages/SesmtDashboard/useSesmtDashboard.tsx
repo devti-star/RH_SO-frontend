@@ -204,6 +204,7 @@ export default function useSesmtDashboard() {
       await atualizarRequerimento(a.requerimentoId, {
         documentos: [{ id: a.id, checklist: checklistObj }]
       });
+      console.log("Aqui");
     } catch (err) {
       console.error("Erro ao atualizar checklist:", err);
     }
