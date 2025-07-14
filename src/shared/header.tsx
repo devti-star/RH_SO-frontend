@@ -137,6 +137,7 @@ function ResponsiveAppBar() {
         }
         const api = ApiService.getInstance();
         const resp = await api.get(`/usuarios/foto/${usuarioId}`, { responseType: "blob" });
+        console.log("resposta: ", resp);
         const url = URL.createObjectURL(resp.data);
         setFotoPerfilUrl(url);
       } catch {
