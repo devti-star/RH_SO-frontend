@@ -431,7 +431,7 @@ function ResponsiveAppBar() {
                 textOverflow: 'ellipsis'
               }}
             >
-              {usuario?.nome?.split(' ')[0] ?? ''}
+              {usuario?.nomeCompleto?.split(' ')[0] ?? ''}
             </Typography>
             <Menu
               sx={{ mt: '45px' }}

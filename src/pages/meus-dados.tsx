@@ -8,7 +8,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   InputAdornment,
   IconButton,
   Paper,
@@ -16,6 +15,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Stack,
 } from "@mui/material";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -141,11 +141,7 @@ const PerfilUsuario: React.FC = () => {
     return () => {
       if (fotoPerfilUrl) URL.revokeObjectURL(fotoPerfilUrl);
     };
-  }, [usuarioId, fotoFile, campos?.foto]); // <- use campos?.foto, não só campos!
-
-
-
-
+  }, [usuarioId, fotoFile, campos?.foto]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -171,7 +167,6 @@ const PerfilUsuario: React.FC = () => {
     setConfirmaSenha("");
   };
 
-
   const toggleMostrarSenhaAtual = () =>
     setMostrarSenhaAtual((prev) => !prev);
   const toggleMostrarNovaSenha = () =>
@@ -195,7 +190,6 @@ const PerfilUsuario: React.FC = () => {
         currentPassword: senhaAtual,
         newPassword: novaSenha,
       };
-      console.error(JSON.stringify(dados));
       const result = await changePassword(dados);
 
       if (result) showSnackbar("Senha alterada com sucesso!", "success");
@@ -244,10 +238,13 @@ const PerfilUsuario: React.FC = () => {
         setCampos((prev) => prev ? { ...prev, foto: data.foto ?? null } : prev);
       }
 
-
       setOriginais({ ...campos });
       setFotoFile(null);
       showSnackbar("Dados atualizados com sucesso!", "success");
+        setTimeout(() => {
+        window.location.href = window.location.pathname + "?t=" + new Date().getTime();
+    }, 500); // 0,5s
+
     } catch (err) {
       showSnackbar("Erro ao salvar dados.", "error");
     } finally {
@@ -263,6 +260,7 @@ const PerfilUsuario: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "60vh",
+          
         }}
       >
         <CircularProgress />
@@ -280,6 +278,7 @@ const PerfilUsuario: React.FC = () => {
         justifyContent: "center",
         alignItems: isMobile ? "center" : "flex-start",
         flexDirection: isMobile ? "column" : "row",
+        
       }}
     >
       <Paper
@@ -294,19 +293,18 @@ const PerfilUsuario: React.FC = () => {
           flexDirection: "column",
           justifyContent: isMobile ? "center" : "flex-start",
           alignItems: isMobile ? "center" : "stretch",
+          mb: { xs: "10vw", md: 0 },
         }}
       >
-        <Grid
-          container
+        <Stack
+          direction={isMobile ? "column" : "row"}
           spacing={4}
           alignItems="stretch"
           justifyContent={isMobile ? "center" : "flex-start"}
           sx={{ width: isMobile ? "100vw" : "auto", px: isMobile ? 2 : 0 }}
         >
-          <Grid
-            item
-            xs={12}
-            md={3}
+          {/* Avatar + Foto */}
+          <Box
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -338,9 +336,6 @@ const PerfilUsuario: React.FC = () => {
                 mb: 2,
               }}
             />
-
-
-
             <Button
               variant="contained"
               component="label"
@@ -364,15 +359,15 @@ const PerfilUsuario: React.FC = () => {
                 onChange={handleImageChange}
               />
             </Button>
-          </Grid>
+          </Box>
 
-          <Grid
-            item
-            xs={12}
-            md={9}
+          {/* Dados Pessoais, Trabalho e Login */}
+          <Box
             sx={{
               textAlign: { xs: "center", md: "left" },
               width: isMobile ? "100vw" : "auto",
+              flex: 1,
+             
             }}
           >
             <Typography
@@ -383,74 +378,78 @@ const PerfilUsuario: React.FC = () => {
             >
               Dados Pessoais
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Nome Completo"
-                  value={campos.nomeCompleto}
-                  onChange={(e) =>
-                    handleChangeCampo("nomeCompleto", e.target.value)
-                  }
-                  disabled={saving}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Cargo"
-                  value={campos.cargo}
-                  onChange={(e) => handleChangeCampo("cargo", e.target.value)}
-                  disabled={saving}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <WorkIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="CPF" value={campos.cpf} disabled />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Matrícula"
-                  value={campos.matricula}
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="RG" value={campos.rg} disabled />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Telefone/Whatsapp"
-                  value={campos.telefone}
-                  onChange={(e) =>
-                    handleChangeCampo("telefone", e.target.value)
-                  }
-                  disabled={saving}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-            </Grid>
+            <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
+              <TextField
+                fullWidth
+                label="Nome Completo"
+                value={campos.nomeCompleto}
+                onChange={(e) =>
+                  handleChangeCampo("nomeCompleto", e.target.value)
+                }
+                disabled={saving}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+              />
+              <TextField
+                fullWidth
+                label="Cargo"
+                value={campos.cargo}
+                onChange={(e) => handleChangeCampo("cargo", e.target.value)}
+                disabled={saving}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <WorkIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+              />
+              <TextField
+                fullWidth
+                label="CPF"
+                value={campos.cpf}
+                disabled
+                sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+              />
+              <TextField
+                fullWidth
+                label="Matrícula"
+                value={campos.matricula}
+                disabled
+                sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+              />
+              <TextField
+                fullWidth
+                label="RG"
+                value={campos.rg}
+                disabled
+                sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+              />
+              <TextField
+                fullWidth
+                label="Telefone/Whatsapp"
+                value={campos.telefone}
+                onChange={(e) =>
+                  handleChangeCampo("telefone", e.target.value)
+                }
+                disabled={saving}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+              />
+            </Stack>
 
             <Box mt={4}>
               <Typography
@@ -461,44 +460,42 @@ const PerfilUsuario: React.FC = () => {
               >
                 Dados do Trabalho
               </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Departamento"
-                    value={campos.departamento}
-                    onChange={(e) =>
-                      handleChangeCampo("departamento", e.target.value)
-                    }
-                    disabled={saving}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <BusinessIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Secretaria"
-                    value={campos.secretaria}
-                    onChange={(e) =>
-                      handleChangeCampo("secretaria", e.target.value)
-                    }
-                    disabled={saving}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <ApartmentIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
+              <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
+                <TextField
+                  fullWidth
+                  label="Departamento"
+                  value={campos.departamento}
+                  onChange={(e) =>
+                    handleChangeCampo("departamento", e.target.value)
+                  }
+                  disabled={saving}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BusinessIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+                />
+                <TextField
+                  fullWidth
+                  label="Secretaria"
+                  value={campos.secretaria}
+                  onChange={(e) =>
+                    handleChangeCampo("secretaria", e.target.value)
+                  }
+                  disabled={saving}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <ApartmentIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+                />
+              </Stack>
             </Box>
 
             <Box mt={4}>
@@ -510,28 +507,33 @@ const PerfilUsuario: React.FC = () => {
               >
                 Informações de Login
               </Typography>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    value={campos.email}
-                    disabled
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <EmailIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  display="flex"
-                  justifyContent={{ xs: "center", sm: "flex-end" }}
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                useFlexGap
+                flexWrap="wrap"
+              >
+                <TextField
+                  fullWidth
+                  label="Email"
+                  value={campos.email}
+                  disabled
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ flexBasis: { xs: "100%", sm: "48%" } }}
+                />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: { xs: "center", sm: "flex-end" },
+                    flex: 1,
+                  }}
                 >
                   <Button
                     variant="contained"
@@ -548,11 +550,11 @@ const PerfilUsuario: React.FC = () => {
                   >
                     Alterar Senha
                   </Button>
-                </Grid>
-              </Grid>
+                </Box>
+              </Stack>
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Stack>
 
         <Box mt={4} display="flex" justifyContent="center">
           <Button
