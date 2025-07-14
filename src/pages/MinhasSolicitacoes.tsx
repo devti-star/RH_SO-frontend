@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   Container,
-  Grid,
   Chip,
   Card,
   CardContent,
@@ -15,7 +14,8 @@ import {
   MenuItem,
   IconButton,
   Paper,
-  Tooltip
+  Tooltip,
+  Stack
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
@@ -238,7 +238,7 @@ export default function MinhasSolicitacoes() {
           </Box>
         </Collapse>
 
-        <Grid container direction="column" spacing={2}>
+        <Stack direction="column" spacing={2}>
           {filteredRequerimentos.map((item, index) => {
             const isExpanded = expandedCardIndex === index;
             const statusInfo = getStatusInfo(item.status, item.etapa);
@@ -250,12 +250,12 @@ export default function MinhasSolicitacoes() {
             const isEmAndamento = item.status === 2 && !isAjuste;
             const ano = item.criadoEm ? new Date(item.criadoEm).getFullYear() : '';
             const protocolo = `${item.id}${ano ? '/' + ano : ''}`;
-            const protocoloNome = `Protocolo ${protocolo}`; 
+            const protocoloNome = `Protocolo ${protocolo}`;
 
             const docPath = item.documentos && item.documentos.length > 0 ? item.documentos[0].caminho : undefined;
 
             return (
-              <Grid item key={item.id}>
+              <Box key={item.id}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -504,10 +504,10 @@ export default function MinhasSolicitacoes() {
                     </Box>
                   </Collapse>
                 </Card>
-              </Grid>
+              </Box>
             );
           })}
-        </Grid>
+        </Stack>
       </Container>
 
       {/* Modal centralizado, formato A4 */}
