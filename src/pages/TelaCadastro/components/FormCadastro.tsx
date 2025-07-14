@@ -113,6 +113,9 @@ export default function FormCadastro({
       setErroSenhas(true);
       return;
     }
+    else{
+      setErroSenhas(false);
+    }
 
     if (!isCPF(cpf)) {
       setErrorCPF(true);
