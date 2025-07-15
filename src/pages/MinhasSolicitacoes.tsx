@@ -90,6 +90,24 @@ async function fetchRequerimentosUsuario(): Promise<Requerimento[]> {
   return response.data;
 }
 
+// NOVO: Função para buscar o último histórico de um requerimento
+async function fetchLastHistorico(requerimentoId: number) {
+  try {
+    const usuario = AuthService.getInstance().getUserStorage(false);
+    const token = usuario?.access_token;
+    const token_type = usuario?.token_type;
+    const response = await axios.get(
+      `${apiURL}/historicos/last/${requerimentoId}`,
+      {
+        headers: { Authorization: `${token_type} ${token}` }
+      }
+    );
+    return response.data;
+  } catch (e) {
+    return null;
+  }
+}
+
 // ---------- Componente ----------
 export default function MinhasSolicitacoes() {
   const theme = useTheme();
@@ -104,6 +122,7 @@ export default function MinhasSolicitacoes() {
   const [correcaoFile, setCorrecaoFile] = useState<File | null>(null);
 
   const [requerimentos, setRequerimentos] = useState<Requerimento[]>([]);
+  const [historicos, setHistoricos] = useState<Record<number, any>>({});
   const [loading, setLoading] = useState<boolean>(true);
 
   // Ref para scroll do modal
@@ -135,6 +154,19 @@ export default function MinhasSolicitacoes() {
     try {
       const data = await fetchRequerimentosUsuario();
       setRequerimentos(data);
+
+      // Buscar devolutiva (último histórico) de cada requerimento
+      const historicosPromises = data.map(async (req: Requerimento) => {
+        const historico = await fetchLastHistorico(req.id);
+        return { reqId: req.id, historico };
+      });
+
+      const results = await Promise.all(historicosPromises);
+      const historicosObj: Record<number, any> = {};
+      results.forEach(({ reqId, historico }) => {
+        historicosObj[reqId] = historico;
+      });
+      setHistoricos(historicosObj);
     } finally {
       setLoading(false);
     }
@@ -251,8 +283,11 @@ export default function MinhasSolicitacoes() {
             const ano = item.criadoEm ? new Date(item.criadoEm).getFullYear() : '';
             const protocolo = `${item.id}${ano ? '/' + ano : ''}`;
             const protocoloNome = `Protocolo ${protocolo}`;
-
             const docPath = item.documentos && item.documentos.length > 0 ? item.documentos[0].caminho : undefined;
+
+            // DEVOLUTIVA: busca observacao do último histórico (se houver)
+            const devolutiva = historicos[item.id]?.observacao ||
+              "A solicitação está em andamento. Aguardando próxima avaliação.";
 
             return (
               <Box key={item.id}>
@@ -291,13 +326,25 @@ export default function MinhasSolicitacoes() {
                     )}
 
                     {isFinalizado && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => setObservacaoIndex(observacaoIndex === index ? null : index)}
-                      >
-                        {item.status === 1 ? 'Ver Observação' : 'Ver motivo do indeferimento'}
-                      </Button>
+                      <>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => setObservacaoIndex(observacaoIndex === index ? null : index)}
+                        >
+                          {item.status === 1 ? 'Ver Observação' : 'Ver motivo do indeferimento'}
+                        </Button>
+                        {/* Botão solicitado */}
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          sx={{ ml: 1 }}
+                          onClick={() => { /* ação futura */ }}
+                        >
+                          Gerar documento SESMT assinado
+                        </Button>
+                      </>
                     )}
 
                     {isEmAndamento && (
@@ -482,7 +529,7 @@ export default function MinhasSolicitacoes() {
                           Devolutiva
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          A solicitação está em andamento. Aguardando próxima avaliação.
+                          {devolutiva}
                         </Typography>
                       </Box>
                     </Box>
@@ -490,19 +537,19 @@ export default function MinhasSolicitacoes() {
 
                   {/* Observação Final ou Motivo do Indeferimento */}
                   <Collapse in={observacaoIndex === index}>
-                    <Box px={3} pb={3}>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                        {item.status === 1 ? 'Observação Final' : 'Motivo do Indeferimento'}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.observacao && item.observacao.length > 0
-                          ? item.observacao
-                          : item.status === 1
-                            ? 'O servidor apresentou documentação adequada e foi avaliado como apto pelo setor responsável.'
-                            : 'O atestado foi rejeitado por conter informações incompletas ou inconsistentes. Verifique junto ao setor responsável.'}
-                      </Typography>
-                    </Box>
-                  </Collapse>
+                <Box px={3} pb={3}>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    {item.status === 1 ? 'Observação Final' : 'Motivo do Indeferimento'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {historicos[item.id]?.observacao && historicos[item.id]?.observacao.length > 0
+                      ? historicos[item.id].observacao
+                      : item.status === 1
+                        ? 'O servidor apresentou documentação adequada e foi avaliado como apto pelo setor responsável.'
+                        : 'O atestado foi rejeitado por conter informações incompletas ou inconsistentes. Verifique junto ao setor responsável.'}
+                  </Typography>
+                </Box>
+              </Collapse>
                 </Card>
               </Box>
             );
