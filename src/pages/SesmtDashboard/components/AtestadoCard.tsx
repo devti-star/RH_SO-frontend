@@ -7,6 +7,7 @@ import {
   Avatar,
   Checkbox,
   Button,
+  Chip,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -79,10 +80,19 @@ export default function AtestadoCard({
           alt={a.nome}
         />
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" align="left" sx={{ fontWeight: "bold" }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+          <Typography variant="h6" align="left" sx={{ fontWeight: "bold", flex: 1 }}>
             {statusIcon}
             {a.nome}
           </Typography>
+          {perfilAtual === "medico" && (
+            <Chip
+              label={!!a.checklist[8] ? "Mais de 3 dias" : "Menor ou igual a 3 dias"}
+              color="primary"
+              sx={{ ml: 2 }}
+            />
+          )}
+        </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {a.texto}
           </Typography>
@@ -128,14 +138,14 @@ export default function AtestadoCard({
             </Typography>
           )}
           {config.tabs[tab].label === "Análise Pendente" && (
-            <Typography sx={{ color: checklistPreenchido ? "#18b46f" : "#e6a700", fontWeight: 600 }}>
+            <Typography sx={{ color: checklistPreenchido && perfilAtual === 'triagem' ? "#18b46f" : "#b61e00", fontWeight: 600 }}>
               {a.aprovado === "aprovado"
                 ? "Atestado aprovado"
                 : a.aprovado === "reprovado"
                 ? "Atestado reprovado"
-                : checklistPreenchido
+                : (checklistPreenchido && perfilAtual === 'triagem')
                 ? "Checklist preenchido"
-                : "Checklist não preenchido"}
+                : perfilAtual === 'triagem' ? "Checklist não preenchido" : ""}
             </Typography>
           )}
           {config.tabs[tab].label === "Em Progresso" && a.observacao && (

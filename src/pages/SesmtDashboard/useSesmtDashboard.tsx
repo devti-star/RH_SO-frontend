@@ -100,7 +100,7 @@ function getConfig(perfil: Perfil): Config {
       mostraChecklist: () => false,
       statusLabel: (a, tab) =>
         tab === 0 ? (
-          <span style={{ color: "#b66400", fontWeight: 600 }}>
+          <span style={{ color: "#9c7102", fontWeight: 600 }}>
             Mensagem do médico: {a.observacao}
           </span>
         ) : null,
