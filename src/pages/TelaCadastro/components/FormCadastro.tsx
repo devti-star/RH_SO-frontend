@@ -33,7 +33,7 @@ import type { Cadastro } from "../../../models/cadastro.interface";
 import { useNavigate } from "react-router-dom";
 import AceitacaoEmail from "../../../shared/aceitacaoEmail";
 import { Roles } from "../../../models/roles";
-import { cadastrarUsuario } from "./service";
+import { cadastrarUsuario, sleep } from "./service";
 
 import { isCPF } from "brazilian-values";
 
@@ -143,6 +143,10 @@ export default function FormCadastro({
     const resp = await cadastrarUsuario(cadastro);
 
     setMostrarModal(true);
+
+    await sleep(5000);
+
+    navigate("/");
   };
 
   const handleTogglePassword = () => {

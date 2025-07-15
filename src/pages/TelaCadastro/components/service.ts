@@ -33,3 +33,7 @@ export const uploadFotoUsuario = async (userId: number, foto: File): Promise<boo
         return false;
     }
 };
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
