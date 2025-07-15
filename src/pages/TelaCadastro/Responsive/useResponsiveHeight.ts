@@ -12,7 +12,7 @@ export const useResponsiveHeight = () => {
 
   const altura =
     (isMobile && sizes.mobile) ||
-    (isMobileTiny && sizes.mobileTiny) || "580px";
+    (isMobileTiny && sizes.mobileTiny) || "649px";
 
   return altura;
 };
