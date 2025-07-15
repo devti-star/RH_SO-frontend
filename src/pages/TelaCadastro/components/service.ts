@@ -6,7 +6,6 @@ import axios from "axios";
 // 1º passo: cadastra usuário sem foto
 export const cadastrarUsuario = async (dados: Cadastro): Promise<{ success: boolean; userId?: number; error?: any }> => {
     try {
-        console.log(apiURL);
         const resp = await axios.post(`${apiURL}/usuarios`, dados);
         return { success: true, userId: resp.data.userId };
     } catch (error) {
