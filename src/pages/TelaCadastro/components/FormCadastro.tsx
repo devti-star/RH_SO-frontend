@@ -113,6 +113,9 @@ export default function FormCadastro({
       setErroSenhas(true);
       return;
     }
+    else{
+      setErroSenhas(false);
+    }
 
     if (!isCPF(cpf)) {
       setErrorCPF(true);
@@ -138,11 +141,6 @@ export default function FormCadastro({
 
     // cadastrar usuário (dados, sem foto)
     const resp = await cadastrarUsuario(cadastro);
-
-    if (!resp.success || !resp.userId) {
-      // O erro já será mostrado pelo snackbar do service!
-      return;
-    }
 
     setMostrarModal(true);
   };
