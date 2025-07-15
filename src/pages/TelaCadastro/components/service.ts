@@ -6,8 +6,8 @@ import axios from "axios";
 // 1º passo: cadastra usuário sem foto
 export const cadastrarUsuario = async (dados: Cadastro): Promise<{ success: boolean; userId?: number; error?: any }> => {
     try {
-        const { foto, ...dadosSemFoto } = dados; // remove foto
-        const resp = await axios.post(`${apiURL}/usuarios/cadastrar`, dadosSemFoto);
+        console.log(apiURL);
+        const resp = await axios.post(`${apiURL}/usuarios`, dados);
         return { success: true, userId: resp.data.userId };
     } catch (error) {
         const { showSnackbar } = useSnackbarStore.getState();
