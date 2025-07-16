@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -8,6 +8,14 @@ import {
   Checkbox,
   Button,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  TextField,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -18,8 +26,8 @@ import type { Config } from "../useSesmtDashboard";
 import { CHECKLIST } from "../mockData";
 
 // Pegando perfil do usuário logado
-import { AuthService } from "../../../auth/components/form/auth.service"; 
-import { Roles } from "../../../models/roles"; 
+import { AuthService } from "../../../auth/components/form/auth.service";
+import { Roles } from "../../../models/roles";
 
 function mapRoleToPerfil(role: number) {
   switch (role) {
@@ -39,7 +47,7 @@ interface Props {
   isMobile: boolean;
   onExpandChecklist: (a: Atestado) => void;
   onCheckChange: (a: Atestado, idx: number) => void;
-  onAprovar: (id: number) => void;
+  onAprovar: (id: number, qtdDias?: number) => void;
   onJustificar: (id: number, acao: "reprovar" | "ajustes" | "informar") => void;
   setSelectedDoc: (id: number) => void;
   setMobileDocOpen: (open: boolean) => void;
@@ -57,6 +65,12 @@ export default function AtestadoCard({
   setSelectedDoc,
   setMobileDocOpen,
 }: Props) {
+  const [openAprovarModal, setOpenAprovarModal] = useState(false);
+
+  // Modal states
+  const [tipoDeferimento, setTipoDeferimento] = useState<"integral" | "parcial">("integral");
+  const [dias, setDias] = useState<number | "">("");
+
   const checklistPreenchido = a.checklist?.slice(0, -1)?.every?.((v) => v);
   let statusIcon: React.ReactNode = null;
   if (config.tabs[tab].label === "Finalizados") {
@@ -67,6 +81,33 @@ export default function AtestadoCard({
   }
 
   const showChecklistToggle = config.mostraChecklist(tab);
+
+  // Handler para o botão Aprovar
+  const handleAprovarClick = () => {
+    if (perfilAtual === "medico") {
+      setOpenAprovarModal(true);
+    } else {
+      onAprovar(a.id);
+    }
+  };
+
+  // Confirmar a aprovação
+  const handleConfirmarAprovacao = () => {
+    setOpenAprovarModal(false);
+    if (tipoDeferimento === "parcial" && dias) {
+      onAprovar(a.id, Number(dias));
+    } else {
+      onAprovar(a.id);
+    }
+    setTipoDeferimento("integral");
+    setDias("");
+  };
+
+  // Atualiza opção selecionada no radio
+  const handleChangeTipo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTipoDeferimento(e.target.value as "integral" | "parcial");
+    if (e.target.value === "integral") setDias("");
+  };
 
   return (
     <Card variant="outlined" sx={{ boxShadow: 2, borderRadius: 3, overflow: "hidden", minWidth: 310 }}>
@@ -80,19 +121,19 @@ export default function AtestadoCard({
           alt={a.nome}
         />
         <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Typography variant="h6" align="left" sx={{ fontWeight: "bold", flex: 1 }}>
-            {statusIcon}
-            {a.nome}
-          </Typography>
-          {perfilAtual === "medico" && (
-            <Chip
-              label={!!a.checklist[8] ? "Mais de 3 dias" : "Menor ou igual a 3 dias"}
-              color="primary"
-              sx={{ ml: 2 }}
-            />
-          )}
-        </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography variant="h6" align="left" sx={{ fontWeight: "bold", flex: 1 }}>
+              {statusIcon}
+              {a.nome}
+            </Typography>
+            {perfilAtual === "medico" && (
+              <Chip
+                label={!!a.checklist[8] ? "Mais de 3 dias" : "Menor ou igual a 3 dias"}
+                color="primary"
+                sx={{ ml: 2 }}
+              />
+            )}
+          </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {a.texto}
           </Typography>
@@ -180,7 +221,7 @@ export default function AtestadoCard({
                 size="small"
                 sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
                 disabled={!config.canAprovar(a.checklist, a.aprovado)}
-                onClick={() => onAprovar(a.id)}
+                onClick={handleAprovarClick}
               >
                 Aprovar
               </Button>
@@ -223,6 +264,53 @@ export default function AtestadoCard({
           </Box>
         </Box>
       </CardContent>
+      {/* Modal de aprovação customizado para médico */}
+      <Dialog open={openAprovarModal} onClose={() => setOpenAprovarModal(false)}>
+        <DialogTitle>Opções de Deferimento</DialogTitle>
+        <DialogContent>
+          <RadioGroup
+            value={tipoDeferimento}
+            onChange={handleChangeTipo}
+            sx={{ gap: 1, pt: 1 }}
+          >
+            <FormControlLabel
+              value="integral"
+              control={<Radio />}
+              label="Deferir tempo integral do atestado apresentado pelo cidadão"
+            />
+            <FormControlLabel
+              value="parcial"
+              control={<Radio />}
+              label="Especificar tempo de deferimento"
+            />
+          </RadioGroup>
+          {tipoDeferimento === "parcial" && (
+            <Box sx={{ mt: 2 }}>
+              <TextField
+                type="number"
+                label="Quantidade de dias"
+                value={dias}
+                onChange={e => setDias(Number(e.target.value))}
+                fullWidth
+                inputProps={{ min: 1 }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAprovarModal(false)} color="inherit">
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmarAprovacao}
+            color="success"
+            variant="contained"
+            disabled={tipoDeferimento === "parcial" && (!dias || Number(dias) < 1)}
+          >
+            Salvar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
