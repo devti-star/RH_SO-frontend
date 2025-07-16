@@ -20,6 +20,7 @@ export default function SesmtDashboard() {
         justifyContent: "center",
         p: 0,
         overflow: "auto",
+        
       }}
     >
       <Box
@@ -36,6 +37,8 @@ export default function SesmtDashboard() {
           alignItems: "stretch",
           p: 0,
           minWidth: ds.isMobile ? "100vw" : 0,
+          // mb: "5vw", 
+          // mt: "10vw", 
         }}
       >
         <Box
@@ -48,6 +51,7 @@ export default function SesmtDashboard() {
             flexDirection: "column",
             p: ds.isMobile ? "20px 0 0 0" : "38px 0 0 0",
             maxHeight: ds.isMobile ? "none" : "100%",
+            
           }}
         >
           <Box sx={{ px: ds.isMobile ? 2 : 5, height: "100%", display: "flex", flexDirection: "column" }}>
@@ -105,4 +109,3 @@ export default function SesmtDashboard() {
     </Box>
   );
 }
-
