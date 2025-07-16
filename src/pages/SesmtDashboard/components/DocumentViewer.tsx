@@ -3,6 +3,12 @@ import { Box, Typography, IconButton, Dialog } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import type { Atestado } from "../../../models/atestados";
 import PdfViewer from "../../../shared/PdfViewer";
+import { apiURL } from "../../../config";
+
+// Adapte aqui: se no seu objeto for "caminho" ao invés de "arquivo", ajuste conforme seu back!
+function getFileUrl(arquivo?: string) {
+  return arquivo ? `${apiURL}/uploads/${arquivo}` : "";
+}
 
 interface Props {
   docSelecionado: Atestado | undefined;
@@ -17,6 +23,9 @@ export default function DocumentViewer({
   mobileDocOpen,
   setMobileDocOpen,
 }: Props) {
+  // Se no seu model o campo for "caminho", troque para docSelecionado?.caminho
+  const fileUrl = getFileUrl(docSelecionado?.arquivo);
+
   if (isMobile) {
     return (
       <Dialog open={mobileDocOpen} onClose={() => setMobileDocOpen(false)} fullScreen PaperProps={{ style: { background: "#222" } }}>
@@ -27,9 +36,7 @@ export default function DocumentViewer({
           </IconButton>
         </Box>
         <Box sx={{ width: "100vw", height: "100%", bgcolor: "#222", p: 0, pt: 2 }}>
-          {docSelecionado && (
-            <PdfViewer url={`/${docSelecionado.arquivo}`} height="100%" width="100%" />
-          )}
+          {fileUrl && <PdfViewer url={fileUrl} height="100%" width="100%" />}
         </Box>
       </Dialog>
     );
@@ -70,8 +77,8 @@ export default function DocumentViewer({
           overflow: "auto",
         }}
       >
-        {docSelecionado ? (
-          <PdfViewer url={`/${docSelecionado.arquivo}`} height="100%" width="100%" />
+        {fileUrl ? (
+          <PdfViewer url={fileUrl} height="100%" width="100%" />
         ) : (
           "DOCUMENTO"
         )}
@@ -79,4 +86,3 @@ export default function DocumentViewer({
     </Box>
   );
 }
-
