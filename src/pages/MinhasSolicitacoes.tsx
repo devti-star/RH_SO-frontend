@@ -28,6 +28,7 @@ import { AuthService } from '../auth/components/form/auth.service';
 // Tipos
 export interface Documento {
   caminho: string;
+  maior3dias?: boolean;
 }
 export interface Requerimento {
   id: number;
@@ -271,289 +272,307 @@ export default function MinhasSolicitacoes() {
         </Collapse>
 
         <Stack direction="column" spacing={2}>
-          {filteredRequerimentos.map((item, index) => {
-            const isExpanded = expandedCardIndex === index;
-            const statusInfo = getStatusInfo(item.status, item.etapa);
-            const tipo = getTipoRequerimento(item.tipo);
-            const etapa = getEtapa(item.etapa);
+          {filteredRequerimentos.length === 0 ? (
+            <Box p={4} textAlign="center">
+              <Typography color="text.secondary" fontWeight="bold">
+                Não há nenhum documento a ser mostrado.
+              </Typography>
+            </Box>
+          ) : (
+            filteredRequerimentos.map((item, index) => {
+              console.log('DOCUMENTOS:', item.documentos);
+              const isExpanded = expandedCardIndex === index;
+              const statusInfo = getStatusInfo(item.status, item.etapa);
+              const tipo = getTipoRequerimento(item.tipo);
+              const etapa = getEtapa(item.etapa);
 
-            const isAjuste = item.etapa === 3;
-            const isFinalizado = item.status === 0 || item.status === 1;
-            const isEmAndamento = item.status === 2 && !isAjuste;
-            const ano = item.criadoEm ? new Date(item.criadoEm).getFullYear() : '';
-            const protocolo = `${item.id}${ano ? '/' + ano : ''}`;
-            const protocoloNome = `Protocolo ${protocolo}`;
-            const docPath = item.documentos && item.documentos.length > 0 ? item.documentos[0].caminho : undefined;
+              const isAjuste = item.etapa === 3;
+              const isFinalizado = item.status === 0 || item.status === 1;
+              const isEmAndamento = item.status === 2 && !isAjuste;
+              const ano = item.criadoEm ? new Date(item.criadoEm).getFullYear() : '';
+              const protocolo = `${item.id}${ano ? '/' + ano : ''}`;
+              const protocoloNome = `Protocolo ${protocolo}`;
+              const docPath = item.documentos && item.documentos.length > 0 ? item.documentos[0].caminho : undefined;
 
-            // DEVOLUTIVA: busca observacao do último histórico (se houver)
-            const devolutiva = historicos[item.id]?.observacao ||
-              "A solicitação está em andamento. Aguardando próxima avaliação.";
+              // DEVOLUTIVA: busca observacao do último histórico (se houver)
+              const devolutiva = historicos[item.id]?.observacao ||
+                "A solicitação está em andamento. Aguardando próxima avaliação.";
 
-            return (
-              <Box key={item.id}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    borderColor: '#e0e0e0',
-                    borderWidth: 2,
-                    borderRadius: 2
-                  }}
-                >
-                  <CardContent sx={{ pb: 1 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                      <Typography sx={{ fontWeight: 600, fontSize: '1rem', color: '#333' }}>
-                        {protocoloNome}
+              return (
+                <Box key={item.id}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      borderColor: '#e0e0e0',
+                      borderWidth: 2,
+                      borderRadius: 2
+                    }}
+                  >
+                    <CardContent sx={{ pb: 1 }}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                        <Typography sx={{ fontWeight: 600, fontSize: '1rem', color: '#333' }}>
+                          {protocoloNome}
+                        </Typography>
+                        <Chip label={statusInfo.label} color={statusInfo.cor as any} />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Tipo: {tipo}
                       </Typography>
-                      <Chip label={statusInfo.label} color={statusInfo.cor as any} />
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Tipo: {tipo}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Etapa atual: {etapa}
-                    </Typography>
-                  </CardContent>
+                      <Typography variant="body2" color="text.secondary">
+                        Etapa atual: {etapa}
+                      </Typography>
+                      {item.etapa === 1 &&
+                        item.documentos?.[0]?.maior3dias === true && (
+                          <Box sx={{ mt: 1, mb: 2, p: 2, bgcolor: "#fff3cd", borderRadius: 2, border: "1px solid #ffecb5" }}>
+                            <Typography color="warning.main" fontWeight={600}>
+                              Atenção: compareça presencialmente ao setor para exame médico. Seu atestado indica período superior a 3 dias.
+                            </Typography>
+                          </Box>
+                        )}
 
-                  <CardActions sx={{ pl: 2, pb: 2 }}>
-                    {docPath && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => openFile(docPath)}
-                      >
-                        Ver Documento
-                      </Button>
-                    )}
+                    </CardContent>
 
-                    {isFinalizado && (
-                      <>
+                    <CardActions sx={{ pl: 2, pb: 2 }}>
+                      {docPath && (
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => setObservacaoIndex(observacaoIndex === index ? null : index)}
+                          onClick={() => openFile(docPath)}
                         >
-                          {item.status === 1 ? 'Ver Observação' : 'Ver motivo do indeferimento'}
+                          Ver Documento
                         </Button>
-                        {/* Botão solicitado */}
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="primary"
-                          sx={{ ml: 1 }}
-                          onClick={() => { /* ação futura */ }}
-                        >
-                          Gerar documento SESMT assinado
-                        </Button>
-                      </>
-                    )}
-
-                    {isEmAndamento && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => setExpandedCardIndex(isExpanded ? null : index)}
-                      >
-                        Ver Progresso
-                      </Button>
-                    )}
-
-                    {isAjuste && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => setCorrecaoIndex(correcaoIndex === index ? null : index)}
-                      >
-                        Corrigir
-                      </Button>
-                    )}
-                  </CardActions>
-
-                  {/* Área de correção (upload novo documento) */}
-                  <Collapse in={correcaoIndex === index}>
-                    <Box px={3} pb={3} pt={1}>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                        Observação para correção
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" mb={2}>
-                        {item.observacao && item.observacao.length > 0
-                          ? item.observacao
-                          : "O documento enviado está incompleto ou ilegível. Por favor, reenvie com os dados corretos."}
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        label="Observações adicionais (opcional)"
-                        multiline
-                        minRows={3}
-                        variant="outlined"
-                        size="small"
-                        sx={{ mb: 2 }}
-                      />
-
-                      {/* Botão de upload */}
-                      <Button
-                        variant="contained"
-                        component="label"
-                        fullWidth
-                        sx={{ mb: 2 }}
-                      >
-                        Enviar novo documento
-                        <input
-                          type="file"
-                          hidden
-                          accept="application/pdf,image/*"
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const file = e.target.files?.[0];
-                            if (file) setCorrecaoFile(file);
-                          }}
-                        />
-                      </Button>
-
-                      {/* Exibição do nome do arquivo e X para excluir */}
-                      {correcaoFile && (
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="space-between"
-                          sx={{
-                            background: "#f9f9f9",
-                            borderRadius: 1,
-                            px: 2,
-                            py: 1,
-                            mb: 2,
-                            boxShadow: 1,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              maxWidth: '80%',
-                            }}
-                          >
-                            {correcaoFile.name}
-                          </Typography>
-                          <IconButton
-                            aria-label="Remover arquivo"
-                            size="small"
-                            onClick={() => setCorrecaoFile(null)}
-                            sx={{ ml: 2 }}
-                          >
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
                       )}
 
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        fullWidth
-                        disabled={!correcaoFile}
-                        onClick={() => handleCorrecao(item.id)}
-                      >
-                        Salvar
-                      </Button>
-                    </Box>
-                  </Collapse>
+                      {isFinalizado && (
+                        <>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setObservacaoIndex(observacaoIndex === index ? null : index)}
+                          >
+                            {item.status === 1 ? 'Ver Observação' : 'Ver motivo do indeferimento'}
+                          </Button>
+                          {/* Botão solicitado */}
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            sx={{ ml: 1 }}
+                            onClick={() => { /* ação futura */ }}
+                          >
+                            Gerar documento SESMT assinado
+                          </Button>
+                        </>
+                      )}
 
-                  {/* Progresso das etapas */}
-                  <Collapse in={isExpanded}>
-                    <Box px={3} pb={3} position="relative">
-                      <Box display="flex" justifyContent="space-between" alignItems="center" position="relative">
-                        {["Triagem", "Médico", "Enfermeiro"].map((nomeEtapa, i) => {
-                          let circleColor = "#e0e0e0";
-                          let statusLabel = "Pendente";
-                          let statusDescricao = "Esta etapa ainda não foi iniciada.";
-                          if (i < item.etapa) {
-                            circleColor = "#4caf50";
-                            statusLabel = "Aprovado";
-                            statusDescricao = "Etapa aprovada com sucesso.";
-                          } else if (i === item.etapa) {
-                            circleColor = "#ff9800";
-                            statusLabel = "Em andamento";
-                            statusDescricao = "Aguardando aprovação desta etapa.";
-                          }
+                      {isEmAndamento && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => setExpandedCardIndex(isExpanded ? null : index)}
+                        >
+                          Ver Progresso
+                        </Button>
+                      )}
 
-                          return (
-                            <Box
-                              key={nomeEtapa}
-                              flex={1}
-                              textAlign="center"
-                              position="relative"
-                              sx={{ paddingTop: '48px' }}
+                      {isAjuste && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => setCorrecaoIndex(correcaoIndex === index ? null : index)}
+                        >
+                          Corrigir
+                        </Button>
+                      )}
+                    </CardActions>
+
+                    {/* Área de correção (upload novo documento) */}
+                    <Collapse in={correcaoIndex === index}>
+                      <Box px={3} pb={3} pt={1}>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                          Observação para correção
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" mb={2}>
+                          {historicos[item.id]?.observacao && historicos[item.id]?.observacao.length > 0
+                            ? historicos[item.id].observacao
+                            : "O documento enviado está incompleto ou ilegível. Por favor, reenvie com os dados corretos."}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          label="Observações adicionais (opcional)"
+                          multiline
+                          minRows={3}
+                          variant="outlined"
+                          size="small"
+                          sx={{ mb: 2 }}
+                        />
+
+                        {/* Botão de upload */}
+                        <Button
+                          variant="contained"
+                          component="label"
+                          fullWidth
+                          sx={{ mb: 2 }}
+                        >
+                          Enviar novo documento
+                          <input
+                            type="file"
+                            hidden
+                            accept="application/pdf,image/*"
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const file = e.target.files?.[0];
+                              if (file) setCorrecaoFile(file);
+                            }}
+                          />
+                        </Button>
+
+                        {/* Exibição do nome do arquivo e X para excluir */}
+                        {correcaoFile && (
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            sx={{
+                              background: "#f9f9f9",
+                              borderRadius: 1,
+                              px: 2,
+                              py: 1,
+                              mb: 2,
+                              boxShadow: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '80%',
+                              }}
                             >
-                              {i < 2 && (
-                                <Box
-                                  sx={{
-                                    position: 'absolute',
-                                    top: '30px',
-                                    left: '50%',
-                                    width: '100%',
-                                    height: 2,
-                                    backgroundColor: circleColor,
-                                    zIndex: 0,
-                                    transform: 'translateX(0%)',
-                                  }}
-                                />
-                              )}
-                              <Tooltip title={statusDescricao} arrow>
-                                <Box
-                                  sx={{
-                                    position: 'absolute',
-                                    top: '10px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: '50%',
-                                    backgroundColor: 'white',
-                                    border: `3px solid ${circleColor}`,
-                                    zIndex: 2,
-                                    cursor: 'pointer',
-                                  }}
-                                />
-                              </Tooltip>
-                              <Typography variant="subtitle2" fontWeight="bold" mt={1}>
-                                {statusLabel}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {nomeEtapa}
-                              </Typography>
-                            </Box>
-                          );
-                        })}
+                              {correcaoFile.name}
+                            </Typography>
+                            <IconButton
+                              aria-label="Remover arquivo"
+                              size="small"
+                              onClick={() => setCorrecaoFile(null)}
+                              sx={{ ml: 2 }}
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
+
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          fullWidth
+                          disabled={!correcaoFile}
+                          onClick={() => handleCorrecao(item.id)}
+                        >
+                          Salvar
+                        </Button>
                       </Box>
-                      <Box mt={4}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          Devolutiva
+                    </Collapse>
+
+                    {/* Progresso das etapas */}
+                    <Collapse in={isExpanded}>
+                      <Box px={3} pb={3} position="relative">
+                        <Box display="flex" justifyContent="space-between" alignItems="center" position="relative">
+                          {["Triagem", "Médico", "Enfermeiro"].map((nomeEtapa, i) => {
+                            let circleColor = "#e0e0e0";
+                            let statusLabel = "Pendente";
+                            let statusDescricao = "Esta etapa ainda não foi iniciada.";
+                            if (i < item.etapa) {
+                              circleColor = "#4caf50";
+                              statusLabel = "Aprovado";
+                              statusDescricao = "Etapa aprovada com sucesso.";
+                            } else if (i === item.etapa) {
+                              circleColor = "#ff9800";
+                              statusLabel = "Em andamento";
+                              statusDescricao = "Aguardando aprovação desta etapa.";
+                            }
+
+                            return (
+                              <Box
+                                key={nomeEtapa}
+                                flex={1}
+                                textAlign="center"
+                                position="relative"
+                                sx={{ paddingTop: '48px' }}
+                              >
+                                {i < 2 && (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      top: '30px',
+                                      left: '50%',
+                                      width: '100%',
+                                      height: 2,
+                                      backgroundColor: circleColor,
+                                      zIndex: 0,
+                                      transform: 'translateX(0%)',
+                                    }}
+                                  />
+                                )}
+                                <Tooltip title={statusDescricao} arrow>
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      top: '10px',
+                                      left: '50%',
+                                      transform: 'translateX(-50%)',
+                                      width: 32,
+                                      height: 32,
+                                      borderRadius: '50%',
+                                      backgroundColor: 'white',
+                                      border: `3px solid ${circleColor}`,
+                                      zIndex: 2,
+                                      cursor: 'pointer',
+                                    }}
+                                  />
+                                </Tooltip>
+                                <Typography variant="subtitle2" fontWeight="bold" mt={1}>
+                                  {statusLabel}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {nomeEtapa}
+                                </Typography>
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                        <Box mt={4}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            Devolutiva
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {devolutiva}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Collapse>
+
+                    {/* Observação Final ou Motivo do Indeferimento */}
+                    <Collapse in={observacaoIndex === index}>
+                      <Box px={3} pb={3}>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                          {item.status === 1 ? 'Observação Final' : 'Motivo do Indeferimento'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {devolutiva}
+                          {historicos[item.id]?.observacao && historicos[item.id]?.observacao.length > 0
+                            ? historicos[item.id].observacao
+                            : item.status === 1
+                              ? 'O servidor apresentou documentação adequada e foi avaliado como apto pelo setor responsável.'
+                              : 'O atestado foi rejeitado por conter informações incompletas ou inconsistentes. Verifique junto ao setor responsável.'}
                         </Typography>
                       </Box>
-                    </Box>
-                  </Collapse>
-
-                  {/* Observação Final ou Motivo do Indeferimento */}
-                  <Collapse in={observacaoIndex === index}>
-                <Box px={3} pb={3}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    {item.status === 1 ? 'Observação Final' : 'Motivo do Indeferimento'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {historicos[item.id]?.observacao && historicos[item.id]?.observacao.length > 0
-                      ? historicos[item.id].observacao
-                      : item.status === 1
-                        ? 'O servidor apresentou documentação adequada e foi avaliado como apto pelo setor responsável.'
-                        : 'O atestado foi rejeitado por conter informações incompletas ou inconsistentes. Verifique junto ao setor responsável.'}
-                  </Typography>
+                    </Collapse>
+                  </Card>
                 </Box>
-              </Collapse>
-                </Card>
-              </Box>
-            );
-          })}
+              );
+            })
+          )}
         </Stack>
       </Container>
 
