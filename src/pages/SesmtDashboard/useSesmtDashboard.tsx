@@ -71,7 +71,18 @@ function getConfig(perfil: Perfil): Config {
       },
       observacaoStyle: (tab) => (tab === 2 ? { color: "#b68400" } : { color: "#1277be" }),
       botoes: (tab, checklist, aprovado) => (tab === 0 ? ["aprovar", "reprovar", "ajustes"] : []),
-      canAprovar: (checklist, aprovado) => checklist.slice(0, -1).every((c) => c) && !aprovado,
+      canAprovar: (checklist, aprovado) => {
+        let ok = !aprovado;
+        let pular = 1;
+        for (let i = 0; i < checklist.length-1; i++) {
+          if (pular === i){
+            pular = pular*4;
+            continue;
+          }
+          ok=ok && checklist[i];
+        }
+        return ok;
+      }
   };
   if (perfil === "medico")
   return {
@@ -204,7 +215,6 @@ export default function useSesmtDashboard() {
       await atualizarRequerimento(a.requerimentoId, {
         documentos: [{ id: a.id, checklist: checklistObj }]
       });
-      console.log("Aqui");
     } catch (err) {
       console.error("Erro ao atualizar checklist:", err);
     }
