@@ -39,7 +39,7 @@ export class AuthService {
       let usuario = response_usuario.data;
       usuario = {...usuario, ...token};
       if (usuario) AuthService.servicoArmazenamento.set("usuario", usuario);
-      console.log(usuario);
+      console.table(usuario);
 
       if (usuario.role === Roles.PADRAO) {
         navigate("/MinhasSolicitacoes");
