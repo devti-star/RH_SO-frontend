@@ -71,7 +71,7 @@ export default function AtestadoCard({
   const [tipoDeferimento, setTipoDeferimento] = useState<"integral" | "parcial">("integral");
   const [dias, setDias] = useState<number | "">("");
 
-  const checklistPreenchido = a.checklist?.slice(0, -1)?.every?.((v) => v);
+  const checklistPreenchido = config.canAprovar(a.checklist, a.aprovado)//a.checklist?.slice(0, -1)?.every?.((v) => v);
   let statusIcon: React.ReactNode = null;
   if (config.tabs[tab].label === "Finalizados") {
     if (a.aprovado === "aprovado")
