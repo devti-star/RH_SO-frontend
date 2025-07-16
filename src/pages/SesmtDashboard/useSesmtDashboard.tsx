@@ -225,9 +225,11 @@ export default function useSesmtDashboard() {
   };
 
   // Aprovação principal (fluxo por perfil)
-  const handleAprovar = async (id: number) => {
+  const handleAprovar = async (id: number, qtdDias?: string) => {
     const atestado = atestados.find((a) => a.id === id);
     if (!atestado) return;
+
+    
 
     const checklistObj = [
       {
@@ -246,6 +248,7 @@ export default function useSesmtDashboard() {
     let novoStatus: number = 2;
     let novaEtapa: number = 0;
     let concluido: boolean | undefined = undefined;
+    let assinatura: string | undefined = undefined;
 
     if (perfilAtual === "triagem") {
       novoStatus = 2; // EM_PROCESSO
@@ -254,6 +257,8 @@ export default function useSesmtDashboard() {
       novoStatus = 1; // DEFERIDO
       novaEtapa = 1;
       concluido = true; // Finaliza
+      assinatura = `Dr. ${usuario?.nomeCompleto}\ncrm: ${usuario?.crm}`;
+      
     }
 
     try {
@@ -264,9 +269,11 @@ export default function useSesmtDashboard() {
           {
             id: atestado.id,
             checklist: checklistObj,
-            ...(concluido !== undefined && { concluido })
+            ...(concluido !== undefined && { concluido }),
+            ...(qtdDias !== undefined && { qtdDias }) 
           }
-        ]
+        ],
+        ...(assinatura !== undefined && { assinatura })
       });
       await carregarAtestados();
     } catch (err) {

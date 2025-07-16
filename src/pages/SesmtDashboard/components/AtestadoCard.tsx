@@ -47,7 +47,7 @@ interface Props {
   isMobile: boolean;
   onExpandChecklist: (a: Atestado) => void;
   onCheckChange: (a: Atestado, idx: number) => void;
-  onAprovar: (id: number, qtdDias?: number) => void;
+  onAprovar: (id: number, qtdDias?: string) => void;
   onJustificar: (id: number, acao: "reprovar" | "ajustes" | "informar") => void;
   setSelectedDoc: (id: number) => void;
   setMobileDocOpen: (open: boolean) => void;
@@ -95,9 +95,9 @@ export default function AtestadoCard({
   const handleConfirmarAprovacao = () => {
     setOpenAprovarModal(false);
     if (tipoDeferimento === "parcial" && dias) {
-      onAprovar(a.id, Number(dias));
+      onAprovar(a.id, `Deferido por ${dias} dias`);
     } else {
-      onAprovar(a.id);
+      onAprovar(a.id, "Deferido integralmente");
     }
     setTipoDeferimento("integral");
     setDias("");
