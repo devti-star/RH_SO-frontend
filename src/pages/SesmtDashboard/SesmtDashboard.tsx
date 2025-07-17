@@ -1,5 +1,5 @@
 import React from "react";
-import { Box } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import useSesmtDashboard from "./useSesmtDashboard";
 import TabsNavigation from "./components/TabsNavigation";
 import AtestadoList from "./components/AtestadoList";
@@ -8,19 +8,27 @@ import JustifyDialog from "./components/JustifyDialog";
 
 export default function SesmtDashboard() {
   const ds = useSesmtDashboard();
+  const theme = useTheme();
+
+  // Valores típicos de header/footer fixos; ajuste conforme seu layout real!
+  const isMobile = ds.isMobile ?? useMediaQuery(theme.breakpoints.down("sm"));
+  const HEADER_HEIGHT = isMobile ? 56 : 64; // px
+  const FOOTER_HEIGHT = isMobile ? 62 : 72; // px
 
   return (
     <Box
       sx={{
         width: "100vw",
-        height: "85vh",
+        minHeight: "100vh",
         bgcolor: "#f8f8f8",
         display: "flex",
         alignItems: ds.isMobile ? "flex-start" : "center",
         justifyContent: "center",
         p: 0,
         overflow: "auto",
-        
+        boxSizing: "border-box",
+        // Reservando espaço do header/footer
+        paddingBottom: "7vh",
       }}
     >
       <Box
@@ -37,8 +45,6 @@ export default function SesmtDashboard() {
           alignItems: "stretch",
           p: 0,
           minWidth: ds.isMobile ? "100vw" : 0,
-          // mb: "5vw", 
-          // mt: "10vw", 
         }}
       >
         <Box
@@ -51,7 +57,6 @@ export default function SesmtDashboard() {
             flexDirection: "column",
             p: ds.isMobile ? "20px 0 0 0" : "38px 0 0 0",
             maxHeight: ds.isMobile ? "none" : "100%",
-            
           }}
         >
           <Box sx={{ px: ds.isMobile ? 2 : 5, height: "100%", display: "flex", flexDirection: "column" }}>

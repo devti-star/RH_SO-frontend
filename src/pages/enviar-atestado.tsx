@@ -232,7 +232,7 @@ const EnvioAtestado = () => {
             overflow: 'hidden',
             transition: TRANSITION,
             minHeight: 420,
-            mb: isMobile ? '10vw' : 0, // <- ADICIONADO!
+            mb: isMobile ? '10vw' : 0, 
           }}
         >
 
@@ -274,7 +274,7 @@ const EnvioAtestado = () => {
               justifyContent: file && !isMobile ? 'flex-start' : 'center',
               transition: TRANSITION,
               height: '100%',
-              marginRight: '1vw',
+              // marginRight: file && !isMobile  ? '0vw' : 0,
             }}
           >
             <Stack

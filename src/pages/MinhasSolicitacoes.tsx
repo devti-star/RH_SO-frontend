@@ -360,7 +360,7 @@ export default function MinhasSolicitacoes() {
                             sx={{ ml: 1 }}
                             onClick={() => { /* ação futura */ }}
                           >
-                            Gerar documento SESMT assinado
+                            Documento SESMT
                           </Button>
                         </>
                       )}
