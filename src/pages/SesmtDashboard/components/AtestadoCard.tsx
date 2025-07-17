@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -24,10 +24,12 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import type { Atestado } from "../../../models/atestados";
 import type { Config } from "../useSesmtDashboard";
 import { CHECKLIST } from "../mockData";
+import { getUltimoHistorico } from "../sesmt.service";
 
 // Pegando perfil do usuário logado
 import { AuthService } from "../../../auth/components/form/auth.service";
 import { Roles } from "../../../models/roles";
+import type { Historico } from "../../../models/ultimo-requerimento";
 
 function mapRoleToPerfil(role: number) {
   switch (role) {
@@ -72,6 +74,7 @@ export default function AtestadoCard({
   // Modal states
   const [tipoDeferimento, setTipoDeferimento] = useState<"integral" | "parcial">("integral");
   const [dias, setDias] = useState<number | "">("");
+  const [historico, setHistorico] = useState<Historico | null>(null);
 
   const checklistPreenchido = config.canAprovar(a.checklist, a.aprovado)//a.checklist?.slice(0, -1)?.every?.((v) => v);
   let statusIcon: React.ReactNode = null;
@@ -83,6 +86,14 @@ export default function AtestadoCard({
   }
 
   const showChecklistToggle = config.mostraChecklist(tab);
+
+  useEffect(() => {
+    const fetchHistorico = async () => {
+      const resultado = await getUltimoHistorico(a.requerimentoId);
+      setHistorico(resultado);
+    };
+    fetchHistorico();
+  }, [a.requerimentoId]);
 
   // Handler para o botão Aprovar
   const handleAprovarClick = () => {
@@ -126,7 +137,9 @@ export default function AtestadoCard({
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <Typography variant="h6" align="left" sx={{ fontWeight: "bold", flex: 1 }}>
               {statusIcon}
-              {a.nome}
+              {historico
+                ? `Protocolo ${a.requerimentoId}/${new Date(historico.dataRegistro).getFullYear()}`
+                : `Protocolo ${a.requerimentoId}` /* ou "" ou algum loading, se preferir */}
             </Typography>
             {perfilAtual === "medico" && (
               <Chip
@@ -136,6 +149,9 @@ export default function AtestadoCard({
               />
             )}
           </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {`Solicitante: ${a.nome}`}
+          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {a.texto}
           </Typography>
