@@ -258,7 +258,7 @@ export default function useSesmtDashboard() {
       novoStatus = 1; // DEFERIDO
       novaEtapa = 1;
       concluido = true; // Finaliza
-      assinatura = `Dr. ${usuario?.nomeCompleto}\ncrm: ${usuario?.crm}`;
+      assinatura = `Dr. ${usuario?.nomeCompleto}<br>CRM: ${usuario?.crm}`;
       
     }
 
