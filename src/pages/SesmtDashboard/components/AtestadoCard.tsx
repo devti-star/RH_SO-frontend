@@ -51,6 +51,7 @@ interface Props {
   onJustificar: (id: number, acao: "reprovar" | "ajustes" | "informar") => void;
   setSelectedDoc: (id: number) => void;
   setMobileDocOpen: (open: boolean) => void;
+  handleGerarDocumento: (id: number) => void;
 }
 
 export default function AtestadoCard({
@@ -64,6 +65,7 @@ export default function AtestadoCard({
   onJustificar,
   setSelectedDoc,
   setMobileDocOpen,
+  handleGerarDocumento,
 }: Props) {
   const [openAprovarModal, setOpenAprovarModal] = useState(false);
 
@@ -218,7 +220,7 @@ export default function AtestadoCard({
               <Button
                 variant="outlined"
                 size="small"
-                //onClick=
+                onClick={() => handleGerarDocumento(a.id)}
                 sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
               >
                 GERAR DOCUMENTO ASSINADO

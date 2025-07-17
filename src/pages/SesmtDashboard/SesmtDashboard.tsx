@@ -74,6 +74,7 @@ export default function SesmtDashboard() {
               onJustificar={ds.handleJustificar}
               setSelectedDoc={ds.setSelectedDoc}
               setMobileDocOpen={ds.setMobileDocOpen}
+              handleGerarDocumento={ds.handleGerarDocumento}
             />
           </Box>
         </Box>

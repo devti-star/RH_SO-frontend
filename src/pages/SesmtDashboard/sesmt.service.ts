@@ -28,3 +28,10 @@ export async function atualizarRequerimento(id: number, update: UpdateRequerimen
   if (resp.status !== 200) throw new Error("Erro ao atualizar requerimento");
   return resp.data;
 }
+
+export async function getGerarRequerimentoPdf(id: number): Promise<Blob> {
+  const api = ApiService.getInstance();
+  const resp = await api.get(`/requerimentos/${id}/pdf`, { responseType: "blob" });
+  if (resp.status !== 200) throw new Error("Erro ao gerar PDF do requerimento");
+  return resp.data;
+}
