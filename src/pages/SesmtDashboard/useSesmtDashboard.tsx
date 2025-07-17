@@ -2,11 +2,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Atestado, Perfil, Status, Aprovacao } from "../../models/atestados";
 import { CHECKLIST } from "./mockData";
-import { solicitarExameMedico, getRequerimentos, atualizarRequerimento } from "./sesmt.service";
+import { solicitarExameMedico, getRequerimentos, atualizarRequerimento, getGerarRequerimentoPdf } from "./sesmt.service";
 import { mapRequerimentosParaAtestados } from "./utils/mapper";
 import { AuthService } from "../../auth/components/form/auth.service";
 import { Roles } from "../../models/roles";
 import type { UpdateRequerimentoPayload } from "../../models/update-requerimento.interface";
+import { useSnackbarStore } from "../../shared/useSnackbar";
 
 // -- Auxiliares de perfil e configuração
 function mapRoleToPerfil(role: number): Perfil {
@@ -349,6 +350,27 @@ export default function useSesmtDashboard() {
   };
 
   const docSelecionado = atestados.find((a) => a.id === selectedDoc);
+ 
+  const handleGerarDocumento = async (id: number) => {
+    try {
+      // Faz a requisição e recebe o PDF como blob
+      const documentoBlob = await getGerarRequerimentoPdf(id);
+
+      // Cria uma URL temporária para o blob
+      const blobUrl = URL.createObjectURL(documentoBlob);
+
+      // Abre em uma nova aba
+      window.open(blobUrl, '_blank');
+
+      // (Opcional) liberar o objeto depois de um tempo para evitar vazamento de memória
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch (err) {
+      // Mostra erro para o usuário, se desejar
+      const { showSnackbar } = useSnackbarStore.getState();
+        showSnackbar(`Erro ao gerar pdf`, "error");
+        console.log(err);
+      }
+  }
 
   return {
     theme,
@@ -379,5 +401,6 @@ export default function useSesmtDashboard() {
     acaoJustificar,
     docSelecionado,
     loading,
+    handleGerarDocumento
   };
 }

@@ -39,11 +39,8 @@ const EnvioAtestado = () => {
   const [alertModalOpen, setAlertModalOpen] = useState(true);
 
   const [fileError, setFileError] = useState(false);
-  const [obsError, setObsError] = useState(false);
 
   const isMobile = useMediaQuery('(max-width:900px)');
-
-  // Ref para o input de arquivo
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCloseAlertModal = () => {
@@ -69,7 +66,6 @@ const EnvioAtestado = () => {
     setFile(null);
     setPreviewUrl(null);
     setFileError(false);
-    // Limpa o valor do input para permitir anexar o mesmo arquivo novamente
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -77,7 +73,6 @@ const EnvioAtestado = () => {
 
   const handleObservacaoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setObservacao(e.target.value);
-    setObsError(false);
   };
 
   const handleSubmit = () => {
@@ -86,10 +81,6 @@ const EnvioAtestado = () => {
       setFileError(true);
       erro = true;
     }
-    // if (!observacao.trim()) {
-    //   setObsError(true);
-    //   erro = true;
-    // }
     if (erro) return;
     setModalOpen(true);
   };
@@ -97,7 +88,7 @@ const EnvioAtestado = () => {
   const handleConfirm = async () => {
     const { showSnackbar } = useSnackbarStore.getState();
 
-    if (!file /*|| !observacao.trim()*/) {
+    if (!file) {
       showSnackbar('Preencha todos os campos obrigatórios.', 'error');
       return;
     }
@@ -129,7 +120,6 @@ const EnvioAtestado = () => {
       setFile(null);
       setPreviewUrl(null);
       setObservacao('');
-      // Limpa o input após envio com sucesso
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -151,12 +141,12 @@ const EnvioAtestado = () => {
         />
       );
     } else if (file.type === 'application/pdf') {
-      return <PdfViewer url={previewUrl} height="500px" width="100%" />;
+      return <PdfViewer url={previewUrl} height={isMobile ? "280px" : "500px"} width="100%" />;
     }
     return <Typography variant="body2">Arquivo não suportado para visualização.</Typography>;
   };
 
-  const canSubmit = !!file /*&& !!observacao.trim()*/;
+  const canSubmit = !!file;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -234,20 +224,28 @@ const EnvioAtestado = () => {
       </Dialog>
 
       <Paper
-        elevation={4}
-        sx={{
-          p: 3,
-          borderRadius: 4,
-          backgroundColor: '#f9f9f9',
-          overflow: 'hidden',
-          transition: TRANSITION,
-          minHeight: 420,
-        }}
-      >
+          elevation={4}
+          sx={{
+            p: isMobile ? 1.5 : 3,
+            borderRadius: 4,
+            backgroundColor: '#f9f9f9',
+            overflow: 'hidden',
+            transition: TRANSITION,
+            minHeight: 420,
+            mb: isMobile ? '10vw' : 0, 
+          }}
+        >
+
         <Typography
           variant="h4"
           gutterBottom
-          sx={{ fontWeight: 600, color: '#173557', textAlign: 'center' }}
+          sx={{
+            fontWeight: 600,
+            color: '#173557',
+            textAlign: 'center',
+            fontSize: isMobile ? 22 : 34,
+            mb: isMobile ? 2 : 4,
+          }}
         >
           Envio de atestado para o SESMT
         </Typography>
@@ -262,12 +260,13 @@ const EnvioAtestado = () => {
             minHeight: 300,
             height: file ? 'auto' : 'calc(60vh - 80px)',
             transition: TRANSITION,
+            gap: isMobile ? 2 : 0,
           }}
         >
-          {/* Inputs - Centralizado antes do upload, lateral após */}
+          {/* Inputs */}
           <Box
             sx={{
-              width: file && !isMobile ? '35%' : '60%',
+              width: file && !isMobile ? '35%' : '100%',
               maxWidth: 700,
               mx: file && !isMobile ? 0 : 'auto',
               display: 'flex',
@@ -275,6 +274,7 @@ const EnvioAtestado = () => {
               justifyContent: file && !isMobile ? 'flex-start' : 'center',
               transition: TRANSITION,
               height: '100%',
+              // marginRight: file && !isMobile  ? '0vw' : 0,
             }}
           >
             <Stack
@@ -361,7 +361,7 @@ const EnvioAtestado = () => {
                 />
               )}
 
-                <TextField
+              <TextField
                 label="Observações"
                 multiline
                 rows={4}
@@ -372,24 +372,27 @@ const EnvioAtestado = () => {
                 sx={{ transition: TRANSITION }}
               />
 
-              <Button
-                variant="contained"
-                fullWidth
-                sx={{
-                  backgroundColor: canSubmit ? '#173557' : '#aaa',
-                  ':hover': { backgroundColor: canSubmit ? '#0f223a' : '#aaa' },
-                  height: 44,
-                  fontWeight: 600,
-                  transition: TRANSITION,
-                }}
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-              >
-                Enviar
-              </Button>
+              {/* Mobile: NÃO renderiza botão aqui se houver arquivo. No desktop, botão aqui sempre */}
+              {(!isMobile || !file) && (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    backgroundColor: canSubmit ? '#173557' : '#aaa',
+                    ':hover': { backgroundColor: canSubmit ? '#0f223a' : '#aaa' },
+                    height: 44,
+                    fontWeight: 600,
+                    transition: TRANSITION,
+                  }}
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                >
+                  Enviar
+                </Button>
+              )}
             </Stack>
           </Box>
-          {/* Preview do documento (só aparece quando há arquivo) */}
+          {/* Preview do documento */}
           {file && (
             <Box
               sx={{
@@ -397,6 +400,7 @@ const EnvioAtestado = () => {
                 pl: file && !isMobile ? 2 : 0,
                 pr: 0,
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 transition: TRANSITION,
@@ -412,12 +416,31 @@ const EnvioAtestado = () => {
                   backgroundColor: '#fff',
                   boxShadow: 2,
                   width: '100%',
-                  minHeight: 220,
+                  minHeight: isMobile ? 150 : 220,
                   transition: TRANSITION,
                 }}
               >
                 {renderPreview()}
               </Box>
+              {/* Mobile: se houver arquivo, botão Enviar aparece AQUI */}
+              {isMobile && (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    backgroundColor: canSubmit ? '#173557' : '#aaa',
+                    ':hover': { backgroundColor: canSubmit ? '#0f223a' : '#aaa' },
+                    height: 44,
+                    fontWeight: 600,
+                    transition: TRANSITION,
+                    mt: 2,
+                  }}
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                >
+                  Enviar
+                </Button>
+              )}
             </Box>
           )}
         </Box>

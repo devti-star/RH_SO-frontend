@@ -18,6 +18,7 @@ interface Props {
   onJustificar: (id: number, acao: "reprovar" | "ajustes" | "informar") => void;
   setSelectedDoc: (id: number) => void;
   setMobileDocOpen: (open: boolean) => void;
+  handleGerarDocumento: (id: number) => void;
 }
 
 export default function AtestadoList({
@@ -34,6 +35,7 @@ export default function AtestadoList({
   onJustificar,
   setSelectedDoc,
   setMobileDocOpen,
+  handleGerarDocumento
 }: Props) {
   return (
     <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: isMobile ? 0 : 1 }}>
@@ -56,6 +58,7 @@ export default function AtestadoList({
             onJustificar={onJustificar}
             setSelectedDoc={setSelectedDoc}
             setMobileDocOpen={setMobileDocOpen}
+            handleGerarDocumento={handleGerarDocumento}
           />
         ))}
         {totalPages > 1 && (

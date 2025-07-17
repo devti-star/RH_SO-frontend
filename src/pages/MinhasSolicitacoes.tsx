@@ -24,6 +24,8 @@ import PdfViewer from '../shared/PdfViewer';
 import axios from 'axios';
 import { apiURL } from '../config';
 import { AuthService } from '../auth/components/form/auth.service';
+import { ApiService } from '../interceptors/Api/api.intercept';
+import { useSnackbarStore } from '../shared/useSnackbar';
 
 // Tipos
 export interface Documento {
@@ -107,6 +109,13 @@ async function fetchLastHistorico(requerimentoId: number) {
   } catch (e) {
     return null;
   }
+}
+
+async function getGerarRequerimentoPdf(id: number): Promise<Blob> {
+  const api = ApiService.getInstance();
+  const resp = await api.get(`/requerimentos/${id}/pdf`, { responseType: "blob" });
+  if (resp.status !== 200) throw new Error("Erro ao gerar PDF do requerimento");
+  return resp.data as Blob;
 }
 
 // ---------- Componente ----------
@@ -227,6 +236,27 @@ export default function MinhasSolicitacoes() {
       alert('Falha ao enviar documento ou atualizar requisição.');
     }
   };
+
+  const handleGerarDocumento = async (id: number) => {
+    try {
+      // Faz a requisição e recebe o PDF como blob
+      const documentoBlob = await getGerarRequerimentoPdf(id);
+
+      // Cria uma URL temporária para o blob
+      const blobUrl = URL.createObjectURL(documentoBlob);
+
+      // Abre em uma nova aba
+      window.open(blobUrl, '_blank');
+
+      // (Opcional) liberar o objeto depois de um tempo para evitar vazamento de memória
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch (err) {
+      // Mostra erro para o usuário, se desejar
+      const { showSnackbar } = useSnackbarStore.getState();
+        showSnackbar(`Erro ao gerar pdf`, "error");
+        console.log(err);
+    }
+  }
 
   if (loading) {
     return <Box p={4}><Typography>Carregando...</Typography></Box>;
@@ -358,9 +388,9 @@ export default function MinhasSolicitacoes() {
                             variant="contained"
                             color="primary"
                             sx={{ ml: 1 }}
-                            onClick={() => { /* ação futura */ }}
+                            onClick={() => { handleGerarDocumento(item.id); }}
                           >
-                            Gerar documento SESMT assinado
+                            Documento SESMT
                           </Button>
                         </>
                       )}
