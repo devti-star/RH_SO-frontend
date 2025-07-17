@@ -135,6 +135,9 @@ export default function MinhasSolicitacoes() {
   const [historicos, setHistoricos] = useState<Record<number, any>>({});
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [correcaoObservacoes, setCorrecaoObservacoes] = useState<{ [index: number]: string }>({});
+
+
   // Ref para scroll do modal
   const docRef = useRef<HTMLDivElement>(null);
 
@@ -202,12 +205,14 @@ export default function MinhasSolicitacoes() {
     }
   };
 
-  const handleCorrecao = async (requerimentoId: number) => {
+  const handleCorrecao = async (requerimentoId: number, observacao: string) => {
     if (!correcaoFile) return;
     try {
       const formData = new FormData();
       formData.append('arquivo', correcaoFile);
-      formData.append('requerimentoId', String(requerimentoId));
+      //formData.append('requerimentoId', String(requerimentoId));
+      formData.append('observacao', observacao);
+      formData.append('etapa', '0');
 
       const usuario = AuthService.getInstance().getUserStorage(false);
       const token = usuario?.access_token;
@@ -351,7 +356,7 @@ export default function MinhasSolicitacoes() {
                       <Typography variant="body2" color="text.secondary">
                         Etapa atual: {etapa}
                       </Typography>
-                      {item.etapa === 1 &&
+                      {item.etapa === 1 && item.status === 2 && 
                         item.documentos?.[0]?.maior3dias === true && (
                           <Box sx={{ mt: 1, mb: 2, p: 2, bgcolor: "#fff3cd", borderRadius: 2, border: "1px solid #ffecb5" }}>
                             <Typography color="warning.main" fontWeight={600}>
@@ -435,6 +440,8 @@ export default function MinhasSolicitacoes() {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
+                          value={correcaoObservacoes[index] || ""}
+                          onChange={e => setCorrecaoObservacoes(obs => ({ ...obs, [index]: e.target.value }))}
                         />
 
                         {/* Botão de upload */}
@@ -498,7 +505,7 @@ export default function MinhasSolicitacoes() {
                           color="primary"
                           fullWidth
                           disabled={!correcaoFile}
-                          onClick={() => handleCorrecao(item.id)}
+                          onClick={() => handleCorrecao(item.id, correcaoObservacoes[index] || '')}
                         >
                           Salvar
                         </Button>
