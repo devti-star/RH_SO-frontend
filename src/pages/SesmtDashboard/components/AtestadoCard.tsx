@@ -212,8 +212,18 @@ export default function AtestadoCard({
               }}
               sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
             >
-              VER DOCUMENTO
+              VER ATESTADO
             </Button>
+            {config.tabs[tab].label === "Finalizados" && (
+              <Button
+                variant="outlined"
+                size="small"
+                //onClick=
+                sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
+              >
+                GERAR DOCUMENTO ASSINADO
+              </Button>
+            )}
             {config.botoes(tab, a.checklist, a.aprovado).includes("aprovar") && (
               <Button
                 variant="contained"
