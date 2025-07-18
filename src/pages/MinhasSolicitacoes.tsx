@@ -23,6 +23,8 @@ import PdfViewer from '../shared/PdfViewer';
 import axios from 'axios';
 import { apiURL } from '../config';
 import { AuthService } from '../auth/components/form/auth.service';
+import { ApiService } from '../interceptors/Api/api.intercept';
+import { useSnackbarStore } from '../shared/useSnackbar';
 
 // Tipos
 export interface Documento {
@@ -108,6 +110,13 @@ async function fetchLastHistorico(requerimentoId: number) {
   }
 }
 
+async function getGerarRequerimentoPdf(idRequerimento: number): Promise<Blob> {
+  const api = ApiService.getInstance();
+  const resp = await api.get(`/relatorios-atestado/${idRequerimento}`, { responseType: "blob" });
+  if (resp.status !== 200) throw new Error("Erro ao gerar PDF do requerimento");
+  return resp.data as Blob;
+}
+
 // ---------- Componente ----------
 export default function MinhasSolicitacoes() {
   const [search, setSearch] = useState<string>('');
@@ -123,6 +132,9 @@ export default function MinhasSolicitacoes() {
   const [requerimentos, setRequerimentos] = useState<Requerimento[]>([]);
   const [historicos, setHistoricos] = useState<Record<number, any>>({});
   const [loading, setLoading] = useState<boolean>(true);
+
+  const [correcaoObservacoes, setCorrecaoObservacoes] = useState<{ [index: number]: string }>({});
+
 
   // Ref para scroll do modal
   const docRef = useRef<HTMLDivElement>(null);
@@ -191,12 +203,14 @@ export default function MinhasSolicitacoes() {
     }
   };
 
-  const handleCorrecao = async (requerimentoId: number) => {
+  const handleCorrecao = async (requerimentoId: number, observacao: string) => {
     if (!correcaoFile) return;
     try {
       const formData = new FormData();
       formData.append('arquivo', correcaoFile);
-      formData.append('requerimentoId', String(requerimentoId));
+      //formData.append('requerimentoId', String(requerimentoId));
+      formData.append('observacao', observacao);
+      formData.append('etapa', '0');
 
       const usuario = AuthService.getInstance().getUserStorage(false);
       const token = usuario?.access_token;
@@ -225,6 +239,27 @@ export default function MinhasSolicitacoes() {
       alert('Falha ao enviar documento ou atualizar requisição.');
     }
   };
+
+  const handleGerarDocumento = async (id: number) => {
+    try {
+      // Faz a requisição e recebe o PDF como blob
+      const documentoBlob = await getGerarRequerimentoPdf(id);
+
+      // Cria uma URL temporária para o blob
+      const blobUrl = URL.createObjectURL(documentoBlob);
+
+      // Abre em uma nova aba
+      window.open(blobUrl, '_blank');
+
+      // (Opcional) liberar o objeto depois de um tempo para evitar vazamento de memória
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch (err) {
+      // Mostra erro para o usuário, se desejar
+      const { showSnackbar } = useSnackbarStore.getState();
+        showSnackbar(`Erro ao gerar pdf`, "error");
+        console.log(err);
+    }
+  }
 
   if (loading) {
     return <Box p={4}><Typography>Carregando...</Typography></Box>;
@@ -319,7 +354,7 @@ export default function MinhasSolicitacoes() {
                       <Typography variant="body2" color="text.secondary">
                         Etapa atual: {etapa}
                       </Typography>
-                      {item.etapa === 1 &&
+                      {item.etapa === 1 && item.status === 2 && 
                         item.documentos?.[0]?.maior3dias === true && (
                           <Box sx={{ mt: 1, mb: 2, p: 2, bgcolor: "#fff3cd", borderRadius: 2, border: "1px solid #ffecb5" }}>
                             <Typography color="warning.main" fontWeight={600}>
@@ -356,9 +391,9 @@ export default function MinhasSolicitacoes() {
                             variant="contained"
                             color="primary"
                             sx={{ ml: 1 }}
-                            onClick={() => { /* ação futura */ }}
+                            onClick={() => { handleGerarDocumento(item.id); }}
                           >
-                            Gerar documento SESMT assinado
+                            Documento SESMT
                           </Button>
                         </>
                       )}
@@ -403,6 +438,8 @@ export default function MinhasSolicitacoes() {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
+                          value={correcaoObservacoes[index] || ""}
+                          onChange={e => setCorrecaoObservacoes(obs => ({ ...obs, [index]: e.target.value }))}
                         />
 
                         {/* Botão de upload */}
@@ -466,7 +503,7 @@ export default function MinhasSolicitacoes() {
                           color="primary"
                           fullWidth
                           disabled={!correcaoFile}
-                          onClick={() => handleCorrecao(item.id)}
+                          onClick={() => handleCorrecao(item.id, correcaoObservacoes[index] || '')}
                         >
                           Salvar
                         </Button>

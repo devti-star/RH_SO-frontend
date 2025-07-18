@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -23,11 +23,13 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import type { Atestado } from "../../../models/atestados";
 import type { Config } from "../useSesmtDashboard";
-import { CHECKLIST } from "../mockData"; 
+import { CHECKLIST } from "../mockData";
+import { getUltimoHistorico } from "../sesmt.service";
 
 // Pegando perfil do usuário logado
 import { AuthService } from "../../../auth/components/form/auth.service";
 import { Roles } from "../../../models/roles";
+import type { Historico } from "../../../models/ultimo-requerimento";
 
 function mapRoleToPerfil(role: number) {
   switch (role) {
@@ -51,6 +53,7 @@ interface Props {
   onJustificar: (id: number, acao: "reprovar" | "ajustes" | "informar") => void;
   setSelectedDoc: (id: number) => void;
   setMobileDocOpen: (open: boolean) => void;
+  handleGerarDocumento: (id: number) => void;
 }
 
 export default function AtestadoCard({
@@ -64,12 +67,14 @@ export default function AtestadoCard({
   onJustificar,
   setSelectedDoc,
   setMobileDocOpen,
+  handleGerarDocumento,
 }: Props) {
   const [openAprovarModal, setOpenAprovarModal] = useState(false);
 
   // Modal states
   const [tipoDeferimento, setTipoDeferimento] = useState<"integral" | "parcial">("integral");
   const [dias, setDias] = useState<number | "">("");
+  const [historico, setHistorico] = useState<Historico | null>(null);
 
   const checklistPreenchido = config.canAprovar(a.checklist, a.aprovado)//a.checklist?.slice(0, -1)?.every?.((v) => v);
   let statusIcon: React.ReactNode = null;
@@ -81,6 +86,14 @@ export default function AtestadoCard({
   }
 
   const showChecklistToggle = config.mostraChecklist(tab);
+
+  useEffect(() => {
+    const fetchHistorico = async () => {
+      const resultado = await getUltimoHistorico(a.requerimentoId);
+      setHistorico(resultado);
+    };
+    fetchHistorico();
+  }, [a.requerimentoId]);
 
   // Handler para o botão Aprovar
   const handleAprovarClick = () => {
@@ -124,7 +137,9 @@ export default function AtestadoCard({
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <Typography variant="h6" align="left" sx={{ fontWeight: "bold", flex: 1 }}>
               {statusIcon}
-              {a.nome}
+              {historico
+                ? `Protocolo ${a.requerimentoId}/${new Date(historico.dataRegistro).getFullYear()}`
+                : `Protocolo ${a.requerimentoId}` /* ou "" ou algum loading, se preferir */}
             </Typography>
             {perfilAtual === "medico" && (
               <Chip
@@ -134,6 +149,9 @@ export default function AtestadoCard({
               />
             )}
           </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {`Solicitante: ${a.nome}`}
+          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {a.texto}
           </Typography>
@@ -218,7 +236,7 @@ export default function AtestadoCard({
               <Button
                 variant="outlined"
                 size="small"
-                //onClick=
+                onClick={() => handleGerarDocumento(a.requerimentoId)}
                 sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
               >
                 GERAR DOCUMENTO ASSINADO

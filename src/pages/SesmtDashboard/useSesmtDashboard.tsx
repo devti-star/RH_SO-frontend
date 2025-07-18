@@ -170,7 +170,9 @@ export default function useSesmtDashboard() {
       (a) =>
         statusArr.includes(a.status) &&
         (a.nome.toLowerCase().includes(busca.toLowerCase()) ||
-          a.texto.toLowerCase().includes(busca.toLowerCase()))
+          a.texto.toLowerCase().includes(busca.toLowerCase()) ||
+          String(a.requerimentoId).includes(busca)) 
+          
     );
   }, [atestados, config.tabs, tab, busca]);
 
@@ -255,7 +257,7 @@ export default function useSesmtDashboard() {
       novoStatus = 1; // DEFERIDO
       novaEtapa = 1;
       concluido = true; // Finaliza
-      assinatura = `Dr. ${usuario?.nomeCompleto}\ncrm: ${usuario?.crm}`;
+      assinatura = `Dr. ${usuario?.nomeCompleto}<br>CRM: ${usuario?.crm}`;
       
     }
 
@@ -347,6 +349,27 @@ export default function useSesmtDashboard() {
   };
 
   const docSelecionado = atestados.find((a) => a.id === selectedDoc);
+ 
+  const handleGerarDocumento = async (id: number) => {
+    try {
+      // Faz a requisição e recebe o PDF como blob
+      const documentoBlob = await getGerarRequerimentoPdf(id);
+
+      // Cria uma URL temporária para o blob
+      const blobUrl = URL.createObjectURL(documentoBlob);
+
+      // Abre em uma nova aba
+      window.open(blobUrl, '_blank');
+
+      // (Opcional) liberar o objeto depois de um tempo para evitar vazamento de memória
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch (err) {
+      // Mostra erro para o usuário, se desejar
+      const { showSnackbar } = useSnackbarStore.getState();
+        showSnackbar(`Erro ao gerar pdf`, "error");
+        console.log(err);
+      }
+  }
 
   return {
     theme,
@@ -377,5 +400,6 @@ export default function useSesmtDashboard() {
     acaoJustificar,
     docSelecionado,
     loading,
+    handleGerarDocumento
   };
 }

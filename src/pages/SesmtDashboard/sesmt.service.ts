@@ -2,6 +2,7 @@ import type { Atestado } from "../../models/atestados";
 import type { Requerimento } from "../../models/requerimento.interface";
 import { ApiService } from "../../interceptors/Api/api.intercept";
 import type { UpdateRequerimentoPayload } from "../../models/update-requerimento.interface";
+import type { Historico } from "../../models/ultimo-requerimento";
 
 export async function solicitarExameMedico(atestado: Atestado) {
   const api = ApiService.getInstance();
@@ -26,5 +27,19 @@ export async function atualizarRequerimento(id: number, update: UpdateRequerimen
   }
   const resp = await api.patch(`/requerimentos/${id}`, update);
   if (resp.status !== 200) throw new Error("Erro ao atualizar requerimento");
+  return resp.data;
+}
+
+export async function getGerarRequerimentoPdf(idRequerimento: number): Promise<Blob> {
+  const api = ApiService.getInstance();
+  const resp = await api.get(`/relatorios-atestado/${idRequerimento}`, { responseType: "blob" });
+  if (resp.status !== 200) throw new Error("Erro ao gerar PDF do requerimento");
+  return resp.data as Blob;
+}
+
+export async function getUltimoHistorico(idRequerimento: number): Promise<Historico> {
+  const api = ApiService.getInstance();
+  const resp = await api.get(`/historicos/last/${idRequerimento}`);
+  if (resp.status !== 200) throw new Error("Erro ao buscar histórico do requerimento");
   return resp.data;
 }

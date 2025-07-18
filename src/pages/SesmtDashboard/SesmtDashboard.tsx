@@ -7,18 +7,27 @@ import JustifyDialog from "./components/JustifyDialog";
 
 export default function SesmtDashboard() {
   const ds = useSesmtDashboard();
+  const theme = useTheme();
+
+  // Valores típicos de header/footer fixos; ajuste conforme seu layout real!
+  const isMobile = ds.isMobile ?? useMediaQuery(theme.breakpoints.down("sm"));
+  const HEADER_HEIGHT = isMobile ? 56 : 64; // px
+  const FOOTER_HEIGHT = isMobile ? 62 : 72; // px
 
   return (
     <Box
       sx={{
         width: "100vw",
-        height: "85vh",
+        minHeight: "100vh",
         bgcolor: "#f8f8f8",
         display: "flex",
         alignItems: ds.isMobile ? "flex-start" : "center",
         justifyContent: "center",
         p: 0,
         overflow: "auto",
+        boxSizing: "border-box",
+        // Reservando espaço do header/footer
+        paddingBottom: "7vh",
       }}
     >
       <Box
@@ -73,6 +82,7 @@ export default function SesmtDashboard() {
               onJustificar={ds.handleJustificar}
               setSelectedDoc={ds.setSelectedDoc}
               setMobileDocOpen={ds.setMobileDocOpen}
+              handleGerarDocumento={ds.handleGerarDocumento}
             />
           </Box>
         </Box>
@@ -104,4 +114,3 @@ export default function SesmtDashboard() {
     </Box>
   );
 }
-
