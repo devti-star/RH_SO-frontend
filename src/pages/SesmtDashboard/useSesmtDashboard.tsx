@@ -173,8 +173,9 @@ export default function useSesmtDashboard() {
       (a) =>
         statusArr.includes(a.status) &&
         (a.nome.toLowerCase().includes(busca.toLowerCase()) ||
-          a.texto.toLowerCase().includes(busca.toLowerCase())) ||
-          String(a.requerimentoId).includes(busca)
+          a.texto.toLowerCase().includes(busca.toLowerCase()) ||
+          String(a.requerimentoId).includes(busca)) 
+          
     );
   }, [atestados, config.tabs, tab, busca]);
 
