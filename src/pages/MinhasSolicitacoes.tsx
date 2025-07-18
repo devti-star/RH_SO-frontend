@@ -111,9 +111,9 @@ async function fetchLastHistorico(requerimentoId: number) {
   }
 }
 
-async function getGerarRequerimentoPdf(id: number): Promise<Blob> {
+async function getGerarRequerimentoPdf(idRequerimento: number): Promise<Blob> {
   const api = ApiService.getInstance();
-  const resp = await api.get(`/requerimentos/${id}/pdf`, { responseType: "blob" });
+  const resp = await api.get(`/relatorios-atestado/${idRequerimento}`, { responseType: "blob" });
   if (resp.status !== 200) throw new Error("Erro ao gerar PDF do requerimento");
   return resp.data as Blob;
 }

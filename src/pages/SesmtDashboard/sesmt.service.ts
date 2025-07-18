@@ -30,9 +30,9 @@ export async function atualizarRequerimento(id: number, update: UpdateRequerimen
   return resp.data;
 }
 
-export async function getGerarRequerimentoPdf(id: number): Promise<Blob> {
+export async function getGerarRequerimentoPdf(idRequerimento: number): Promise<Blob> {
   const api = ApiService.getInstance();
-  const resp = await api.get(`/requerimentos/${id}/pdf`, { responseType: "blob" });
+  const resp = await api.get(`/relatorios-atestado/${idRequerimento}`, { responseType: "blob" });
   if (resp.status !== 200) throw new Error("Erro ao gerar PDF do requerimento");
   return resp.data as Blob;
 }

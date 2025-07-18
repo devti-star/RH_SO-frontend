@@ -236,7 +236,7 @@ export default function AtestadoCard({
               <Button
                 variant="outlined"
                 size="small"
-                onClick={() => handleGerarDocumento(a.id)}
+                onClick={() => handleGerarDocumento(a.requerimentoId)}
                 sx={{ borderRadius: 2, minHeight: 38, maxHeight: 38, minWidth: 120, flexShrink: 0, flexGrow: 0, px: 2 }}
               >
                 GERAR DOCUMENTO ASSINADO
