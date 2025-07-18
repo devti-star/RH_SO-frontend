@@ -67,6 +67,7 @@ const appBarStyles = {
   boxShadow: '0 1px 8px rgba(5,10,36,0.09)',
   minHeight: '58px',
   justifyContent: 'center',
+   zIndex: 1301,
 };
 const logoBox = {
   display: 'flex',
@@ -172,8 +173,13 @@ function ResponsiveAppBar() {
     }
   };
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
+  if (anchorElNav) {
+    setAnchorElNav(null); // Fecha se já está aberto
+  } else {
+    setAnchorElNav(event.currentTarget); // Abre se estiver fechado
+  }
+};
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -210,7 +216,8 @@ function ResponsiveAppBar() {
   ];
 
   return (
-    <AppBar position="static" sx={{ ...appBarStyles, zIndex: 1100 }}>
+    <AppBar position="fixed" sx={{ ...appBarStyles }}>
+      
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ height: { xs: 62, md: 64 }, px: 2, minHeight: 58 }}>
 
@@ -288,7 +295,7 @@ function ResponsiveAppBar() {
                           backgroundColor: '#173557',
                           minWidth: '200px',
                           boxShadow: '0px 8px 24px 0px rgba(5,10,36,0.11)',
-                          zIndex: 1,
+                        
                           borderRadius: '10px',
                           overflow: 'hidden',
                           color: '#fff'
@@ -428,7 +435,6 @@ function ResponsiveAppBar() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                zIndex:'-1 !important',
                 
               }
             }}
@@ -521,6 +527,7 @@ function ResponsiveAppBar() {
         </Toolbar>
       </Container>
     </AppBar>
+    
   );
 }
 
