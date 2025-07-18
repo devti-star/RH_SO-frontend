@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Atestado, Perfil, Status, Aprovacao } from "../../models/atestados";
-import { getRequerimentos, atualizarRequerimento } from "./sesmt.service";
+import { getRequerimentos, atualizarRequerimento, getGerarRequerimentoPdf } from "./sesmt.service";
 import { mapRequerimentosParaAtestados } from "./utils/mapper";
 import { AuthService } from "../../auth/components/form/auth.service";
 import { Roles } from "../../models/roles";
+import { useSnackbarStore } from "../../shared/useSnackbar";
 
 // -- Auxiliares de perfil e configuração
 function mapRoleToPerfil(role: number): Perfil {
