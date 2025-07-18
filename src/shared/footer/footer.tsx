@@ -5,7 +5,7 @@ function Footer() {
     <footer>
       <div className="footer-line"></div>
       <p className="footer-text">
-        © Diretoria de TI / Três Lagoas · v1.0.0
+        © Diretoria de TI / Três Lagoas · BETA v1.0.0
       </p>
     </footer>
   );
