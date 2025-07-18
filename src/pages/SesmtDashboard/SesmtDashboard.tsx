@@ -1,5 +1,4 @@
-import React from "react";
-import { Box, useTheme, useMediaQuery } from "@mui/material";
+import { Box } from "@mui/material";
 import useSesmtDashboard from "./useSesmtDashboard";
 import TabsNavigation from "./components/TabsNavigation";
 import AtestadoList from "./components/AtestadoList";
@@ -8,12 +7,6 @@ import JustifyDialog from "./components/JustifyDialog";
 
 export default function SesmtDashboard() {
   const ds = useSesmtDashboard();
-  const theme = useTheme();
-
-  // Valores típicos de header/footer fixos; ajuste conforme seu layout real!
-  const isMobile = ds.isMobile ?? useMediaQuery(theme.breakpoints.down("sm"));
-  const HEADER_HEIGHT = isMobile ? 56 : 64; // px
-  const FOOTER_HEIGHT = isMobile ? 62 : 72; // px
 
   return (
     <Box

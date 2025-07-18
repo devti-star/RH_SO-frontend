@@ -1,12 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Atestado, Perfil, Status, Aprovacao } from "../../models/atestados";
-import { CHECKLIST } from "./mockData";
-import { solicitarExameMedico, getRequerimentos, atualizarRequerimento, getGerarRequerimentoPdf } from "./sesmt.service";
+import { getRequerimentos, atualizarRequerimento, getGerarRequerimentoPdf } from "./sesmt.service";
 import { mapRequerimentosParaAtestados } from "./utils/mapper";
 import { AuthService } from "../../auth/components/form/auth.service";
 import { Roles } from "../../models/roles";
-import type { UpdateRequerimentoPayload } from "../../models/update-requerimento.interface";
 import { useSnackbarStore } from "../../shared/useSnackbar";
 
 // -- Auxiliares de perfil e configuração
@@ -32,7 +30,7 @@ export interface TabItem {
 export interface Config {
   tabs: TabItem[];
   mostraChecklist: (tab: number) => boolean;
-  statusLabel: (a: Atestado, tab: number) => React.ReactNode;
+  statusLabel: (tab: number, a: Atestado) => React.ReactNode;
   observacaoStyle: (tab: number) => React.CSSProperties;
   botoes: (tab: number, checklist?: boolean[], aprovado?: Aprovacao) => string[];
   canAprovar: (checklist: boolean[], aprovado: Aprovacao) => boolean;
@@ -47,7 +45,7 @@ function getConfig(perfil: Perfil): Config {
         { label: "Finalizados", status: ["finalizado"] },
       ],
       mostraChecklist: (tab) => tab === 0,
-      statusLabel: (a, tab) => {
+      statusLabel: (tab, a) => {
         if (tab === 2)
           return (
             <span style={{ color: "#b68400", fontWeight: 600 }}>
@@ -71,7 +69,7 @@ function getConfig(perfil: Perfil): Config {
         return null;
       },
       observacaoStyle: (tab) => (tab === 2 ? { color: "#b68400" } : { color: "#1277be" }),
-      botoes: (tab, checklist, aprovado) => (tab === 0 ? ["aprovar", "reprovar", "ajustes"] : []),
+      botoes: (tab) => (tab === 0 ? ["aprovar", "reprovar", "ajustes"] : []),
       canAprovar: (checklist, aprovado) => {
         let ok = !aprovado;
         let pular = 1;
@@ -93,14 +91,14 @@ function getConfig(perfil: Perfil): Config {
       { label: "Finalizados", status: ["finalizado"] },
     ],
     mostraChecklist: () => false,
-    statusLabel: (a, tab) =>
+    statusLabel: (tab) =>
       tab === 1 ? (
         <span style={{ color: "#b66400", fontWeight: 600 }}>
           Aguardando justificativa do enfermeiro
         </span>
       ) : null,
     observacaoStyle: () => ({ color: "#1277be" }),
-    botoes: (tab, checklist, aprovado) => (tab === 0 ? ["aprovar", "reprovar"] : []),
+    botoes: (tab) => (tab === 0 ? ["aprovar", "reprovar"] : []),
     canAprovar: () => true, // Médico pode sempre aprovar ou reprovar
   };
   if (perfil === "enfermeiro")
@@ -110,14 +108,14 @@ function getConfig(perfil: Perfil): Config {
         { label: "Finalizados", status: ["finalizado"] },
       ],
       mostraChecklist: () => false,
-      statusLabel: (a, tab) =>
+      statusLabel: (tab, a) =>
         tab === 0 ? (
           <span style={{ color: "#9c7102", fontWeight: 600 }}>
             Mensagem do médico: {a.observacao}
           </span>
         ) : null,
       observacaoStyle: () => ({ color: "#1277be" }),
-      botoes: (tab, checklist, aprovado) => (tab === 0 ? ["informar"] : []),
+      botoes: (tab) => (tab === 0 ? ["informar"] : []),
       canAprovar: () => false,
     };
   return {

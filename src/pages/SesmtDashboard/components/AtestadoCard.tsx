@@ -155,7 +155,7 @@ export default function AtestadoCard({
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {a.texto}
           </Typography>
-          {config.statusLabel(a, tab)}
+          {config.statusLabel(tab, a)}
           {showChecklistToggle && (
             <Button
               onClick={() => onExpandChecklist(a)}

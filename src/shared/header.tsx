@@ -20,8 +20,6 @@ import { AuthService } from '../auth/components/form/auth.service';
 import { getUsuario } from "../shared/services/usuario.service";
 import { ApiService } from "../interceptors/Api/api.intercept";
 import { Roles, type RolesType } from '../models/roles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
 
 // --- Tipos Originais ---
 type RouteItem = {
@@ -118,8 +116,6 @@ function ResponsiveAppBar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const authService: AuthService = AuthService.getInstance();
   const usuario = authService.getUserStorage();

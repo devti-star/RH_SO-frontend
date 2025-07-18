@@ -1,27 +1,18 @@
 import {
     Box,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     FormControl,
     FormHelperText,
-    FormLabel,
     IconButton,
     InputAdornment,
     InputLabel,
-    MenuItem,
     OutlinedInput,
-    Select,
     Typography,
     type BoxProps,
 } from "@mui/material";
 import CustomButton from "../../../shared/customButton";
-import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
+import React, { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import CloseIcon from "@mui/icons-material/Close";
-import type { Cadastro } from "../../../models/cadastro.interface";
-import { useParams, useNavigate } from "react-router-dom";
-import AceitacaoEmail from "./modal_confirmacao";
+import { useParams } from "react-router-dom";
 import { resetPassword } from "./services/submit";
 import Modal from "./modal_confirmacao";
 
@@ -41,8 +32,6 @@ export default function FormCadastro({
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
     const [erroSenhas, setErroSenhas] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
     const { token } = useParams<{ token: string }>();
     const [mostrarModal, setMostrarModal] = useState(false);
 
@@ -55,8 +44,6 @@ export default function FormCadastro({
         }
 
         setErroSenhas(false);
-        setLoading(true);
-        setErrorMessage('');
 
         try {
             // Token agora vem diretamente de useParams()
@@ -67,14 +54,7 @@ export default function FormCadastro({
             await resetPassword(token, senha);
             setMostrarModal(true);
         } catch (error) {
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : 'Erro ao redefinir senha'
-            );
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
 
     const handleTogglePassword = () => {

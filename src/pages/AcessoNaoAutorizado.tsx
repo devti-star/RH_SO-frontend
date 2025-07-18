@@ -1,7 +1,6 @@
-import React from 'react';
 import { Box, Typography, Button, Container, Paper } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function AcessoNaoAutorizado() {
 
