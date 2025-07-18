@@ -1,12 +1,9 @@
 import { Box, Container, useMediaQuery } from "@mui/material";
 import Banner from "../../shared/banner";
-import { useResponsiveImageWidth } from "../../shared/useResponsiveImageWidth";
 import logo from "../../shared/images/brasaoAzul.png";
-import { useState } from "react";
 import { useResponsivePadding } from "./Responsive/useResponsivePadding";
 import { useResponsiveHeight } from "./Responsive/useResponsiveHeight";
 import FormCadastro from "./form/form";
-import { useLocation } from "react-router-dom";
 
 
 export default function RecoveryPassword() {
@@ -14,10 +11,8 @@ export default function RecoveryPassword() {
   const isMobileTiny = useMediaQuery("(max-width: 619px)");
   const espacamento = useResponsivePadding();
   const altura = useResponsiveHeight();
-  const location = useLocation(); // Adicione este hook
 
 
-  
   return (
     <Container
       disableGutters

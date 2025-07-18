@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardActions,
-  useTheme,
   TextField,
   Collapse,
   MenuItem,
@@ -111,7 +110,6 @@ async function fetchLastHistorico(requerimentoId: number) {
 
 // ---------- Componente ----------
 export default function MinhasSolicitacoes() {
-  const theme = useTheme();
   const [search, setSearch] = useState<string>('');
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [statusFilter, setStatusFilter] = useState<string>('');

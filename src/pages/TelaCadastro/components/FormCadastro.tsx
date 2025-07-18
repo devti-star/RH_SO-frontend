@@ -140,7 +140,7 @@ export default function FormCadastro({
     };
 
     // cadastrar usuário (dados, sem foto)
-    const resp = await cadastrarUsuario(cadastro);
+    await cadastrarUsuario(cadastro);
 
     setMostrarModal(true);
 

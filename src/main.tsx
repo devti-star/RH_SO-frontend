@@ -6,8 +6,6 @@ import router from './routes/routesConfig.tsx';
 import '@fontsource/poppins/500.css';
 import { createTheme, ThemeProvider } from '@mui/material';
 import { GlobalSnackbar } from './shared/GlobalSnackbar.tsx';
-import { Roles } from './models/roles.ts';
-import { ServicoArmazenamento } from './shared/services/storage.service.ts';
 
 const theme = createTheme({
   palette: {

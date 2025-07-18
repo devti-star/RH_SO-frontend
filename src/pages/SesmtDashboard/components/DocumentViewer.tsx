@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, IconButton, Dialog } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import type { Atestado } from "../../../models/atestados";

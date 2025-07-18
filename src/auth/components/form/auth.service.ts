@@ -1,6 +1,6 @@
 import { apiURL } from "../../../config";
 import type { login } from "../../../models/login";
-import { redirect, useNavigate, type NavigateFunction } from "react-router-dom";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
 import { useSnackbarStore } from "../../../shared/useSnackbar";
 import { ServicoArmazenamento } from "../../../shared/services/storage.service";
 import type { LoginResponse, Usuario } from "../../../models/usuario.interface";

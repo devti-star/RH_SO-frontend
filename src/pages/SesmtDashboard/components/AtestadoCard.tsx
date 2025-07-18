@@ -23,7 +23,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import type { Atestado } from "../../../models/atestados";
 import type { Config } from "../useSesmtDashboard";
-import { CHECKLIST } from "../mockData";
+import { CHECKLIST } from "../mockData"; 
 
 // Pegando perfil do usuário logado
 import { AuthService } from "../../../auth/components/form/auth.service";
@@ -137,7 +137,7 @@ export default function AtestadoCard({
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {a.texto}
           </Typography>
-          {config.statusLabel(a, tab)}
+          {config.statusLabel(tab, a)}
           {showChecklistToggle && (
             <Button
               onClick={() => onExpandChecklist(a)}

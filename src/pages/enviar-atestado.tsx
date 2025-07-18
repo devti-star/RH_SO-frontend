@@ -39,7 +39,6 @@ const EnvioAtestado = () => {
   const [alertModalOpen, setAlertModalOpen] = useState(true);
 
   const [fileError, setFileError] = useState(false);
-  const [obsError, setObsError] = useState(false);
 
   const isMobile = useMediaQuery('(max-width:900px)');
 
@@ -77,7 +76,6 @@ const EnvioAtestado = () => {
 
   const handleObservacaoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setObservacao(e.target.value);
-    setObsError(false);
   };
 
   const handleSubmit = () => {

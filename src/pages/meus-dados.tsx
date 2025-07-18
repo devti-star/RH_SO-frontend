@@ -36,6 +36,8 @@ import {
 } from "./meus-dados.service";
 import type { ChangePassword } from "../models/changePassword";
 import { ApiService } from "../interceptors/Api/api.intercept";
+import type { Usuario } from "../models/usuario.interface";
+
 
 const azulPrimario = "#050A24";
 const azulClaro = "#173557";
@@ -84,7 +86,7 @@ const PerfilUsuario: React.FC = () => {
         return;
       }
       try {
-        const data = await getUsuario(usuarioId);
+        const data: Usuario = await getUsuario(usuarioId);
 
         const camposUsuario: UsuarioCampos = {
           nomeCompleto: data.nomeCompleto ?? "",

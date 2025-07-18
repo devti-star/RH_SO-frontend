@@ -2,7 +2,6 @@ import { Box, Container, FormControl, InputLabel, OutlinedInput, useMediaQuery, 
 import Banner from "../../shared/banner";
 import logo from "../../shared/images/brasaoAzul.png";
 import { useState } from "react";
-import { useResponsivePadding } from "./Responsive/useResponsivePadding";
 import { useResponsiveHeight } from "./Responsive/useResponsiveHeight";
 import CustomButton from "../../shared/customButton";
 import { enviarEmail } from "./form/services/submit";
@@ -11,7 +10,6 @@ import Modal from "./form/ModalEnvio";
 export default function ForgotPassword() {
     const isMobile = useMediaQuery("(max-width: 885px)");
     const isMobileTiny = useMediaQuery("(max-width: 619px)");
-    const espacamento = useResponsivePadding();
     const altura = useResponsiveHeight();
     const [email, setEmail] = useState("");
     const [mostrarModal, setMostrarModal] = useState(false);
