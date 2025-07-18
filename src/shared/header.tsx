@@ -20,6 +20,7 @@ import { AuthService } from '../auth/components/form/auth.service';
 import { getUsuario } from "../shared/services/usuario.service";
 import { ApiService } from "../interceptors/Api/api.intercept";
 import { Roles, type RolesType } from '../models/roles';
+import logo from "./images/logoBranca.png";
 
 // --- Tipos Originais ---
 type RouteItem = {
@@ -225,7 +226,7 @@ function ResponsiveAppBar() {
             <Box
               component="img"
               sx={logoImg}
-              src="src/shared/images/logoBranca.png"
+              src={logo}
               alt="Prefeitura de Três Lagoas"
             />
             <Typography
